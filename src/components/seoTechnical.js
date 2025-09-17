@@ -2,12 +2,12 @@ import "../css/seoTechnical.css";
 
 function SeoTechnical({ pageSpeedData, score }) {
   if (!pageSpeedData) {
-    return <p>Loading PageSpeed results...</p>;
+    return <p>No PageSpeed data available. Please analyze first.</p>;
   }
 
   return (
-    <div className="seo-technical">
-      <h1>SEO Technical</h1>
+    <div className="seo-pagespeed">
+      <h1>SEO Page Speed</h1>
 
       {/* Radial Gauge */}
       <div className="radial-score">
