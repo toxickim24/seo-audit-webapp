@@ -11,7 +11,8 @@ function App() {
     { id: "seo-onpage", label: "SEO On-Page" },
     { id: "seo-technical", label: "SEO Technical" },
     { id: "seo-offpage", label: "SEO Off-page" },
-    { id: "lead-pdf", label: "Get Lead" },
+    { id: "seo-performance", label: "SEO Performance" },
+    { id: "lead-pdf", label: "Leads Management" },
   ];
 
   const [activeTab, setActiveTab] = useState(tabs[0].id);

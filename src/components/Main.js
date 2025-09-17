@@ -1,8 +1,8 @@
 import "../css/Main.css";
-import "../css/seoTechnical.css";
+import "../css/seoPerformance.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import SeoTechnical from "./seoTechnical";
+import SeoPerformance from "./seoPerformance";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -139,9 +139,12 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* SEO Technical moved to its own component */}
+            {/* SEO Technical */}
             {activeTab === "seo-technical" && (
-              <SeoTechnical pageSpeedData={seoData.pageSpeed} score={pageSpeed} />
+              <>
+                <h1>SEO Technical</h1>
+                <p>Technical analysis coming soon...</p>
+              </>
             )}
 
             {/* SEO Offpage */}
@@ -149,6 +152,18 @@ function Main({ activeTab }) {
               <>
                 <h1>SEO Offpage</h1>
                 <p>Off-page analysis coming soon...</p>
+              </>
+            )}
+
+            {/* SEO Performance */}
+            {activeTab === "seo-performance" && (
+              <SeoPerformance pageSpeedData={seoData.pageSpeed} score={pageSpeed} />
+            )}
+
+          {/* View Leads */}
+            {activeTab === "seo-viewleads" && (
+              <>
+                <h1>Lead Management Dashboard</h1>
               </>
             )}
           </div>

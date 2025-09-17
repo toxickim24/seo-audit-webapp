@@ -1,6 +1,6 @@
-import "../css/seoTechnical.css";
+import "../css/seoPerformance.css";
 
-function SeoTechnical({ pageSpeedData, score }) {
+function SeoPerformance({ pageSpeedData, score }) {
   if (!pageSpeedData) {
     return <p>No PageSpeed data available. Please analyze first.</p>;
   }
@@ -102,4 +102,4 @@ function SeoTechnical({ pageSpeedData, score }) {
   );
 }
 
-export default SeoTechnical;
+export default SeoPerformance;
