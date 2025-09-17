@@ -54,3 +54,26 @@
   background: #fb6a45;
   color: white;
 }
+
+/* Loader Spinner */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.loader {
+  border: 6px solid #f3f3f3; /* Light gray */
+  border-top: 6px solid #4CAF50; /* Green */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
