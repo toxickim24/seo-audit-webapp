@@ -1,16 +1,19 @@
 import "../css/Main.css";
+import "../css/seoTechnical.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import SeoTechnical from "./seoTechnical";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
+  const [pageSpeed, setPageSpeed] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const urlPattern = /^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
+  const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
 
-  //Analyze On Page
   const handleAnalyze = async () => {
     if (!urlPattern.test(url)) {
       setError("Please enter a valid website.");
@@ -20,15 +23,58 @@ function Main({ activeTab }) {
 
     setError("");
     setIsSubmitted(true);
+    setIsLoading(true);
+    setSeoData(null);
+    setPageSpeed(null);
 
     try {
+      // Fetch your SEO backend data
       const res = await fetch(`/analyze?url=${encodeURIComponent(url)}`);
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
       setSeoData(data);
+
+      // Fetch Google PageSpeed Insights
+      const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
+        url
+      )}&key=AIzaSyAZCIYhuH59SFasuRg9osspJIAz5K3IwyU&strategy=mobile`;
+      const psiRes = await fetch(psiUrl);
+      if (psiRes.ok) {
+        const psiData = await psiRes.json();
+        const lighthouse = psiData.lighthouseResult;
+
+        setPageSpeed(lighthouse?.categories?.performance?.score * 100);
+
+        const audits = lighthouse?.audits || {};
+        const metrics =
+          lighthouse?.audits["metrics"]?.details?.items?.[0] || {};
+
+        setSeoData((prev) => ({
+          ...prev,
+          pageSpeed: {
+            fcp: metrics.firstContentfulPaint,
+            lcp: metrics.largestContentfulPaint,
+            tti: metrics.interactive,
+            speedIndex: metrics.speedIndex,
+            tbt: metrics.totalBlockingTime,
+            cls: audits["cumulative-layout-shift"]?.numericValue,
+            fid: audits["max-potential-fid"]?.numericValue,
+            opportunities: lighthouse?.audits
+              ? Object.values(lighthouse.audits)
+                  .filter((a) => a.details?.type === "opportunity")
+                  .map((a) => ({
+                    title: a.title,
+                    savingsMs: a.details.overallSavingsMs,
+                  }))
+              : [],
+          },
+        }));
+      }
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -42,6 +88,7 @@ function Main({ activeTab }) {
             autoplay
           />
         </div>
+
         <div className="search-box">
           <input
             type="url"
@@ -53,7 +100,15 @@ function Main({ activeTab }) {
           {error && <p className="error-message">{error}</p>}
         </div>
 
-        {isSubmitted && seoData && (
+        {/* Loader */}
+        {isLoading && (
+          <div className="loader-container">
+            <div className="loader"></div>
+            <p>Analyzing website, please wait...</p>
+          </div>
+        )}
+
+        {!isLoading && isSubmitted && seoData && (
           <div className="results-container">
             {/* Overview */}
             {activeTab === "overview" && (
@@ -84,12 +139,9 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* SEO Technical */}
+            {/* SEO Technical moved to its own component */}
             {activeTab === "seo-technical" && (
-              <>
-                <h1>SEO Technical</h1>
-                <p>Technical analysis coming soon...</p>
-              </>
+              <SeoTechnical pageSpeedData={seoData.pageSpeed} score={pageSpeed} />
             )}
 
             {/* SEO Offpage */}
