@@ -114,13 +114,22 @@ function Main({ activeTab }) {
             {activeTab === "overview" && (
               <>
                 <h1>Overview</h1>
+
+                {/* Existing backend SEO score */}
                 <p>
-                  Score: {seoData.overview.score} / {seoData.overview.maxScore}
+                  SEO Score: {seoData.overview.score} / {seoData.overview.maxScore}
                 </p>
                 <progress
                   value={seoData.overview.score}
                   max={seoData.overview.maxScore}
                 ></progress>
+
+                {/* NEW: PageSpeed Performance Score */}
+                {pageSpeed !== null && (
+                  <p>
+                    Performance Score: {pageSpeed} / 100
+                  </p>
+                )}
               </>
             )}
 
