@@ -6,18 +6,30 @@ function Main({ activeTab }) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [seoData, setSeoData] = useState(null);
 
-  // Basic URL Validation
   const urlPattern = /^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
 
-  const handleAnalyze = () => {
+  //Analyze On Page
+  const handleAnalyze = async () => {
     if (!urlPattern.test(url)) {
       setError("Please enter a valid website.");
       setIsSubmitted(false);
       return;
     }
+
     setError("");
     setIsSubmitted(true);
+
+    try {
+      const res = await fetch(`/analyze?url=${encodeURIComponent(url)}`);
+      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
+      setSeoData(data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to fetch SEO data.");
+    }
   };
 
   return (
@@ -30,7 +42,6 @@ function Main({ activeTab }) {
             autoplay
           />
         </div>
-
         <div className="search-box">
           <input
             type="url"
@@ -42,14 +53,19 @@ function Main({ activeTab }) {
           {error && <p className="error-message">{error}</p>}
         </div>
 
-        {/* Show results if URL was submitted */}
-        {isSubmitted && (
+        {isSubmitted && seoData && (
           <div className="results-container">
             {/* Overview */}
             {activeTab === "overview" && (
               <>
                 <h1>Overview</h1>
-                <p>Check your website SEO performance instantly.</p>
+                <p>
+                  Score: {seoData.overview.score} / {seoData.overview.maxScore}
+                </p>
+                <progress
+                  value={seoData.overview.score}
+                  max={seoData.overview.maxScore}
+                ></progress>
               </>
             )}
 
@@ -57,7 +73,14 @@ function Main({ activeTab }) {
             {activeTab === "seo-onpage" && (
               <>
                 <h1>SEO Onpage</h1>
-                <p>Check your website SEO performance instantly.</p>
+                <p><b>Title:</b> {seoData.onpage.title}</p>
+                <p><b>Meta Description:</b> {seoData.onpage.metaDescription}</p>
+                <p><b>H1:</b> {seoData.onpage.h1.join(", ")}</p>
+                <p><b>H2:</b> {seoData.onpage.h2.join(", ")}</p>
+                <p><b>H3:</b> {seoData.onpage.h3.join(", ")}</p>
+                <p><b>Images:</b> {seoData.onpage.imageCount} (with alt: {seoData.onpage.imagesWithAlt})</p>
+                <p><b>Internal Links:</b> {seoData.onpage.internalLinks}</p>
+                <p><b>Canonical:</b> {seoData.onpage.canonical}</p>
               </>
             )}
 
@@ -65,7 +88,7 @@ function Main({ activeTab }) {
             {activeTab === "seo-technical" && (
               <>
                 <h1>SEO Technical</h1>
-                <p>Here you can see all your leads...</p>
+                <p>Technical analysis coming soon...</p>
               </>
             )}
 
@@ -73,20 +96,10 @@ function Main({ activeTab }) {
             {activeTab === "seo-offpage" && (
               <>
                 <h1>SEO Offpage</h1>
-                <p>Generate and view detailed reports.</p>
+                <p>Off-page analysis coming soon...</p>
               </>
             )}
-
-           
           </div>
-        )}
-
-        {/* Leads & Send PDF */}
-        {activeTab === "lead-pdf" && (
-            <>
-            <h1>Leads & Send PDF</h1>
-            <p>Generate and view detailed reports.</p>
-            </>
         )}
       </section>
     </main>
