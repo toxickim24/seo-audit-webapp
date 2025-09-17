@@ -1,4 +1,4 @@
-export async function fetchPageSpeed(url) {
+export async function fetchSeoPerformance(url) {
   const apiKey = process.env.REACT_APP_PAGESPEED_KEY;
   if (!apiKey) throw new Error("⚠️ Missing PageSpeed API key");
 

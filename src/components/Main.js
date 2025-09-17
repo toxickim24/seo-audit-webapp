@@ -2,7 +2,7 @@ import "../css/Main.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SeoPerformance from "./SeoPerformance";
-import { fetchPageSpeed } from "../api/pageSpeed";
+import { fetchSeoPerformance } from "../api/SeoPerformance";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -41,7 +41,7 @@ function Main({ activeTab }) {
       setSeoData(data);
 
       // ✅ PageSpeed fetch
-      const pageSpeedResults = await fetchPageSpeed(url);
+      const pageSpeedResults = await fetchSeoPerformance(url);
       setPageSpeed(pageSpeedResults.score);
       setSeoData((prev) => ({
         ...prev,
