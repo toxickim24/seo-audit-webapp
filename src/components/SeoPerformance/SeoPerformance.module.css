@@ -1,4 +1,4 @@
-.seo-pagespeed {
+.seoPagespeed{
   background: #fff;
   padding: 20px;
   border-radius: 10px;
@@ -7,13 +7,13 @@
   margin: 0px auto;
 }
 
-.seo-pagespeed h1 {
+.seoPagespeed h1 {
   text-align: center;
   margin-bottom: 20px;
   color: #2c3e50;
 }
 
-.seo-pagespeed h3 {
+.seoPagespeed h3 {
   margin-top: 25px;
   margin-bottom: 10px;
   color: #333;
@@ -32,7 +32,7 @@
   color: #444;
 }
 
-.progress-bar {
+.progressBar {
   background: #f0f0f0;
   border-radius: 8px;
   overflow: hidden;
@@ -40,7 +40,7 @@
   position: relative;
 }
 
-.progress-fill {
+.progressFill {
   height: 100%;
   color: #fff;
   font-size: 0.85rem;
@@ -50,16 +50,16 @@
   transition: width 0.4s ease-in-out;
 }
 
-.progress-fill.good {
+.progressFill.good {
   background: #2ecc71; /* green */
 }
 
-.progress-fill.average {
+.progressFill.average {
   background: #f1c40f; /* yellow */
   color: #111;
 }
 
-.progress-fill.poor {
+.progressFill.poor {
   background: #e74c3c; /* red */
 }
 
@@ -81,17 +81,17 @@
   background: #fafafa;
 }
 
-.op-title {
+.opTitle {
   font-weight: 500;
   color: #2c3e50;
 }
 
-.op-value {
+.opValue {
   font-weight: bold;
   color: #16a085;
 }
 
-.radial-score {
+.radialScore {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -149,7 +149,7 @@
   --color: #e74c3c; /* red */
 }
 
-.radial-score .label {
+.radialScore .label {
   margin-top: 10px;
   font-weight: bold;
   color: #2c3e50;

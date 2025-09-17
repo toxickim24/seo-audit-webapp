@@ -1,8 +1,8 @@
 import "../css/Main.css";
-import "../css/seoPerformance.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import SeoPerformance from "./seoPerformance";
+import SeoPerformance from "./SeoPerformance";
+import { fetchPageSpeed } from "../api/pageSpeed";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -28,48 +28,25 @@ function Main({ activeTab }) {
     setPageSpeed(null);
 
     try {
-      // Fetch your SEO backend data
-      const res = await fetch(`/analyze?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error("Server error");
+      // ✅ Backend SEO fetch
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
+      );
+
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
+
       const data = await res.json();
       setSeoData(data);
 
-      // Fetch Google PageSpeed Insights
-      const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
-        url
-      )}&key=AIzaSyAZCIYhuH59SFasuRg9osspJIAz5K3IwyU&strategy=mobile`;
-      const psiRes = await fetch(psiUrl);
-      if (psiRes.ok) {
-        const psiData = await psiRes.json();
-        const lighthouse = psiData.lighthouseResult;
-
-        setPageSpeed(lighthouse?.categories?.performance?.score * 100);
-
-        const audits = lighthouse?.audits || {};
-        const metrics =
-          lighthouse?.audits["metrics"]?.details?.items?.[0] || {};
-
-        setSeoData((prev) => ({
-          ...prev,
-          pageSpeed: {
-            fcp: metrics.firstContentfulPaint,
-            lcp: metrics.largestContentfulPaint,
-            tti: metrics.interactive,
-            speedIndex: metrics.speedIndex,
-            tbt: metrics.totalBlockingTime,
-            cls: audits["cumulative-layout-shift"]?.numericValue,
-            fid: audits["max-potential-fid"]?.numericValue,
-            opportunities: lighthouse?.audits
-              ? Object.values(lighthouse.audits)
-                  .filter((a) => a.details?.type === "opportunity")
-                  .map((a) => ({
-                    title: a.title,
-                    savingsMs: a.details.overallSavingsMs,
-                  }))
-              : [],
-          },
-        }));
-      }
+      // ✅ PageSpeed fetch
+      const pageSpeedResults = await fetchPageSpeed(url);
+      setPageSpeed(pageSpeedResults.score);
+      setSeoData((prev) => ({
+        ...prev,
+        pageSpeed: pageSpeedResults,
+      }));
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
@@ -114,26 +91,22 @@ function Main({ activeTab }) {
             {activeTab === "overview" && (
               <>
                 <h1>Overview</h1>
-
-                {/* Existing backend SEO score */}
                 <p>
-                  SEO Score: {seoData.overview.score} / {seoData.overview.maxScore}
+                  SEO Score: {seoData.overview.score} /{" "}
+                  {seoData.overview.maxScore}
                 </p>
                 <progress
                   value={seoData.overview.score}
                   max={seoData.overview.maxScore}
                 ></progress>
 
-                {/* NEW: PageSpeed Performance Score */}
                 {pageSpeed !== null && (
-                  <p>
-                    Performance Score: {pageSpeed} / 100
-                  </p>
+                  <p>Performance Score: {pageSpeed} / 100</p>
                 )}
               </>
             )}
 
-            {/* SEO Onpage */}
+            {/* Onpage */}
             {activeTab === "seo-onpage" && (
               <>
                 <h1>SEO Onpage</h1>
@@ -148,7 +121,7 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* SEO Technical */}
+            {/* Technical */}
             {activeTab === "seo-technical" && (
               <>
                 <h1>SEO Technical</h1>
@@ -156,23 +129,19 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* SEO Offpage */}
+            {/* Performance (extra tab) */}
+            {activeTab === "seo-performance" && seoData.pageSpeed && (
+              <SeoPerformance
+                pageSpeedData={seoData.pageSpeed}
+                score={seoData.pageSpeed.score}
+              />
+            )}
+
+            {/* Offpage */}
             {activeTab === "seo-offpage" && (
               <>
                 <h1>SEO Offpage</h1>
                 <p>Off-page analysis coming soon...</p>
-              </>
-            )}
-
-            {/* SEO Performance */}
-            {activeTab === "seo-performance" && (
-              <SeoPerformance pageSpeedData={seoData.pageSpeed} score={pageSpeed} />
-            )}
-
-          {/* View Leads */}
-            {activeTab === "seo-viewleads" && (
-              <>
-                <h1>Lead Management Dashboard</h1>
               </>
             )}
           </div>
