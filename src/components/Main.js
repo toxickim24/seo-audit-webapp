@@ -28,7 +28,7 @@ function Main({ activeTab }) {
     setPageSpeed(null);
 
     try {
-      // ✅ Backend SEO fetch
+      // SEO On-Page Fetch
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
@@ -40,7 +40,7 @@ function Main({ activeTab }) {
       const data = await res.json();
       setSeoData(data);
 
-      // ✅ PageSpeed fetch
+      // PageSpeed Fetch
       const pageSpeedResults = await fetchSeoPerformance(url);
       setPageSpeed(pageSpeedResults.score);
       setSeoData((prev) => ({
@@ -80,7 +80,14 @@ function Main({ activeTab }) {
         {/* Loader */}
         {isLoading && (
           <div className="loader-container">
-            <div className="loader"></div>
+            <div class="book">
+              <div class="book__pg-shadow"></div>
+              <div class="book__pg"></div>
+              <div class="book__pg book__pg--2"></div>
+              <div class="book__pg book__pg--3"></div>
+              <div class="book__pg book__pg--4"></div>
+              <div class="book__pg book__pg--5"></div>
+            </div>
             <p>Analyzing website, please wait...</p>
           </div>
         )}
