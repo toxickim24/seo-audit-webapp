@@ -9,6 +9,7 @@ function Main({ activeTab }) {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
+  const [pageSpeed, setPageSpeed] = useState(null); // 👈 desktop score only
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,7 @@ function Main({ activeTab }) {
     setIsSubmitted(true);
     setIsLoading(true);
     setSeoData(null);
+    setPageSpeed(null); // 👈 reset desktop score
     setDesktopPerf(null);
     setMobilePerf(null);
 
@@ -39,10 +41,12 @@ function Main({ activeTab }) {
       const data = await res.json();
       setSeoData(data);
 
-      // PageSpeed Fetch (Desktop + Mobile)
+      // PageSpeed Fetch
       const desktop = await fetchSeoPerformance(url, "desktop");
       const mobile = await fetchSeoPerformance(url, "mobile");
 
+      // store desktop score in pageSpeed (number only)
+      setPageSpeed(desktop.score);
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
 
@@ -110,18 +114,9 @@ function Main({ activeTab }) {
                   max={seoData.overview.maxScore}
                 ></progress>
 
-                {/* Desktop + Mobile Performance Scores */}
-                {desktopPerf && mobilePerf && (
-                  <div className="perf-scores">
-                    <p>
-                      <strong>Desktop Performance Score:</strong>{" "}
-                      {desktopPerf.score} / 100
-                    </p>
-                    <p>
-                      <strong>Mobile Performance Score:</strong>{" "}
-                      {mobilePerf.score} / 100
-                    </p>
-                  </div>
+                {/* Desktop performance score only */}
+                {pageSpeed !== null && (
+                  <p>Performance Score: {pageSpeed} / 100</p>
                 )}
               </>
             )}
