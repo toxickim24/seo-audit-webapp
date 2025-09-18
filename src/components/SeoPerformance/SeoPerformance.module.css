@@ -1,156 +1,146 @@
-.seoPagespeed{
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  max-width: 700px;
-  margin: 0px auto;
+.container {
+  padding: 40px;
+  font-family: system-ui, sans-serif;
+  background: #f8f9fa;
 }
 
-.seoPagespeed h1 {
+.container h1 {
+  margin-bottom: 40px;
+  font-size: 26px;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 20px;
   color: #2c3e50;
 }
 
-.seoPagespeed h3 {
-  margin-top: 25px;
-  margin-bottom: 10px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 5px;
+/* Two-column layout */
+.twoColumn {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap; /* stack on small screens */
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.metric {
-  margin: 15px 0;
+/* Each result (Desktop / Mobile) */
+.resultBox {
+  flex: 0 0 500px; /* fixed width columns */
+  max-width: 500px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.metric label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
-  color: #444;
+/* Section header */
+.resultBox h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
 }
 
-.progressBar {
-  background: #f0f0f0;
-  border-radius: 8px;
-  overflow: hidden;
-  height: 25px;
-  position: relative;
+/* Score circle */
+.scoreBox {
+  width: 200px;
+  margin-bottom: 30px;
 }
 
-.progressFill {
-  height: 100%;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: bold;
-  line-height: 25px;
+.scoreLabel {
   text-align: center;
-  transition: width 0.4s ease-in-out;
+  margin-top: 12px;
+  font-size: 15px;
+  color: #444;
+  font-weight: 500;
 }
 
-.progressFill.good {
-  background: #2ecc71; /* green */
+/* Metrics grid */
+.metricsGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
 }
 
-.progressFill.average {
-  background: #f1c40f; /* yellow */
+/* Metric card */
+.metricCard {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  border: 1px solid #eee;
+  transition: box-shadow 0.2s ease;
+}
+
+.metricCard:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.metricCard h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 6px 0;
   color: #111;
 }
 
-.progressFill.poor {
-  background: #e74c3c; /* red */
+.description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
 }
 
-/* Opportunities styling */
+/* Opportunities (Recommendations) */
 .opportunities {
-  list-style: none;
-  padding: 0;
+  margin-top: 10px;
+  padding: 15px;
+  background: #fdfdfd;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  width: 100%;
+  text-align: left; /* 👈 ensures left alignment */
+}
+
+.opportunities h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.opportunities ul {
+  list-style: disc;
+  padding-left: 20px; /* 👈 indent bullets */
+  margin: 0;
 }
 
 .opportunities li {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 15px;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #444;
+  line-height: 1.5;
+  text-align: left; /* 👈 ensures each list item is left aligned */
 }
 
-.opportunities li:nth-child(even) {
-  background: #fafafa;
-}
+/* Responsive */
+@media (max-width: 1100px) {
+  .twoColumn {
+    flex-direction: column;
+    align-items: center;
+  }
 
-.opTitle {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.opValue {
-  font-weight: bold;
-  color: #16a085;
-}
-
-.radialScore {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px auto;
-}
-
-.circle {
-  --size: 140px;
-  --bar-width: 12px;
-  --percent: 0;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: conic-gradient(
-    var(--color, #e74c3c) calc(var(--percent) * 1%),
-    #e0e0e0 0
-  );
-  position: relative;
-}
-
-.circle .inner {
-  width: calc(var(--size) - (var(--bar-width) * 2));
-  height: calc(var(--size) - (var(--bar-width) * 2));
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.circle .inner span {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.circle .inner small {
-  font-size: 0.8rem;
-  color: #777;
-}
-
-.circle.good {
-  --color: #2ecc71; /* green */
-}
-
-.circle.average {
-  --color: #f1c40f; /* yellow */
-}
-
-.circle.poor {
-  --color: #e74c3c; /* red */
-}
-
-.radialScore .label {
-  margin-top: 10px;
-  font-weight: bold;
-  color: #2c3e50;
+  .resultBox {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }

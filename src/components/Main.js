@@ -80,13 +80,13 @@ function Main({ activeTab }) {
         {/* Loader */}
         {isLoading && (
           <div className="loader-container">
-            <div class="book">
-              <div class="book__pg-shadow"></div>
-              <div class="book__pg"></div>
-              <div class="book__pg book__pg--2"></div>
-              <div class="book__pg book__pg--3"></div>
-              <div class="book__pg book__pg--4"></div>
-              <div class="book__pg book__pg--5"></div>
+            <div className="book">
+              <div className="book__pg-shadow"></div>
+              <div className="book__pg"></div>
+              <div className="book__pg book__pg--2"></div>
+              <div className="book__pg book__pg--3"></div>
+              <div className="book__pg book__pg--4"></div>
+              <div className="book__pg book__pg--5"></div>
             </div>
             <p>Analyzing website, please wait...</p>
           </div>
@@ -137,11 +137,8 @@ function Main({ activeTab }) {
             )}
 
             {/* Performance (extra tab) */}
-            {activeTab === "seo-performance" && seoData.pageSpeed && (
-              <SeoPerformance
-                pageSpeedData={seoData.pageSpeed}
-                score={seoData.pageSpeed.score}
-              />
+            {activeTab === "seo-performance" && url && (
+              <SeoPerformance url={url} />
             )}
 
             {/* Offpage */}
