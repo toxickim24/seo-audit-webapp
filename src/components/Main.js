@@ -9,7 +9,8 @@ function Main({ activeTab }) {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
-  const [pageSpeed, setPageSpeed] = useState(null);
+  const [desktopPerf, setDesktopPerf] = useState(null);
+  const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
@@ -25,27 +26,29 @@ function Main({ activeTab }) {
     setIsSubmitted(true);
     setIsLoading(true);
     setSeoData(null);
-    setPageSpeed(null);
+    setDesktopPerf(null);
+    setMobilePerf(null);
 
     try {
       // SEO On-Page Fetch
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
-
-      if (!res.ok) {
-        throw new Error("Server error");
-      }
+      if (!res.ok) throw new Error("Server error");
 
       const data = await res.json();
       setSeoData(data);
 
-      // PageSpeed Fetch
-      const pageSpeedResults = await fetchSeoPerformance(url);
-      setPageSpeed(pageSpeedResults.score);
+      // PageSpeed Fetch (Desktop + Mobile)
+      const desktop = await fetchSeoPerformance(url, "desktop");
+      const mobile = await fetchSeoPerformance(url, "mobile");
+
+      setDesktopPerf(desktop);
+      setMobilePerf(mobile);
+
       setSeoData((prev) => ({
         ...prev,
-        pageSpeed: pageSpeedResults,
+        pageSpeed: { desktop, mobile },
       }));
     } catch (err) {
       console.error("Fetch error:", err);
@@ -107,8 +110,18 @@ function Main({ activeTab }) {
                   max={seoData.overview.maxScore}
                 ></progress>
 
-                {pageSpeed !== null && (
-                  <p>Performance Score: {pageSpeed} / 100</p>
+                {/* Desktop + Mobile Performance Scores */}
+                {desktopPerf && mobilePerf && (
+                  <div className="perf-scores">
+                    <p>
+                      <strong>Desktop Performance Score:</strong>{" "}
+                      {desktopPerf.score} / 100
+                    </p>
+                    <p>
+                      <strong>Mobile Performance Score:</strong>{" "}
+                      {mobilePerf.score} / 100
+                    </p>
+                  </div>
                 )}
               </>
             )}
@@ -136,9 +149,12 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* Performance (extra tab) */}
-            {activeTab === "seo-performance" && url && (
-              <SeoPerformance url={url} />
+            {/* Performance */}
+            {activeTab === "seo-performance" && (
+              <SeoPerformance
+                desktopData={desktopPerf}
+                mobileData={mobilePerf}
+              />
             )}
 
             {/* Offpage */}
