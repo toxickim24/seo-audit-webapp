@@ -10,7 +10,7 @@ function App() {
     { id: "overview", label: "Overview" },
     { id: "seo-onpage", label: "SEO On-Page" },
     { id: "seo-technical", label: "SEO Technical" },
-    { id: "seo-offpage", label: "SEO Off-page" },
+    { id: "seo-content", label: "SEO Content" },
     { id: "seo-performance", label: "SEO Performance" },
     { id: "lead-pdf", label: "Leads Management" },
   ];

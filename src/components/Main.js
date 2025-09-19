@@ -1,8 +1,12 @@
 import "../css/Main.css";
+import "../css/Loader.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import AnimatedProgress from "../components/AnimatedProgress/AnimatedProgress";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
+import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
+import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -32,14 +36,12 @@ function Main({ activeTab }) {
     setMobilePerf(null);
 
     try {
-      // SEO On-Page Fetch
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
       if (!res.ok) throw new Error("Server error");
 
       const data = await res.json();
-      setSeoData(data);
 
       // PageSpeed Fetch
       const desktop = await fetchSeoPerformance(url, "desktop");
@@ -62,9 +64,14 @@ function Main({ activeTab }) {
     }
   };
 
+  const passFailStyle = (pass) => ({
+    backgroundColor: pass ? "lightgreen" : "#ff9999",
+  });
+
   return (
     <main>
       <section className="main-container">
+        {/* Animation */}
         <div className="animation-seo">
           <DotLottieReact
             src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
@@ -73,6 +80,7 @@ function Main({ activeTab }) {
           />
         </div>
 
+        {/* URL Input */}
         <div className="search-box">
           <input
             type="url"
@@ -87,60 +95,141 @@ function Main({ activeTab }) {
         {/* Loader */}
         {isLoading && (
           <div className="loader-container">
-            <div className="book">
-              <div className="book__pg-shadow"></div>
-              <div className="book__pg"></div>
-              <div className="book__pg book__pg--2"></div>
-              <div className="book__pg book__pg--3"></div>
-              <div className="book__pg book__pg--4"></div>
-              <div className="book__pg book__pg--5"></div>
+             <div class="book-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" class="book">
+                <rect stroke-width="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+                <line stroke-width="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" ></line>
+                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M25 20H50"></path>
+                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M101 20H76"></path>
+                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M16 30L50 30"></path>
+                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M110 30L76 30"></path>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg"fill="#ffffff74"viewBox="0 0 65 75"class="book-page">
+                <path stroke-linecap="round"stroke-width="4"stroke="#22354d"d="M40 20H15"></path>
+                <path stroke-linecap="round"stroke-width="4"stroke="#22354d"d="M49 30L15 30"></path>
+                <path stroke-width="5"stroke="#fb6a45"d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+              </svg>
             </div>
             <p>Analyzing website, please wait...</p>
           </div>
         )}
 
+        {/* Results */}
         {!isLoading && isSubmitted && seoData && (
           <div className="results-container">
+
             {/* Overview */}
             {activeTab === "overview" && (
-              <>
-                <h1>Overview</h1>
-                <p>
-                  SEO Score: {seoData.overview.score} /{" "}
-                  {seoData.overview.maxScore}
-                </p>
-                <progress
-                  value={seoData.overview.score}
-                  max={seoData.overview.maxScore}
-                ></progress>
+              <div className="overview-container">
+                <div className="overview-wrapper">
+                  <h2 className="result-title">Overview</h2>
 
-                {/* Desktop performance score only */}
-                {pageSpeed !== null && (
-                  <p>Performance Score: {pageSpeed} / 100</p>
+                  {/* Overall SEO Score */}
+                  {(() => {
+                    const scores = [
+                      seoData.onpage?.overview?.score,
+                      seoData.contentSeo?.overview?.score,
+                      seoData.technicalSeo?.overview?.score,
+                      pageSpeed,
+                    ].filter((s) => s !== undefined && s !== null);
+
+                    const overallScore = scores.length
+                      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+                      : 0;
+
+                    return (
+                      <AnimatedProgress
+                        score={overallScore}
+                        maxScore={100}
+                        label="Overall SEO Score"
+                      />
+                    );
+                  })()}
+
+                  {seoData.onpage && (
+                    <AnimatedProgress
+                      score={seoData.onpage.overview.score}
+                      maxScore={100}
+                      label="On-Page SEO"
+                    />
+                  )}
+                  {seoData.contentSeo && (
+                    <AnimatedProgress
+                      score={seoData.contentSeo.overview?.score || 0}
+                      maxScore={100}
+                      label="Content SEO"
+                    />
+                  )}
+                  {seoData.technicalSeo && (
+                    <AnimatedProgress
+                      score={seoData.technicalSeo.overview?.score || 0}
+                      maxScore={100}
+                      label="Technical SEO"
+                    />
+                  )}
+                  {pageSpeed !== null && (
+                    <AnimatedProgress
+                      score={pageSpeed}
+                      maxScore={100}
+                      label="Performance SEO"
+                    />
+                  )}
+
+                  {/* SEO Suggestions */}
+                  {seoData.onpage && (
+                    <SeoSuggestions onpage={seoData.onpage.onpage} contentSeo={seoData.contentSeo} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* On-Page SEO */}
+            {activeTab === "seo-onpage" && seoData.onpage && (
+              <SeoOnPage onpage={seoData.onpage.onpage} passFailStyle={passFailStyle} />
+            )}
+
+            {/* Technical SEO */}
+            {activeTab === "seo-technical" && seoData.technicalSeo && (
+              <>
+                <h2 className="result-title">Technical SEO</h2>
+                <p><b>Canonical:</b> {seoData.technicalSeo.technicalSeo.canonical}</p>
+                <p><b>Robots Meta:</b> {seoData.technicalSeo.technicalSeo.hasRobotsMeta ? "Yes" : "No"}</p>
+                <p><b>&nbsp;&nbsp;Indexable:</b> {seoData.technicalSeo.technicalSeo.robotsIndex}</p>
+                <p><b>&nbsp;&nbsp;Follow Links:</b> {seoData.technicalSeo.technicalSeo.robotsFollow}</p>
+                <p><b>Viewport Meta:</b> {seoData.technicalSeo.technicalSeo.hasViewport ? "Yes" : "No"}</p>
+                <p><b>HTTPS:</b> {seoData.technicalSeo.technicalSeo.https ? "Yes" : "No"}</p>
+                <p><b>Favicon:</b> {seoData.technicalSeo.technicalSeo.hasFavIcon ? "Yes" : "No"}</p>
+                <p><b>Language Tag:</b> {seoData.technicalSeo.technicalSeo.hreflang ? "Yes" : "No"}</p>
+                <p><b>Mixed Content:</b> {seoData.technicalSeo.technicalSeo.mixedContent ? "Yes" : "No"}</p>
+                <p><b>Robots.txt URL:</b> <a href={seoData.technicalSeo.technicalSeo.robotsTxtUrl} target="_blank">{seoData.technicalSeo.technicalSeo.robotsTxtUrl}</a></p>
+                {seoData.technicalSeo.technicalSeo.sitemapUrl && (
+                  <p><b>Sitemap URL:</b> <a href={seoData.technicalSeo.technicalSeo.sitemapUrl} target="_blank">{seoData.technicalSeo.technicalSeo.sitemapUrl}</a></p>
                 )}
+                <p><b>Canonical Conflict:</b> {seoData.technicalSeo.technicalSeo.canonicalConflict ? "Yes" : "No"}</p>
+                <p><b>WWW Version:</b> {seoData.technicalSeo.technicalSeo.isWWW ? "WWW" : "Non-WWW"}</p>
+                <p><b>Trailing Slash:</b> {seoData.technicalSeo.technicalSeo.trailingSlash ? "Yes" : "No"}</p>
+                <p><b>Page Size (KB):</b> {seoData.technicalSeo.technicalSeo.pageSizeKB}</p>
+                <p><b>Number of Requests:</b> {seoData.technicalSeo.technicalSeo.numRequests}</p>
+                <p><b>AMP Page:</b> {seoData.technicalSeo.technicalSeo.hasAMP ? "Yes" : "No"}</p>
+                <p><b>Sitemap Valid URLs:</b></p>
+                <ul>
+                  {seoData.technicalSeo.technicalSeo.sitemapValidUrls.map((u, i) => (
+                    <li key={i}>{u.url} - {u.status}</li>
+                  ))}
+                </ul>
+
               </>
             )}
 
-            {/* Onpage */}
-            {activeTab === "seo-onpage" && (
+            {/* Content SEO */}
+            {activeTab === "seo-content" && seoData.contentSeo && (
               <>
-                <h1>SEO Onpage</h1>
-                <p><b>Title:</b> {seoData.onpage.title}</p>
-                <p><b>Meta Description:</b> {seoData.onpage.metaDescription}</p>
-                <p><b>H1:</b> {seoData.onpage.h1.join(", ")}</p>
-                <p><b>H2:</b> {seoData.onpage.h2.join(", ")}</p>
-                <p><b>H3:</b> {seoData.onpage.h3.join(", ")}</p>
-                <p><b>Images:</b> {seoData.onpage.imageCount} (with alt: {seoData.onpage.imagesWithAlt})</p>
-                <p><b>Internal Links:</b> {seoData.onpage.internalLinks}</p>
-                <p><b>Canonical:</b> {seoData.onpage.canonical}</p>
-              </>
-            )}
-
-            {/* Technical */}
-            {activeTab === "seo-technical" && (
-              <>
-                <h1>SEO Technical</h1>
-                <p>Technical analysis coming soon...</p>
+                <h2 className="result-title">Content SEO</h2>
+                <p><b>Word Count:</b> {seoData.contentSeo.contentSeo.wordCount}</p>
+                <p><b>Keyword Density:</b> {seoData.contentSeo.contentSeo.keywordDensity}</p>
+                <p><b>Body Length:</b> {seoData.contentSeo.contentSeo.bodyLength}</p>
+                <p><b>Keyword in Headings:</b> {seoData.contentSeo.contentSeo.keywordInHeadings ? "Yes" : "No"}</p>
+                <p><b>Media Count (img/video):</b> {seoData.contentSeo.contentSeo.mediaCount}</p>
               </>
             )}
 
@@ -151,14 +240,7 @@ function Main({ activeTab }) {
                 mobileData={mobilePerf}
               />
             )}
-
-            {/* Offpage */}
-            {activeTab === "seo-offpage" && (
-              <>
-                <h1>SEO Offpage</h1>
-                <p>Off-page analysis coming soon...</p>
-              </>
-            )}
+            
           </div>
         )}
       </section>
