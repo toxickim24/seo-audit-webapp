@@ -50,7 +50,6 @@ function Main({ activeTab }) {
       if (!res.ok) throw new Error("Server error");
 
       const data = await res.json();
-      console.log("SEO Data:", data);
 
       // 2️⃣ Fetch PageSpeed performance
       const desktop = await fetchSeoPerformance(url, "desktop");
