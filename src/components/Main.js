@@ -7,6 +7,10 @@ import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
+import SeoTechnicalSuggestions from "./SeoTechnical/SeoTechnicalSuggestions";
+import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
+import SeoContentSuggestions from "./SeoContent/SeoContentSuggestions";
+import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -178,9 +182,19 @@ function Main({ activeTab }) {
                     />
                   )}
 
-                  {/* SEO Suggestions */}
+                  {/* SEO On Page Suggestions */}
                   {seoData.onpage && (
                     <SeoSuggestions onpage={seoData.onpage.onpage} contentSeo={seoData.contentSeo} />
+                  )}
+
+                  {/* Technical SEO Suggestions */}
+                  {seoData.technicalSeo && (
+                    <SeoTechnicalSuggestions technicalSeo={seoData.technicalSeo.technicalSeo} />
+                  )}
+
+                  {/* Content SEO Suggestions */}
+                  {seoData.contentSeo && (
+                    <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
                   )}
                 </div>
               </div>
@@ -193,46 +207,14 @@ function Main({ activeTab }) {
 
             {/* Technical SEO */}
             {activeTab === "seo-technical" && seoData.technicalSeo && (
-              <>
-                <h2 className="result-title">Technical SEO</h2>
-                <p><b>Canonical:</b> {seoData.technicalSeo.technicalSeo.canonical}</p>
-                <p><b>Robots Meta:</b> {seoData.technicalSeo.technicalSeo.hasRobotsMeta ? "Yes" : "No"}</p>
-                <p><b>&nbsp;&nbsp;Indexable:</b> {seoData.technicalSeo.technicalSeo.robotsIndex}</p>
-                <p><b>&nbsp;&nbsp;Follow Links:</b> {seoData.technicalSeo.technicalSeo.robotsFollow}</p>
-                <p><b>Viewport Meta:</b> {seoData.technicalSeo.technicalSeo.hasViewport ? "Yes" : "No"}</p>
-                <p><b>HTTPS:</b> {seoData.technicalSeo.technicalSeo.https ? "Yes" : "No"}</p>
-                <p><b>Favicon:</b> {seoData.technicalSeo.technicalSeo.hasFavIcon ? "Yes" : "No"}</p>
-                <p><b>Language Tag:</b> {seoData.technicalSeo.technicalSeo.hreflang ? "Yes" : "No"}</p>
-                <p><b>Mixed Content:</b> {seoData.technicalSeo.technicalSeo.mixedContent ? "Yes" : "No"}</p>
-                <p><b>Robots.txt URL:</b> <a href={seoData.technicalSeo.technicalSeo.robotsTxtUrl} target="_blank">{seoData.technicalSeo.technicalSeo.robotsTxtUrl}</a></p>
-                {seoData.technicalSeo.technicalSeo.sitemapUrl && (
-                  <p><b>Sitemap URL:</b> <a href={seoData.technicalSeo.technicalSeo.sitemapUrl} target="_blank">{seoData.technicalSeo.technicalSeo.sitemapUrl}</a></p>
-                )}
-                <p><b>Canonical Conflict:</b> {seoData.technicalSeo.technicalSeo.canonicalConflict ? "Yes" : "No"}</p>
-                <p><b>WWW Version:</b> {seoData.technicalSeo.technicalSeo.isWWW ? "WWW" : "Non-WWW"}</p>
-                <p><b>Trailing Slash:</b> {seoData.technicalSeo.technicalSeo.trailingSlash ? "Yes" : "No"}</p>
-                <p><b>Page Size (KB):</b> {seoData.technicalSeo.technicalSeo.pageSizeKB}</p>
-                <p><b>Number of Requests:</b> {seoData.technicalSeo.technicalSeo.numRequests}</p>
-                <p><b>AMP Page:</b> {seoData.technicalSeo.technicalSeo.hasAMP ? "Yes" : "No"}</p>
-                <p><b>Sitemap Valid URLs:</b></p>
-                <ul>
-                  {seoData.technicalSeo.technicalSeo.sitemapValidUrls.map((u, i) => (
-                    <li key={i}>{u.url} - {u.status}</li>
-                  ))}
-                </ul>
-              </>
+              <SeoTechnicalDisplay technicalSeo={seoData.technicalSeo.technicalSeo} passFailStyle={passFailStyle}
+              />
             )}
 
             {/* Content SEO */}
             {activeTab === "seo-content" && seoData.contentSeo && (
-              <>
-                <h2 className="result-title">Content SEO</h2>
-                <p><b>Word Count:</b> {seoData.contentSeo.contentSeo.wordCount}</p>
-                <p><b>Keyword Density:</b> {seoData.contentSeo.contentSeo.keywordDensity}</p>
-                <p><b>Body Length:</b> {seoData.contentSeo.contentSeo.bodyLength}</p>
-                <p><b>Keyword in Headings:</b> {seoData.contentSeo.contentSeo.keywordInHeadings ? "Yes" : "No"}</p>
-                <p><b>Media Count (img/video):</b> {seoData.contentSeo.contentSeo.mediaCount}</p>
-              </>
+              <SeoContentDisplay contentSeo={seoData.contentSeo.contentSeo} passFailStyle={passFailStyle}
+              />
             )}
 
             {/* Performance */}
