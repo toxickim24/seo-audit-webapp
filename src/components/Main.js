@@ -197,6 +197,16 @@ function Main({ activeTab }) {
                     <SeoSuggestions onpage={seoData.onpage.onpage} contentSeo={seoData.contentSeo} />
                   )}
 
+                  {/* Technical SEO Suggestions */}
+                  {seoData.technicalSeo && (
+                    <SeoTechnicalSuggestions technicalSeo={seoData.technicalSeo.technicalSeo} />
+                  )}
+
+                  {/* Content SEO Suggestions */}
+                  {seoData.contentSeo && (
+                    <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
+                  )}
+
                   {/* Desktop Recommendations */}
                   {desktopRecommendations.length > 0 && (
                     <div className="seo-recommendations">
@@ -243,16 +253,6 @@ function Main({ activeTab }) {
                         })}
                       </ul>
                     </div>
-                  )}
-
-                  {/* Technical SEO Suggestions */}
-                  {seoData.technicalSeo && (
-                    <SeoTechnicalSuggestions technicalSeo={seoData.technicalSeo.technicalSeo} />
-                  )}
-
-                  {/* Content SEO Suggestions */}
-                  {seoData.contentSeo && (
-                    <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
                   )}
 
                 </div>
