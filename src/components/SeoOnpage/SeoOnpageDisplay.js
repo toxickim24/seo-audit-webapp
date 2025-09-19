@@ -1,6 +1,3 @@
-// components/SeoOnPage/SeoOnPage.js
-import React from "react";
-
 const SeoOnPage = ({ onpage, passFailStyle }) => {
   return (
     <div className="overview-container">
