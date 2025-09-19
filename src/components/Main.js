@@ -7,6 +7,7 @@ import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
+import { getOverallScore } from "../utils/calcOverallScore";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -14,6 +15,8 @@ function Main({ activeTab }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
   const [pageSpeed, setPageSpeed] = useState(null);
+  const [desktopRecommendations, setDesktopRecommendations] = useState([]);
+  const [mobileRecommendations, setMobileRecommendations] = useState([]);
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +54,15 @@ function Main({ activeTab }) {
 
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
-      setPageSpeed(desktop.score);
+      const overallScore = getOverallScore(desktop.score, mobile.score);
+      setPageSpeed(overallScore);
+
+      // filter and separate desktop + mobile
+      const desktopOpps = (desktop.opportunities || []).filter((opp) => opp.savingsMs > 0);
+      const mobileOpps = (mobile.opportunities || []).filter((opp) => opp.savingsMs > 0);
+
+      setDesktopRecommendations(desktopOpps);
+      setMobileRecommendations(mobileOpps);
 
       // 3️⃣ Merge all data into seoData state
       setSeoData({
@@ -182,6 +193,55 @@ function Main({ activeTab }) {
                   {seoData.onpage && (
                     <SeoSuggestions onpage={seoData.onpage.onpage} contentSeo={seoData.contentSeo} />
                   )}
+
+                  {/* Desktop Recommendations */}
+                  {desktopRecommendations.length > 0 && (
+                    <div className="seo-recommendations">
+                      <h3>Performance Recommendations Desktop</h3>
+                      <ul>
+                        {desktopRecommendations.map((opp, i) => {
+                          const seconds = opp.savingsMs / 1000;
+                          let impact =
+                            opp.savingsMs > 1000
+                              ? "High impact ⚡"
+                              : opp.savingsMs > 200
+                              ? "Medium impact 👍"
+                              : "Low impact ✅";
+
+                          return (
+                            <li key={`d-${i}`}>
+                              {opp.title} — {impact} (about {seconds.toFixed(1)}s faster)
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Mobile Recommendations */}
+                  {mobileRecommendations.length > 0 && (
+                    <div className="seo-recommendations">
+                      <h3>Performance Recommendations Mobile</h3>
+                      <ul>
+                        {mobileRecommendations.map((opp, i) => {
+                          const seconds = opp.savingsMs / 1000;
+                          let impact =
+                            opp.savingsMs > 1000
+                              ? "High impact ⚡"
+                              : opp.savingsMs > 200
+                              ? "Medium impact 👍"
+                              : "Low impact ✅";
+
+                          return (
+                            <li key={`m-${i}`}>
+                              {opp.title} — {impact} (about {seconds.toFixed(1)}s faster)
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
                 </div>
               </div>
             )}
