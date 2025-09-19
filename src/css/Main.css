@@ -156,12 +156,14 @@
   font-size: 25px;
   font-weight: 700;
   color: black;
+  text-align: start;
 }
 
 .onpage-box span{
   font-size: 16px;
   font-weight: 400;
   color: black;
+  text-align: start;
 }
 
 .onpage-counter-box{
@@ -220,6 +222,10 @@
   margin: 0;
 }
 
+.header-list-container li{
+  text-align: start;
+}
+
 .link-summary-container,
 .image-summary-container{
   display: flex;
@@ -244,12 +250,14 @@
   border: 1px solid #ccc;
 }
 
+.link-summary-box b,
 .image-summary-box b{
   font-size: 20px;
   font-weight: 700;
   color: black;
 }
 
+.link-summary-box span,
 .image-summary-box span{
   font-size: 40px;
   font-weight: 400;
@@ -271,10 +279,134 @@
   font-size: 25px;
   font-weight: 700;
   color: black;
+  text-align: start;
 }
 
 .og-box span{
   font-size: 18px;
   font-weight: 400;
   color: black;
+  text-align: start;
+}
+
+/* Technical SEO */
+.seo-technical-container{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.seo-technical-wrapper{
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.seo-technical-box{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  width: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  gap: 10px;
+}
+
+.seo-technical-meta{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 20px;
+}
+
+.seo-technical-box b {
+  font-size: 25px;
+  font-weight: 700;
+  color: black;
+  text-align: start;
+}
+
+.seo-technical-box p {
+  font-size: 18px;
+  font-weight: 400;
+  color: black;
+  text-align: start;
+}
+.seo-technical-box a{
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 400;
+  color: black;
+  text-align: start;
+}
+
+.seo-technical-box a:hover{
+  color: #fb6a45;
+}
+
+.seo-technical-box ul{
+  list-style-type: none;
+  margin: none;
+}
+
+.seo-technical-box ul li{
+  text-align: start;
+  padding: 8px 0;
+}
+
+/* Content SEO */
+
+.seo-content-container{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.seo-content-wrapper{
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.seo-content-box{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  width: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  gap: 10px;
+}
+
+.seo-content-meta{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 20px;
+}
+
+.seo-content-box b {
+  font-size: 25px;
+  font-weight: 700;
+  color: black;
+  text-align: start;
+}
+
+.seo-content-box p {
+  font-size: 18px;
+  font-weight: 400;
+  color: black;
+  text-align: start;
 }

@@ -62,8 +62,8 @@ export async function analyzeTechnicalSeo(url) {
     // --- Robots Meta (index/follow) ---
     const robotsMeta = $("meta[name='robots']").attr("content") || "";
     result.technicalSeo.hasRobotsMeta = robotsMeta !== "";
-    result.technicalSeo.robotsIndex = /noindex/i.test(robotsMeta) ? "No" : "Yes";
-    result.technicalSeo.robotsFollow = /nofollow/i.test(robotsMeta) ? "No" : "Yes";
+    result.technicalSeo.robotsIndex = /noindex/i.test(robotsMeta) ? "Failed" : "Pass";
+    result.technicalSeo.robotsFollow = /nofollow/i.test(robotsMeta) ? "Failed" : "Pass";
 
     // --- Sitemap URLs Validity ---
     result.technicalSeo.sitemapValidUrls = [];
