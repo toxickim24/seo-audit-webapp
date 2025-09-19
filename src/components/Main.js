@@ -13,7 +13,7 @@ function Main({ activeTab }) {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
-  const [pageSpeed, setPageSpeed] = useState(null); // 👈 desktop score only
+  const [pageSpeed, setPageSpeed] = useState(null);
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,31 +31,34 @@ function Main({ activeTab }) {
     setIsSubmitted(true);
     setIsLoading(true);
     setSeoData(null);
-    setPageSpeed(null); // 👈 reset desktop score
+    setPageSpeed(null);
     setDesktopPerf(null);
     setMobilePerf(null);
 
     try {
+      // 1️⃣ Fetch SEO analysis from backend
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
       if (!res.ok) throw new Error("Server error");
 
       const data = await res.json();
+      console.log("SEO Data:", data);
 
-      // PageSpeed Fetch
+      // 2️⃣ Fetch PageSpeed performance
       const desktop = await fetchSeoPerformance(url, "desktop");
       const mobile = await fetchSeoPerformance(url, "mobile");
 
-      // store desktop score in pageSpeed (number only)
-      setPageSpeed(desktop.score);
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
+      setPageSpeed(desktop.score);
 
-      setSeoData((prev) => ({
-        ...prev,
+      // 3️⃣ Merge all data into seoData state
+      setSeoData({
+        ...data,
         pageSpeed: { desktop, mobile },
-      }));
+      });
+
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
@@ -95,19 +98,19 @@ function Main({ activeTab }) {
         {/* Loader */}
         {isLoading && (
           <div className="loader-container">
-             <div class="book-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" class="book">
-                <rect stroke-width="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
-                <line stroke-width="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" ></line>
-                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M25 20H50"></path>
-                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M101 20H76"></path>
-                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M16 30L50 30"></path>
-                <path stroke-linecap="round" stroke-width="4" stroke="#22354d" d="M110 30L76 30"></path>
+            <div className="book-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+                <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+                <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" ></line>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
               </svg>
-              <svg xmlns="http://www.w3.org/2000/svg"fill="#ffffff74"viewBox="0 0 65 75"class="book-page">
-                <path stroke-linecap="round"stroke-width="4"stroke="#22354d"d="M40 20H15"></path>
-                <path stroke-linecap="round"stroke-width="4"stroke="#22354d"d="M49 30L15 30"></path>
-                <path stroke-width="5"stroke="#fb6a45"d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
+                <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
               </svg>
             </div>
             <p>Analyzing website, please wait...</p>
@@ -217,7 +220,6 @@ function Main({ activeTab }) {
                     <li key={i}>{u.url} - {u.status}</li>
                   ))}
                 </ul>
-
               </>
             )}
 
