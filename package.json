@@ -8,6 +8,7 @@
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "react": "^19.1.1",
+    "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.1.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^5.1.0",

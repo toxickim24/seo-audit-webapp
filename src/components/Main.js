@@ -13,7 +13,9 @@ function Main({ activeTab }) {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
-  const [pageSpeed, setPageSpeed] = useState(null);
+  const [pageSpeed, setPageSpeed] = useState(null); // 👈 desktop score only
+  const [desktopPerf, setDesktopPerf] = useState(null);
+  const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
@@ -29,7 +31,9 @@ function Main({ activeTab }) {
     setIsSubmitted(true);
     setIsLoading(true);
     setSeoData(null);
-    setPageSpeed(null);
+    setPageSpeed(null); // 👈 reset desktop score
+    setDesktopPerf(null);
+    setMobilePerf(null);
 
     try {
       const res = await fetch(
@@ -39,11 +43,19 @@ function Main({ activeTab }) {
 
       const data = await res.json();
 
-      // Fetch PageSpeed separately
-      const pageSpeedResults = await fetchSeoPerformance(url);
+      // PageSpeed Fetch
+      const desktop = await fetchSeoPerformance(url, "desktop");
+      const mobile = await fetchSeoPerformance(url, "mobile");
 
-      setSeoData({ ...data, pageSpeed: pageSpeedResults });
-      setPageSpeed(pageSpeedResults.score);
+      // store desktop score in pageSpeed (number only)
+      setPageSpeed(desktop.score);
+      setDesktopPerf(desktop);
+      setMobilePerf(mobile);
+
+      setSeoData((prev) => ({
+        ...prev,
+        pageSpeed: { desktop, mobile },
+      }));
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
@@ -209,7 +221,6 @@ function Main({ activeTab }) {
               </>
             )}
 
-
             {/* Content SEO */}
             {activeTab === "seo-content" && seoData.contentSeo && (
               <>
@@ -222,10 +233,14 @@ function Main({ activeTab }) {
               </>
             )}
 
-            {/* Performance SEO */}
-            {activeTab === "seo-performance" && seoData.pageSpeed && (
-              <SeoPerformance pageSpeedData={seoData.pageSpeed} score={seoData.pageSpeed.score} />
+            {/* Performance */}
+            {activeTab === "seo-performance" && (
+              <SeoPerformance
+                desktopData={desktopPerf}
+                mobileData={mobilePerf}
+              />
             )}
+            
           </div>
         )}
       </section>
