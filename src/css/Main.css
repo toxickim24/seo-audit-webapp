@@ -393,3 +393,17 @@
   flex-wrap: nowrap;
   gap: 20px;
 }
+
+.seo-content-box b {
+  font-size: 25px;
+  font-weight: 700;
+  color: black;
+  text-align: start;
+}
+
+.seo-content-box p {
+  font-size: 18px;
+  font-weight: 400;
+  color: black;
+  text-align: start;
+}
