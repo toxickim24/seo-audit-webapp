@@ -43,36 +43,38 @@ function Main({ activeTab }) {
     setMobilePerf(null);
 
     try {
-      // 1️⃣ Fetch SEO analysis from backend
+      // Fetch SEO analysis from backend
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
       if (!res.ok) throw new Error("Server error");
-
       const data = await res.json();
 
-      // 2️⃣ Fetch PageSpeed performance
-      const desktop = await fetchSeoPerformance(url, "desktop");
-      const mobile = await fetchSeoPerformance(url, "mobile");
+      // Fetch PageSpeed Desktop + Mobile (parallel + cache)
+      const { desktop, mobile } = await fetchSeoPerformance(url);
 
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
-      const overallScore = getOverallScore(desktop.score, mobile.score);
+
+      const overallScore = getOverallScore(desktop?.score, mobile?.score);
       setPageSpeed(overallScore);
 
-      // filter and separate desktop + mobile
-      const desktopOpps = (desktop.opportunities || []).filter((opp) => opp.savingsMs > 0);
-      const mobileOpps = (mobile.opportunities || []).filter((opp) => opp.savingsMs > 0);
+      // filter opportunities (same as SeoPerformance)
+      const desktopOpps = (desktop?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
+      const mobileOpps = (mobile?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
 
       setDesktopRecommendations(desktopOpps);
       setMobileRecommendations(mobileOpps);
 
-      // 3️⃣ Merge all data into seoData state
+      // Merge all data into seoData state
       setSeoData({
         ...data,
         pageSpeed: { desktop, mobile },
       });
-
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
@@ -210,7 +212,7 @@ function Main({ activeTab }) {
                   {/* Desktop Recommendations */}
                   {desktopRecommendations.length > 0 && (
                     <div className="seo-recommendations">
-                      <h3>Performance Recommendations Desktop</h3>
+                      <h3>Performance Recommendations (Desktop)</h3>
                       <ul>
                         {desktopRecommendations.map((opp, i) => {
                           const seconds = opp.savingsMs / 1000;
@@ -234,7 +236,7 @@ function Main({ activeTab }) {
                   {/* Mobile Recommendations */}
                   {mobileRecommendations.length > 0 && (
                     <div className="seo-recommendations">
-                      <h3>Performance Recommendations Mobile</h3>
+                      <h3>Performance Recommendations (Mobile)</h3>
                       <ul>
                         {mobileRecommendations.map((opp, i) => {
                           const seconds = opp.savingsMs / 1000;
@@ -266,24 +268,25 @@ function Main({ activeTab }) {
 
             {/* Technical SEO */}
             {activeTab === "seo-technical" && seoData.technicalSeo && (
-              <SeoTechnicalDisplay technicalSeo={seoData.technicalSeo.technicalSeo} passFailStyle={passFailStyle}
+              <SeoTechnicalDisplay
+                technicalSeo={seoData.technicalSeo.technicalSeo}
+                passFailStyle={passFailStyle}
               />
             )}
 
             {/* Content SEO */}
             {activeTab === "seo-content" && seoData.contentSeo && (
-              <SeoContentDisplay contentSeo={seoData.contentSeo.contentSeo} passFailStyle={passFailStyle}
+              <SeoContentDisplay
+                contentSeo={seoData.contentSeo.contentSeo}
+                passFailStyle={passFailStyle}
               />
             )}
 
             {/* Performance */}
             {activeTab === "seo-performance" && (
-              <SeoPerformance
-                desktopData={desktopPerf}
-                mobileData={mobilePerf}
-              />
+              <SeoPerformance desktopData={desktopPerf} mobileData={mobilePerf} />
             )}
-            
+
           </div>
         )}
       </section>
