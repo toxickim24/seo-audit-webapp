@@ -141,6 +141,8 @@ function Main({ activeTab }) {
 
   return (
     <main>
+    {/* Default SEO tabs (all inside main-container) */}
+    {activeTab !== "leads-management" && (
       <section className="main-container">
         <div className="animation-seo">
           <DotLottieReact
@@ -248,6 +250,7 @@ function Main({ activeTab }) {
           </div>
         )}
       </section>
+      )}
       
       {/* Leads Management outside main-container */}
       {activeTab === "leads-management" && <LeadsManagement />}

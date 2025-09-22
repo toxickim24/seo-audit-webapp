@@ -4,7 +4,7 @@ const CACHE_TTL = 60 * 60 * 1000; // 1 hour cache
 if (!API_KEY) throw new Error("⚠️ Missing PageSpeed API key");
 
 function getCacheKey(url, strategy) {
-  return `seo-perf-${strategy}-${url}`;
+  return `seoPerformance:${url}:${strategy}`;
 }
 
 function getCachedResult(url, strategy) {
@@ -12,14 +12,18 @@ function getCachedResult(url, strategy) {
   const cached = localStorage.getItem(key);
   if (!cached) return null;
 
-  const parsed = JSON.parse(cached);
-  const expired = Date.now() - parsed.time > CACHE_TTL;
-
-  if (expired) {
-    localStorage.removeItem(key);
+  try {
+    const parsed = JSON.parse(cached);
+    const expired = Date.now() - parsed.time > CACHE_TTL;
+    if (expired) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    localStorage.removeItem(key); // corrupted data
     return null;
   }
-  return parsed.data;
 }
 
 function setCacheResult(url, strategy, data) {
@@ -30,14 +34,12 @@ function setCacheResult(url, strategy, data) {
   );
 }
 
-async function fetchStrategy(url, strategy = "mobile") {
-  // Check cache first
+export async function fetchSeoPerformance(url, strategy = "mobile") {
+  // ✅ Try cache first
   const cached = getCachedResult(url, strategy);
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
 
-  // Call API if not cached
+  // 🌐 Fetch fresh data
   const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
     url
   )}&key=${API_KEY}&strategy=${strategy}&category=performance`;
@@ -52,7 +54,7 @@ async function fetchStrategy(url, strategy = "mobile") {
   const categories = lighthouse.categories || {};
   const performanceScore = categories.performance?.score;
 
-  const parsed = {
+  const result = {
     strategy,
     score:
       performanceScore !== undefined
@@ -73,22 +75,8 @@ async function fetchStrategy(url, strategy = "mobile") {
       })),
   };
 
-  // Save to cache
-  setCacheResult(url, strategy, parsed);
+  // 💾 Save to cache
+  setCacheResult(url, strategy, result);
 
-  return parsed;
-}
-
-// 🚀 Main function: fetch both Desktop & Mobile in parallel
-export async function fetchSeoPerformance(url) {
-  try {
-    const [desktop, mobile] = await Promise.all([
-      fetchStrategy(url, "desktop"),
-      fetchStrategy(url, "mobile"),
-    ]);
-    return { desktop, mobile };
-  } catch (err) {
-    console.error("❌ SeoPerformance fetch error:", err);
-    return { desktop: null, mobile: null };
-  }
+  return result;
 }
