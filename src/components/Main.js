@@ -2,13 +2,18 @@ import "../css/Main.css";
 import "../css/Loader.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import SeoPerformance from "./SeoPerformance";
+import { fetchSeoPerformance } from "../api/SeoPerformance";
+import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 import AnimatedProgress from "../components/AnimatedProgress/AnimatedProgress";
 import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 import SeoTechnicalSuggestions from "./SeoTechnical/SeoTechnicalSuggestions";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
-import SeoContentSuggestions from "./SeoContent/SeoContentSuggestions";
 import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
+import Overview from "../components/Overview/Overview";
+import { generateSeoPDF } from "../utils/generateSeoPDF";
+import { getOverallScore } from "../utils/calcOverallScore";
 import { getOverallScore } from "../utils/calcOverallScore";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoPerformance from "./SeoPerformance";
@@ -25,6 +30,11 @@ function Main({ activeTab }) {
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState("");
+  const [emailStatusType, setEmailStatusType] = useState(""); // "success", "error", "info"
+  const [isEmailSending, setIsEmailSending] = useState(false); // NEW
 
   const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
 
@@ -51,8 +61,8 @@ function Main({ activeTab }) {
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
 
-      // Fetch PageSpeed Desktop + Mobile
-      const { desktop, mobile } = await fetchSeoPerformance(url);
+      const desktop = await fetchSeoPerformance(url, "desktop");
+      const mobile = await fetchSeoPerformance(url, "mobile");
 
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
@@ -82,285 +92,170 @@ function Main({ activeTab }) {
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!seoData || !url || !email) {
+      setEmailStatus("Email is missing");
+      setEmailStatusType("error");
+      return;
+    }
+
+    try {
+      setIsEmailSending(true);
+      setEmailStatus("");
+      setEmailStatusType("");
+
+      const pdfBlob = generateSeoPDF(
+        seoData,
+        url,
+        pageSpeed,
+        { desktopData: desktopPerf, mobileData: mobilePerf },
+        false
+      );
+
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      const res = await fetch("http://localhost:5000/send-seo-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, pdfBlob: base64Data }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText);
+      }
+
+      setEmail("");
+      setEmailStatus("SEO Audit Sent!");
+      setEmailStatusType("success");
+    } catch (err) {
+      console.error("Send email error:", err);
+      setEmailStatus("Failed to send email.");
+      setEmailStatusType("error");
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
   const passFailStyle = (pass) => ({
     backgroundColor: pass ? "lightgreen" : "#ff9999",
   });
 
   return (
     <main>
-      {/* SEO Tabs stay inside main-container */}
-      {activeTab !== "leads-management" && (
-        <section className="main-container">
-          {/* Animation */}
-          <div className="animation-seo">
-            <DotLottieReact
-              src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-              loop
-              autoplay
-            />
-          </div>
+      <section className="main-container">
+        <div className="animation-seo">
+          <DotLottieReact
+            src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+            loop
+            autoplay
+            onError={(err) => console.warn("Lottie error ignored:", err)}
+            onLoad={(data) => console.log("Loaded .lottie", data)}
+          />
+        </div>
 
-          {/* URL Input */}
-          <div className="search-box">
-            <input
-              type="url"
-              placeholder="Enter your website URL"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-            <button onClick={handleAnalyze}>Analyze SEO</button>
-            {error && <p className="error-message">{error}</p>}
-          </div>
+        <div className="search-box">
+          <input
+            type="url"
+            placeholder="Enter your website URL"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <button onClick={handleAnalyze}>Analyze SEO</button>
+          {error && <p className="error-message">{error}</p>}
+        </div>
 
-          {/* Loader */}
-          {isLoading && (
-            <div className="loader-container">
-              <div className="book-wrapper">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="white"
-                  viewBox="0 0 126 75"
-                  className="book"
-                >
-                  <rect
-                    strokeWidth="5"
-                    stroke="#fb6a45"
-                    rx="7.5"
-                    height="70"
-                    width="121"
-                    y="2.5"
-                    x="2.5"
-                  ></rect>
-                  <line
-                    strokeWidth="5"
-                    stroke="#fb6a45"
-                    y2="75"
-                    x2="63.5"
-                    x1="63.5"
-                  ></line>
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M25 20H50"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M101 20H76"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M16 30L50 30"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M110 30L76 30"
-                  ></path>
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="#ffffff74"
-                  viewBox="0 0 65 75"
-                  className="book-page"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M40 20H15"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeWidth="4"
-                    stroke="#22354d"
-                    d="M49 30L15 30"
-                  ></path>
-                  <path
-                    strokeWidth="5"
-                    stroke="#fb6a45"
-                    d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"
-                  ></path>
-                </svg>
-              </div>
-              <p>Analyzing website, please wait...</p>
+        {isLoading && (
+          <div className="loader-container">
+            <div className="book-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+                <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+                <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
+                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
+                <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+              </svg>
             </div>
-          )}
+            <p>Analyzing website, please wait...</p>
+          </div>
+        )}
 
-          {/* Results */}
-          {!isLoading && isSubmitted && seoData && (
-            <div className="results-container">
-              {/* Overview */}
-              {activeTab === "overview" && (
-                <div className="overview-container">
-                  <div className="overview-wrapper">
-                    <h2 className="result-title">Overview</h2>
+        {!isLoading && isSubmitted && seoData && (
+          <div className="results-container">
 
-                    {/* Overall SEO Score */}
-                    {(() => {
-                      const scores = [
-                        seoData.onpage?.overview?.score,
-                        seoData.contentSeo?.overview?.score,
-                        seoData.technicalSeo?.overview?.score,
-                        pageSpeed,
-                      ].filter((s) => s !== undefined && s !== null);
+            {activeTab === "overview" && (
+              <Overview
+                seoData={seoData}
+                pageSpeed={pageSpeed}
+                desktopRecommendations={desktopRecommendations}
+                mobileRecommendations={mobileRecommendations}
+              />
+            )}
 
-                      const overallScore = scores.length
-                        ? Math.round(
-                            scores.reduce((a, b) => a + b, 0) / scores.length
-                          )
-                        : 0;
+            {activeTab === "seo-onpage" && seoData.onpage && (
+              <SeoOnPage onpage={seoData.onpage.onpage} passFailStyle={passFailStyle} />
+            )}
 
-                      return (
-                        <AnimatedProgress
-                          score={overallScore}
-                          maxScore={100}
-                          label="Overall SEO Score"
-                        />
-                      );
-                    })()}
+            {activeTab === "seo-technical" && seoData.technicalSeo && (
+              <SeoTechnicalDisplay technicalSeo={seoData.technicalSeo.technicalSeo} passFailStyle={passFailStyle} />
+            )}
 
-                    {seoData.onpage && (
-                      <AnimatedProgress
-                        score={seoData.onpage.overview.score}
-                        maxScore={100}
-                        label="On-Page SEO"
-                      />
-                    )}
-                    {seoData.contentSeo && (
-                      <AnimatedProgress
-                        score={seoData.contentSeo.overview?.score || 0}
-                        maxScore={100}
-                        label="Content SEO"
-                      />
-                    )}
-                    {seoData.technicalSeo && (
-                      <AnimatedProgress
-                        score={seoData.technicalSeo.overview?.score || 0}
-                        maxScore={100}
-                        label="Technical SEO"
-                      />
-                    )}
-                    {pageSpeed !== null && (
-                      <AnimatedProgress
-                        score={pageSpeed}
-                        maxScore={100}
-                        label="Performance SEO"
-                      />
-                    )}
+            {activeTab === "seo-content" && seoData.contentSeo && (
+              <SeoContentDisplay contentSeo={seoData.contentSeo.contentSeo} passFailStyle={passFailStyle} />
+            )}
 
-                    {/* Suggestions */}
-                    {seoData.onpage && (
-                      <SeoSuggestions
-                        onpage={seoData.onpage.onpage}
-                        contentSeo={seoData.contentSeo}
-                      />
-                    )}
-                    {seoData.technicalSeo && (
-                      <SeoTechnicalSuggestions
-                        technicalSeo={seoData.technicalSeo.technicalSeo}
-                      />
-                    )}
-                    {seoData.contentSeo && (
-                      <SeoContentSuggestions
-                        contentSeo={seoData.contentSeo.contentSeo}
-                      />
-                    )}
+            {activeTab === "seo-performance" && (
+              <SeoPerformance desktopData={desktopPerf} mobileData={mobilePerf} />
+            )}
 
-                    {/* Desktop Recommendations */}
-                    {desktopRecommendations.length > 0 && (
-                      <div className="seo-recommendations">
-                        <h3>Performance Recommendations (Desktop)</h3>
-                        <ul>
-                          {desktopRecommendations.map((opp, i) => {
-                            const seconds = opp.savingsMs / 1000;
-                            let impact =
-                              opp.savingsMs > 1000
-                                ? "High impact ⚡"
-                                : opp.savingsMs > 200
-                                ? "Medium impact 👍"
-                                : "Low impact ✅";
+            {activeTab === "download-pdf" && (
+              <>
+                <div className="email-sent-container">
+                  
+                  <div className="email-sent-card">
+                    <h2>Claim Your Free SEO Audit</h2>
+                    <input
+                      type="email"
+                      placeholder="Enter email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button onClick={handleSendEmail} disabled={isEmailSending}>
+                      Get Report
+                    </button>
 
-                            return (
-                              <li key={`d-${i}`}>
-                                {opp.title} — {impact} (about{" "}
-                                {seconds.toFixed(1)}s faster)
-                              </li>
-                            );
-                          })}
-                        </ul>
+                    {/* Loader for email sending */}
+                    {isEmailSending && (
+                      <div className="loader-container email-loader">
+                        <div className="loader"></div>
+                        <p>Sending email, please wait...</p>
                       </div>
                     )}
 
-                    {/* Mobile Recommendations */}
-                    {mobileRecommendations.length > 0 && (
-                      <div className="seo-recommendations">
-                        <h3>Performance Recommendations (Mobile)</h3>
-                        <ul>
-                          {mobileRecommendations.map((opp, i) => {
-                            const seconds = opp.savingsMs / 1000;
-                            let impact =
-                              opp.savingsMs > 1000
-                                ? "High impact ⚡"
-                                : opp.savingsMs > 200
-                                ? "Medium impact 👍"
-                                : "Low impact ✅";
-
-                            return (
-                              <li key={`m-${i}`}>
-                                {opp.title} — {impact} (about{" "}
-                                {seconds.toFixed(1)}s faster)
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
+                    {emailStatus && (
+                      <p className={`email-status ${emailStatusType}`}>
+                        {emailStatus}
+                      </p>
                     )}
                   </div>
                 </div>
-              )}
-
-              {/* On-Page SEO */}
-              {activeTab === "seo-onpage" && seoData.onpage && (
-                <SeoOnPage
-                  onpage={seoData.onpage.onpage}
-                  passFailStyle={passFailStyle}
-                />
-              )}
-
-              {/* Technical SEO */}
-              {activeTab === "seo-technical" && seoData.technicalSeo && (
-                <SeoTechnicalDisplay
-                  technicalSeo={seoData.technicalSeo.technicalSeo}
-                  passFailStyle={passFailStyle}
-                />
-              )}
-
-              {/* Content SEO */}
-              {activeTab === "seo-content" && seoData.contentSeo && (
-                <SeoContentDisplay
-                  contentSeo={seoData.contentSeo.contentSeo}
-                  passFailStyle={passFailStyle}
-                />
-              )}
-
-              {/* Performance */}
-              {activeTab === "seo-performance" && (
-                <SeoPerformance
-                  desktopData={desktopPerf}
-                  mobileData={mobilePerf}
-                />
-              )}
-            </div>
-          )}
-        </section>
-      )}
-
+              </>
+            )}
+          </div>
+        )}
+      </section>
+      
       {/* Leads Management outside main-container */}
       {activeTab === "leads-management" && <LeadsManagement />}
     </main>
