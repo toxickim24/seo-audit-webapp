@@ -1,0 +1,111 @@
+.container {
+  padding: 100px 40px;
+  min-height: calc(100vh - 120px);
+  background: #f9fafb;
+}
+
+/* Title */
+.container h2 {
+  font-size: 40px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+/* Actions (Export Button row) */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+/* Export Button */
+.exportBtn {
+  padding: 12px 20px;
+  background: #FF8E3A;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.exportBtn:hover {
+  background: #FB6A45;
+}
+
+/* Delete Button */
+.deleteBtn {
+  padding: 6px 12px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.deleteBtn:hover {
+  background: #b91c1c;
+  transform: scale(1.05);
+}
+
+/* DataTable overrides */
+.rdt_Table {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.rdt_TableHead {
+  background: #f1f5f9;
+  font-weight: 600;
+  font-size: 14px;
+  color: #334155;
+}
+
+.rdt_TableRow {
+  font-size: 14px;
+  color: #475569;
+}
+
+.rdt_TableRow:hover {
+  background: #f9fafb;
+}
+
+.rdt_Pagination {
+  border-top: 1px solid #e5e7eb;
+  padding: 10px;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  .exportBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .rdt_Table {
+    font-size: 12px;
+  }
+
+  .deleteBtn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

@@ -9,6 +9,8 @@
     "cheerio": "^1.1.2",
     "react": "^19.1.1",
     "react-circular-progressbar": "^2.2.0",
+    "react-csv": "^2.2.2",
+    "react-data-table-component": "^7.7.0",
     "react-dom": "^19.1.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^5.1.0",
@@ -18,7 +20,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "server": "node server/server.js",
-    "dev": "concurrently \"npm run server\" \"npm run start\""
+    "dev": "concurrently \"npm run server\" \"npm run start\"",
+    "update-all": "npm update && cd server && npm update"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
