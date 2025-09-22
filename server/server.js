@@ -7,7 +7,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
 import mysql from "mysql2/promise"; // ✅ mysql2 for async/await
-import dotenv from "dotenv"; // ✅ load .env
 
 import { analyzeOnPage } from "../src/api/SeoOnpage.js";
 import { analyzeContentSeo } from "../src/api/SeoContent.js";

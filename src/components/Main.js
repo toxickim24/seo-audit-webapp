@@ -5,18 +5,11 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
-import AnimatedProgress from "../components/AnimatedProgress/AnimatedProgress";
-import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
-import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
-import SeoTechnicalSuggestions from "./SeoTechnical/SeoTechnicalSuggestions";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
 import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
 import Overview from "../components/Overview/Overview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
 import { getOverallScore } from "../utils/calcOverallScore";
-import { getOverallScore } from "../utils/calcOverallScore";
-import { fetchSeoPerformance } from "../api/SeoPerformance";
-import SeoPerformance from "./SeoPerformance";
 import LeadsManagement from "./LeadsManagement";
 
 function Main({ activeTab }) {
