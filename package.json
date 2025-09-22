@@ -22,7 +22,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "server": "node server/server.js",
-    "dev": "concurrently \"npm run server\" \"npm run start\""
+    "dev": "concurrently \"npm run server\" \"npm run start\"",
+    "update-all": "npm update && cd server && npm update"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

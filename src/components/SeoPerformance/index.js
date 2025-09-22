@@ -165,7 +165,7 @@ function SeoPerformance({ desktopData, mobileData }) {
 
   return (
     <div className={styles.container}>
-      <h1>SEO Performance Audit</h1>
+      <h2 className="result-title">SEO Performance Audit</h2>
       <div className={styles.threeColumn}>
         {/* Overall */}
         <div className={styles.resultBox}>

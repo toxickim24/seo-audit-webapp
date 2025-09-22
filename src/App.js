@@ -12,7 +12,7 @@ function App() {
     { id: "seo-technical", label: "SEO Technical" },
     { id: "seo-content", label: "SEO Content" },
     { id: "seo-performance", label: "SEO Performance" },
-    { id: "lead-pdf", label: "Leads Management" },
+    { id: "leads-management", label: "Lead Management" },
     { id: "download-pdf", label: "Download PDF" },
   ];
 

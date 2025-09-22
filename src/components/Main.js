@@ -5,11 +5,19 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
+import AnimatedProgress from "../components/AnimatedProgress/AnimatedProgress";
+import SeoSuggestions from "./SeoOnpage/SeoOnPageSuggestions";
+import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
+import SeoTechnicalSuggestions from "./SeoTechnical/SeoTechnicalSuggestions";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
 import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
 import Overview from "../components/Overview/Overview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
 import { getOverallScore } from "../utils/calcOverallScore";
+import { getOverallScore } from "../utils/calcOverallScore";
+import { fetchSeoPerformance } from "../api/SeoPerformance";
+import SeoPerformance from "./SeoPerformance";
+import LeadsManagement from "./LeadsManagement";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -46,11 +54,11 @@ function Main({ activeTab }) {
     setMobilePerf(null);
 
     try {
+      // Fetch SEO analysis from backend
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
       );
       if (!res.ok) throw new Error("Server error");
-
       const data = await res.json();
 
       const desktop = await fetchSeoPerformance(url, "desktop");
@@ -59,11 +67,15 @@ function Main({ activeTab }) {
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
 
-      const overallScore = getOverallScore(desktop.score, mobile.score);
+      const overallScore = getOverallScore(desktop?.score, mobile?.score);
       setPageSpeed(overallScore);
 
-      const desktopOpps = (desktop.opportunities || []).filter((opp) => opp.savingsMs > 0);
-      const mobileOpps = (mobile.opportunities || []).filter((opp) => opp.savingsMs > 0);
+      const desktopOpps = (desktop?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
+      const mobileOpps = (mobile?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
 
       setDesktopRecommendations(desktopOpps);
       setMobileRecommendations(mobileOpps);
@@ -243,6 +255,9 @@ function Main({ activeTab }) {
           </div>
         )}
       </section>
+      
+      {/* Leads Management outside main-container */}
+      {activeTab === "leads-management" && <LeadsManagement />}
     </main>
   );
 }
