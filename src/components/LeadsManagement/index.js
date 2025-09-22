@@ -1,109 +1,142 @@
 import { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
-import { CSVLink } from "react-csv";
 import styles from "./LeadsManagement.module.css";
 
 function LeadsManagement() {
   const [leads, setLeads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
 
-  // Fetch leads from backend
   useEffect(() => {
     fetch("http://localhost:5000/leads")
       .then((res) => res.json())
-      .then((data) => {
-        setLeads(Array.isArray(data) ? data : []); // ✅ always array
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching leads:", err);
-        setLoading(false);
-      });
+      .then((data) => setLeads(Array.isArray(data) ? data : []))
+      .catch((err) => console.error("Error fetching leads:", err));
   }, []);
 
-  // Delete handler
+  // ✅ Search filter
+  const filteredLeads = leads.filter((lead) =>
+    Object.values(lead).some((val) =>
+      String(val).toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  // ✅ Sorting
+  const sortedLeads = [...filteredLeads].sort((a, b) => {
+    if (sortConfig.direction === "asc") {
+      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+    }
+    return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+  });
+
+  // ✅ Toggle sort
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  // ✅ Real delete from DB
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
     try {
-      await fetch(`http://localhost:5000/leads/${id}`, { method: "DELETE" });
-      setLeads((prev) => prev.filter((lead) => lead.id !== id));
+      const res = await fetch(`http://localhost:5000/leads/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete lead");
+
+      setLeads(leads.filter((lead) => lead.id !== id));
+      console.log(`✅ Lead ${id} deleted from DB`);
     } catch (err) {
-      console.error("Failed to delete lead:", err);
+      console.error("❌ Error deleting lead:", err.message);
+      alert("Failed to delete lead. Check server logs.");
     }
   };
 
-  // DataTable columns
-  const columns = [
-    { name: "ID", selector: (row) => row.id, sortable: true, width: "70px" },
-    { name: "Name", selector: (row) => row.name, sortable: true },
-    { name: "Email", selector: (row) => row.email, sortable: true },
-    { name: "Phone", selector: (row) => row.phone, sortable: true },
-    { name: "Company", selector: (row) => row.company, sortable: true },
-    { name: "Website", selector: (row) => row.website, sortable: true },
-    { name: "Score", selector: (row) => row.score, sortable: true },
-    {
-      id: "date",
-      name: "Date",
-      selector: (row) => new Date(row.date).getTime(),
-      sortable: true,
-      format: (row) => new Date(row.date).toLocaleString(),
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <button
-          className={styles.deleteBtn}
-          onClick={() => handleDelete(row.id)}
-        >
-          Delete
-        </button>
-      ),
-    },
-  ];
+  // ✅ Export CSV
+  const exportToCSV = () => {
+    if (!leads.length) return;
+    const headers = Object.keys(leads[0]).join(",");
+    const rows = leads.map((lead) => Object.values(lead).join(","));
+    const csv = [headers, ...rows].join("\n");
 
-  // ✅ CSV Headers
-  const csvHeaders = [
-    { label: "ID", key: "id" },
-    { label: "Name", key: "name" },
-    { label: "Email", key: "email" },
-    { label: "Phone", key: "phone" },
-    { label: "Company", key: "company" },
-    { label: "Website", key: "website" },
-    { label: "Score", key: "score" },
-    { label: "Date", key: "date" },
-  ];
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "leads.csv";
+    link.click();
+  };
 
   return (
     <div className={styles.container}>
-      <h2>Leads Management Dashboard</h2>
+      <h2 className={styles.title}>📊 Lead Management Dashboard</h2>
+      <span>Manage and analyze your SEO audit leads</span>
 
+      {/* Search + Export Row */}
       <div className={styles.actions}>
-	  {leads.length > 0 && (
-	    <CSVLink
-	      data={Array.isArray(leads) ? leads : []}
-	      headers={csvHeaders}
-	      filename="leads.csv"
-	      className={styles.exportBtn}
-	    >
-	      Export CSV
-	    </CSVLink>
-	  )}
-	</div>
+        <input
+          type="text"
+          placeholder="Search leads..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className={styles.searchBox}
+        />
 
-	<div className={styles.tableWrapper}>
-	    <DataTable
-	      columns={columns}
-	      data={leads}
-	      progressPending={loading}
-	      pagination
-	      highlightOnHover
-	      striped
-	      responsive
-	      defaultSortFieldId="date"
-	      defaultSortAsc={false}
-	    />
-    </div>
+        {leads.length > 0 && (
+          <button onClick={exportToCSV} className={styles.exportBtn}>
+            Export CSV
+          </button>
+        )}
+      </div>
+
+      {/* Table */}
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              {["id", "name", "email", "phone", "company", "website", "score", "date"].map(
+                (col) => (
+                  <th key={col} onClick={() => handleSort(col)}>
+                    {col.toUpperCase()}{" "}
+                    {sortConfig.key === col ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                  </th>
+                )
+              )}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedLeads.length ? (
+              sortedLeads.map((lead) => (
+                <tr key={lead.id}>
+                  <td>{lead.id}</td>
+                  <td>{lead.name}</td>
+                  <td>{lead.email}</td>
+                  <td>{lead.phone}</td>
+                  <td>{lead.company}</td>
+                  <td>{lead.website}</td>
+                  <td>{lead.score}</td>
+                  <td>{new Date(lead.date).toLocaleString()}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDelete(lead.id)}
+                      className={styles.deleteBtn}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9">No leads found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
     </div>
   );

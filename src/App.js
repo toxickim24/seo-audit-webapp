@@ -12,7 +12,7 @@ function App() {
     { id: "seo-technical", label: "SEO Technical" },
     { id: "seo-content", label: "SEO Content" },
     { id: "seo-performance", label: "SEO Performance" },
-    { id: "leads-management", label: "Leads Management" },
+    { id: "leads-management", label: "Lead Management" },
   ];
 
   const [activeTab, setActiveTab] = useState(tabs[0].id);
