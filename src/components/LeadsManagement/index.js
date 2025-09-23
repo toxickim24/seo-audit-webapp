@@ -6,26 +6,40 @@ function LeadsManagement() {
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
 
+  // ✅ Fetch leads from backend
+  const fetchLeads = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/leads");
+      const data = await res.json();
+      setLeads(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Error fetching leads:", err);
+      setLeads([]);
+    }
+  };
+
   useEffect(() => {
-    fetch("http://localhost:5000/leads")
-      .then((res) => res.json())
-      .then((data) => setLeads(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error fetching leads:", err));
+    fetchLeads();
   }, []);
 
   // ✅ Search filter
   const filteredLeads = leads.filter((lead) =>
     Object.values(lead).some((val) =>
-      String(val).toLowerCase().includes(search.toLowerCase())
+      String(val || "")
+        .toLowerCase()
+        .includes(search.toLowerCase())
     )
   );
 
   // ✅ Sorting
   const sortedLeads = [...filteredLeads].sort((a, b) => {
+    const aVal = a[sortConfig.key] || "";
+    const bVal = b[sortConfig.key] || "";
+
     if (sortConfig.direction === "asc") {
-      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+      return aVal > bVal ? 1 : -1;
     }
-    return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+    return aVal < bVal ? 1 : -1;
   });
 
   // ✅ Toggle sort
@@ -36,7 +50,7 @@ function LeadsManagement() {
     }));
   };
 
-  // ✅ Real delete from DB
+  // ✅ Delete lead from DB
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
@@ -47,7 +61,7 @@ function LeadsManagement() {
 
       if (!res.ok) throw new Error("Failed to delete lead");
 
-      setLeads(leads.filter((lead) => lead.id !== id));
+      setLeads((prev) => prev.filter((lead) => lead.id !== id));
       console.log(`✅ Lead ${id} deleted from DB`);
     } catch (err) {
       console.error("❌ Error deleting lead:", err.message);
@@ -58,8 +72,13 @@ function LeadsManagement() {
   // ✅ Export CSV
   const exportToCSV = () => {
     if (!leads.length) return;
+
     const headers = Object.keys(leads[0]).join(",");
-    const rows = leads.map((lead) => Object.values(lead).join(","));
+    const rows = leads.map((lead) =>
+      Object.values(lead)
+        .map((val) => `"${String(val || "").replace(/"/g, '""')}"`)
+        .join(",")
+    );
     const csv = [headers, ...rows].join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -96,15 +115,26 @@ function LeadsManagement() {
         <table className={styles.table}>
           <thead>
             <tr>
-              {["id", "name", "email", "phone", "company", "website", "score", "date"].map(
-                (col) => (
-                  <th key={col} onClick={() => handleSort(col)}>
-                    {col.toUpperCase()}{" "}
-                    {sortConfig.key === col ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
-                  </th>
-                )
-              )}
-              <th>Actions</th>
+              {[
+                "id",
+                "name",
+                "email",
+                "phone",
+                "company",
+                "website",
+                "score",
+                "date",
+              ].map((col) => (
+                <th key={col} onClick={() => handleSort(col)}>
+                  {col.toUpperCase()}{" "}
+                  {sortConfig.key === col
+                    ? sortConfig.direction === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
+                </th>
+              ))}
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -112,13 +142,17 @@ function LeadsManagement() {
               sortedLeads.map((lead) => (
                 <tr key={lead.id}>
                   <td>{lead.id}</td>
-                  <td>{lead.name}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
-                  <td>{lead.company}</td>
-                  <td>{lead.website}</td>
-                  <td>{lead.score}</td>
-                  <td>{new Date(lead.date).toLocaleString()}</td>
+                  <td>{lead.name || "-"}</td>
+                  <td>{lead.email || "-"}</td>
+                  <td>{lead.phone || "-"}</td>
+                  <td>{lead.company || "-"}</td>
+                  <td>{lead.website || "-"}</td>
+                  <td>{lead.score ?? "-"}</td>
+                  <td>
+                    {lead.date
+                      ? new Date(lead.date).toLocaleString()
+                      : "-"}
+                  </td>
                   <td>
                     <button
                       onClick={() => handleDelete(lead.id)}
@@ -137,7 +171,6 @@ function LeadsManagement() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

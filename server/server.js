@@ -6,7 +6,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
-import mysql from "mysql2/promise"; // ✅ mysql2 for async/await
+import mysql from "mysql2/promise";
 
 import { analyzeOnPage } from "../src/api/SeoOnpage.js";
 import { analyzeContentSeo } from "../src/api/SeoContent.js";
@@ -95,28 +95,6 @@ app.get("/analyze", async (req, res) => {
       3
   );
 
-  // ✅ Attempt to save into DB (but don’t break app if DB is down)
-  if (db) {
-    try {
-      await db.execute(
-        "INSERT INTO leads (name, email, phone, company, website, score, date) VALUES (?, ?, ?, ?, ?, ?, NOW())",
-        [
-          "Test User",        // you can replace with real values later
-          "test@example.com",
-          "123-456-7890",
-          "SEO Test Co",
-          url,
-          overviewScore,
-        ]
-      );
-      console.log("✅ Data inserted into MySQL");
-    } catch (err) {
-      console.error("❌ Failed to insert into MySQL:", err.message);
-    }
-  } else {
-    console.warn("⚠️ Skipping DB insert — no connection");
-  }
-
   // Response
   res.json({
     url,
@@ -176,6 +154,29 @@ app.get("/leads", async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to fetch leads:", err.message);
     res.json([]); // ✅ safe fallback
+  }
+});
+
+// Create new lead
+app.post("/leads", async (req, res) => {
+  if (!db) return res.status(500).json({ error: "Database not connected" });
+
+  const { name, phone, company, email, website, overallScore, date } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    const [result] = await db.execute(
+      "INSERT INTO leads (name, phone, company, email, website, score, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [name, phone, company, email, website, overallScore, date]
+    );
+
+    res.status(201).json({ success: true, id: result.insertId });
+  } catch (err) {
+    console.error("❌ Failed to insert lead:", err.message);
+    res.status(500).json({ error: "Failed to save lead" });
   }
 });
 

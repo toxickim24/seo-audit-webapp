@@ -2,13 +2,13 @@ import "../css/Main.css";
 import "../css/Loader.css";
 import { useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import SeoPerformance from "./SeoPerformance";
-import { fetchSeoPerformance } from "../api/SeoPerformance";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
 import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
 import Overview from "../components/Overview/Overview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
+import SeoPerformance from "./SeoPerformance";
+import { fetchSeoPerformance } from "../api/SeoPerformance";
 import { getOverallScore } from "../utils/calcOverallScore";
 import LeadsManagement from "./LeadsManagement";
 
@@ -24,11 +24,16 @@ function Main({ activeTab }) {
   const [mobilePerf, setMobilePerf] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [leads, setLeads] = useState([]);
+  const [overallScore, setOverallScore] = useState(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [emailStatus, setEmailStatus] = useState("");
   const [emailStatusType, setEmailStatusType] = useState(""); // "success", "error", "info"
   const [isEmailSending, setIsEmailSending] = useState(false); // NEW
-
+  
   const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
 
   const handleAnalyze = async () => {
@@ -86,8 +91,15 @@ function Main({ activeTab }) {
   };
 
   const handleSendEmail = async () => {
-    if (!seoData || !url || !email) {
-      setEmailStatus("Email is missing");
+    if (!seoData || !url || !email || !name) {
+      let msg = "";
+
+      if (!name) msg = "Name is missing";
+      else if (!email) msg = "Email is missing";
+      else if (!url) msg = "Website URL is missing";
+      else if (!seoData) msg = "SEO data not available";
+
+      setEmailStatus(msg);
       setEmailStatusType("error");
       return;
     }
@@ -123,7 +135,6 @@ function Main({ activeTab }) {
         throw new Error(errText);
       }
 
-      setEmail("");
       setEmailStatus("SEO Audit Sent!");
       setEmailStatusType("success");
     } catch (err) {
@@ -133,6 +144,41 @@ function Main({ activeTab }) {
     } finally {
       setIsEmailSending(false);
     }
+  };
+
+  const handleSaveLead = async () => {
+    // define the object first ⬇
+    const newLead = {
+      name,
+      phone,
+      company,
+      email,
+      website: url,
+      overallScore,
+      date: new Date().toISOString(),
+    };
+
+    try {
+      const res = await fetch("http://localhost:5000/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newLead),
+      });
+
+      if (!res.ok) throw new Error("Failed to save lead");
+
+    } catch (err) {
+      console.error("❌ Error saving lead:", err);
+    }
+  };
+
+  const handleClick = async () => {
+    setIsEmailSending(true);
+
+    await handleSendEmail();   // your email logic
+    await handleSaveLead();    // inserts into DB
+
+    setIsEmailSending(false);
   };
 
   const passFailStyle = (pass) => ({
@@ -195,6 +241,7 @@ function Main({ activeTab }) {
                 pageSpeed={pageSpeed}
                 desktopRecommendations={desktopRecommendations}
                 mobileRecommendations={mobileRecommendations}
+                onScoreReady={setOverallScore}
               />
             )}
 
@@ -221,12 +268,30 @@ function Main({ activeTab }) {
                   <div className="email-sent-card">
                     <h2>Claim Your Free SEO Audit</h2>
                     <input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    <input
                       type="email"
                       placeholder="Enter email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
-                    <button onClick={handleSendEmail} disabled={isEmailSending}>
+                    <input
+                      type="tel"
+                      placeholder="Enter phone (optional)"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter company (optional)"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                    />
+                    <button onClick={handleClick} disabled={isEmailSending}>
                       Get Report
                     </button>
 

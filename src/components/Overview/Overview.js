@@ -1,9 +1,10 @@
+import { useEffect } from "react";
 import AnimatedProgress from "../AnimatedProgress/AnimatedProgress";
 import SeoSuggestions from "../SeoOnpage/SeoOnPageSuggestions";
 import SeoTechnicalSuggestions from "../SeoTechnical/SeoTechnicalSuggestions";
 import SeoContentSuggestions from "../SeoContent/SeoContentSuggestions";
 
-function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommendations }) {
+function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommendations, onScoreReady }) {
 
   const overallScore = (() => {
     const scores = [
@@ -15,6 +16,12 @@ function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommenda
 
     return scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
   })();
+
+  useEffect(() => {
+    if (onScoreReady) {
+      onScoreReady(overallScore);
+    }
+  }, [overallScore, onScoreReady]);
 
   const renderPerformanceRecommendations = (recommendations, label) => (
     recommendations.length > 0 && (
