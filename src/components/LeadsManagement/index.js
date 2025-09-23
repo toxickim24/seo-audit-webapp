@@ -5,11 +5,12 @@ function LeadsManagement() {
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   // ✅ Fetch leads from backend
   const fetchLeads = async () => {
     try {
-      const res = await fetch("http://localhost:5000/leads");
+      const res = await fetch(`${API_BASE_URL}/leads`);
       const data = await res.json();
       setLeads(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -55,7 +56,7 @@ function LeadsManagement() {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/leads/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/leads/${id}`, {
         method: "DELETE",
       });
 

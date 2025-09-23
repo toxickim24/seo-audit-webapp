@@ -36,6 +36,8 @@ function Main({ activeTab }) {
   
   const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
 
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleAnalyze = async () => {
     if (!urlPattern.test(url)) {
       setError("Please enter a valid website.");
@@ -125,7 +127,7 @@ function Main({ activeTab }) {
         reader.readAsDataURL(pdfBlob);
       });
 
-      const res = await fetch("http://localhost:5000/send-seo-email", {
+      const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, pdfBlob: base64Data }),
@@ -160,7 +162,7 @@ function Main({ activeTab }) {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/leads", {
+      const res = await fetch(`${API_BASE_URL}/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
