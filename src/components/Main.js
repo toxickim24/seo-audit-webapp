@@ -55,8 +55,7 @@ function Main({ activeTab }) {
 
     try {
       // Fetch SEO analysis from backend
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/analyze?url=${encodeURIComponent(url)}`
+      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`
       );
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
