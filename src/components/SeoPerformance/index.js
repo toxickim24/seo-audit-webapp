@@ -2,7 +2,7 @@ import React from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import styles from "./SeoPerformance.module.css";
-import { getOverallScore } from "../../utils/calcOverallScore"; // adjust path if needed
+import { getOverallSpeedScore } from "../../utils/calcOverallSpeedScore"; // adjust path if needed
 
 function SeoPerformance({ desktopData, mobileData }) {
   // Metric renderer with rating + explanation
@@ -161,7 +161,7 @@ function SeoPerformance({ desktopData, mobileData }) {
   };
 
   // Calculate overall average score
-  const overallScore = getOverallScore(desktopData?.score, mobileData?.score);
+  const overallSpeedScore = getOverallSpeedScore(desktopData?.score, mobileData?.score);
 
   return (
     <div className={styles.container}>
@@ -172,12 +172,12 @@ function SeoPerformance({ desktopData, mobileData }) {
           <h2>Overall</h2>
           <div className={styles.scoreBox}>
             <CircularProgressbar
-              value={overallScore ?? 0}
-              text={overallScore !== null ? `${overallScore}%` : "N/A"}
+              value={overallSpeedScore ?? 0}
+              text={overallSpeedScore !== null ? `${overallSpeedScore}%` : "N/A"}
               styles={buildStyles({
                 textColor: "#2c3e50",
                 pathColor:
-                  overallScore >= 80 ? "green" : overallScore >= 50 ? "orange" : "red",
+                  overallSpeedScore >= 80 ? "green" : overallSpeedScore >= 50 ? "orange" : "red",
                 trailColor: "#eee",
               })}
             />

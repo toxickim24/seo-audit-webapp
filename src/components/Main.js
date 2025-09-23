@@ -9,7 +9,7 @@ import Overview from "../components/Overview/Overview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
-import { getOverallScore } from "../utils/calcOverallScore";
+import { getOverallSpeedScore } from "../utils/calcOverallSpeedScore";
 import LeadsManagement from "./LeadsManagement";
 
 function Main({ activeTab }) {
@@ -66,8 +66,8 @@ function Main({ activeTab }) {
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
 
-      const overallScore = getOverallScore(desktop?.score, mobile?.score);
-      setPageSpeed(overallScore);
+      const overallSpeedScore = getOverallSpeedScore(desktop?.score, mobile?.score);
+      setPageSpeed(overallSpeedScore);
 
       const desktopOpps = (desktop?.opportunities || []).filter(
         (opp) => opp.savingsMs > 0
