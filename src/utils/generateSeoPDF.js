@@ -7,7 +7,7 @@ import {
 } from "./seoFullRecommendation.js";
 
 // Generate SEO PDF
-export const generateSeoPDF = (seoData, url, pageSpeed, performanceData, download = true) => {
+export const generateSeoPDF = (seoData, url, overallScore, pageSpeed, performanceData, download = true) => {
   if (!seoData) return;
 
   const doc = new jsPDF();
@@ -139,7 +139,7 @@ export const generateSeoPDF = (seoData, url, pageSpeed, performanceData, downloa
   const contentScore = seoData.contentSeo?.overview?.score || 0;
 
   const scores = [
-    { name: "Overall SEO", value: pageSpeed || 0 },
+    { name: "Overall SEO", value: overallScore || 0 },
     { name: "On-Page SEO", value: onpageScore },
     { name: "Technical SEO", value: technicalScore },
     { name: "Content SEO", value: contentScore },

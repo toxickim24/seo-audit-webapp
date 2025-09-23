@@ -112,6 +112,7 @@ function Main({ activeTab }) {
       const pdfBlob = generateSeoPDF(
         seoData,
         url,
+        overallScore,
         pageSpeed,
         { desktopData: desktopPerf, mobileData: mobilePerf },
         false
