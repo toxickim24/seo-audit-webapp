@@ -9,6 +9,7 @@ import Overview from "../components/Overview/Overview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
+import { getOverallScore } from "../utils/calcOverallScore";
 import { getOverallSpeedScore } from "../utils/calcOverallSpeedScore";
 import LeadsManagement from "./LeadsManagement";
 
@@ -78,6 +79,9 @@ function Main({ activeTab }) {
 
       setDesktopRecommendations(desktopOpps);
       setMobileRecommendations(mobileOpps);
+
+      const score = getOverallScore(data, overallSpeedScore);
+      setOverallScore(score);
 
       setSeoData({
         ...data,
@@ -243,7 +247,7 @@ function Main({ activeTab }) {
                 pageSpeed={pageSpeed}
                 desktopRecommendations={desktopRecommendations}
                 mobileRecommendations={mobileRecommendations}
-                onScoreReady={setOverallScore}
+                overallScore={setOverallScore}
               />
             )}
 
