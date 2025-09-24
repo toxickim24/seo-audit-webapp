@@ -36,7 +36,13 @@ async function initDB() {
     console.log("✅ MySQL connected successfully");
   } catch (err) {
     console.error("❌ MySQL connection failed:", err.message);
-    db = null; // keep app running even if DB is down
+    console.error("Details:", {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      db: process.env.DB_NAME,
+      port: process.env.DB_PORT || 3306,
+    });
+    db = null;
   }
 }
 initDB();
