@@ -1,4 +1,4 @@
-import jsPDF from "jspdf";
+import jsPDF from "jspdf"; 
 import { 
   getPerformanceRecommendations,
   getFullOnpageRecommendations,
@@ -138,8 +138,19 @@ export const generateSeoPDF = (seoData, url, overallScore, pageSpeed, performanc
   const technicalScore = seoData.technicalSeo?.overview?.score || 0;
   const contentScore = seoData.contentSeo?.overview?.score || 0;
 
+  // Calculate Overall SEO
+  let calculatedOverallScore = overallScore;
+  if (calculatedOverallScore == null) {
+    const scoreComponents = [onpageScore, technicalScore, contentScore, pageSpeed || 0]
+      .filter((s) => s > 0); 
+    calculatedOverallScore =
+      scoreComponents.length > 0
+        ? Math.round(scoreComponents.reduce((a, b) => a + b, 0) / scoreComponents.length)
+        : 0;
+  }
+
   const scores = [
-    { name: "Overall SEO", value: overallScore || 0 },
+    { name: "Overall SEO", value: calculatedOverallScore },
     { name: "On-Page SEO", value: onpageScore },
     { name: "Technical SEO", value: technicalScore },
     { name: "Content SEO", value: contentScore },
@@ -407,6 +418,6 @@ export const generateSeoPDF = (seoData, url, overallScore, pageSpeed, performanc
   if (download) {
     doc.save(`SEO_Report_${url.replace(/https?:\/\//, "").replace(/\W/g, "_")}.pdf`);
   } else {
-    return doc.output("blob"); // return Blob instead of downloading
+    return doc.output("blob");
   }
 };
