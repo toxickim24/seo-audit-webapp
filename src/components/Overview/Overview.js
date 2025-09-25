@@ -1,30 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import AnimatedProgress from "../AnimatedProgress/AnimatedProgress";
 import SeoSuggestions from "../SeoOnpage/SeoOnPageSuggestions";
 import SeoTechnicalSuggestions from "../SeoTechnical/SeoTechnicalSuggestions";
 import SeoContentSuggestions from "../SeoContent/SeoContentSuggestions";
 
-function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommendations, onScoreReady }) {
+function Overview({
+  seoData,
+  pageSpeed,
+  desktopRecommendations,
+  mobileRecommendations,
+  onScoreReady,
+}) {
+  // ✅ Compute overall score only after PageSpeed is ready
+  const overallScore = useMemo(() => {
+    if (pageSpeed === null) return null; // wait for PageSpeed explicitly
 
-  const overallScore = (() => {
     const scores = [
-      seoData.onpage?.overview?.score,
-      seoData.contentSeo?.overview?.score,
-      seoData.technicalSeo?.overview?.score,
+      seoData?.onpage?.overview?.score ?? 0,
+      seoData?.contentSeo?.overview?.score ?? 0,
+      seoData?.technicalSeo?.overview?.score ?? 0,
       pageSpeed,
-    ].filter((s) => s !== undefined && s !== null);
+    ];
 
-    return scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-  })();
+    const validScores = scores.filter((s) => s > 0);
+    return validScores.length
+      ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
+      : 0;
+  }, [seoData, pageSpeed]);
 
+  // ✅ Send score to parent only when it's final
   useEffect(() => {
-    if (onScoreReady) {
+    if (onScoreReady && overallScore !== null) {
       onScoreReady(overallScore);
     }
   }, [overallScore, onScoreReady]);
 
-  const renderPerformanceRecommendations = (recommendations, label) => (
-    recommendations.length > 0 && (
+  const renderPerformanceRecommendations = (recommendations, label) =>
+    recommendations?.length > 0 && (
       <div className="seo-recommendations">
         <h3>{label}</h3>
         <ul>
@@ -45,8 +57,7 @@ function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommenda
           })}
         </ul>
       </div>
-    )
-  );
+    );
 
   return (
     <div className="overview-container">
@@ -54,22 +65,69 @@ function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommenda
         <h2 className="result-title">Overview</h2>
 
         {/* Overall SEO Score */}
-        <AnimatedProgress score={overallScore} maxScore={100} label="Overall SEO Score" />
+        {overallScore !== null && (
+          <AnimatedProgress
+            score={overallScore}
+            maxScore={100}
+            label="Overall SEO Score"
+          />
+        )}
 
         {/* Individual Scores */}
-        {seoData.onpage && <AnimatedProgress score={seoData.onpage.overview.score} maxScore={100} label="On-Page SEO" />}
-        {seoData.contentSeo && <AnimatedProgress score={seoData.contentSeo.overview?.score || 0} maxScore={100} label="Content SEO" />}
-        {seoData.technicalSeo && <AnimatedProgress score={seoData.technicalSeo.overview?.score || 0} maxScore={100} label="Technical SEO" />}
-        {pageSpeed !== null && <AnimatedProgress score={pageSpeed} maxScore={100} label="Performance SEO" />}
+        {seoData?.onpage && (
+          <AnimatedProgress
+            score={seoData.onpage.overview?.score ?? 0}
+            maxScore={100}
+            label="On-Page SEO"
+          />
+        )}
+        {seoData?.contentSeo && (
+          <AnimatedProgress
+            score={seoData.contentSeo.overview?.score ?? 0}
+            maxScore={100}
+            label="Content SEO"
+          />
+        )}
+        {seoData?.technicalSeo && (
+          <AnimatedProgress
+            score={seoData.technicalSeo.overview?.score ?? 0}
+            maxScore={100}
+            label="Technical SEO"
+          />
+        )}
+        {pageSpeed !== null && (
+          <AnimatedProgress
+            score={pageSpeed}
+            maxScore={100}
+            label="Performance SEO"
+          />
+        )}
 
         {/* Suggestions */}
-        {seoData.onpage && <SeoSuggestions onpage={seoData.onpage.onpage} contentSeo={seoData.contentSeo} />}
-        {seoData.technicalSeo && <SeoTechnicalSuggestions technicalSeo={seoData.technicalSeo.technicalSeo} />}
-        {seoData.contentSeo && <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />}
+        {seoData?.onpage && (
+          <SeoSuggestions
+            onpage={seoData.onpage.onpage}
+            contentSeo={seoData.contentSeo}
+          />
+        )}
+        {seoData?.technicalSeo && (
+          <SeoTechnicalSuggestions
+            technicalSeo={seoData.technicalSeo.technicalSeo}
+          />
+        )}
+        {seoData?.contentSeo && (
+          <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
+        )}
 
         {/* Performance Recommendations */}
-        {renderPerformanceRecommendations(desktopRecommendations, "Performance Recommendations Desktop")}
-        {renderPerformanceRecommendations(mobileRecommendations, "Performance Recommendations Mobile")}
+        {renderPerformanceRecommendations(
+          desktopRecommendations,
+          "Performance Recommendations Desktop"
+        )}
+        {renderPerformanceRecommendations(
+          mobileRecommendations,
+          "Performance Recommendations Mobile"
+        )}
       </div>
     </div>
   );

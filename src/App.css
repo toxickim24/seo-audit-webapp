@@ -23,6 +23,11 @@ footer {
   color: white;
 }
 
+footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .header {

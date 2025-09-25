@@ -1,7 +1,18 @@
 function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer>
-      <p>© 2025 SEO Mojo. All Rights Reserved.</p>
+      <p>
+        © {year} SEO Mojo. All Rights Reserved. Made by{" "}
+        <a
+          href="https://webdesigndavao.xyz/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Web Dev Davao
+        </a>
+      </p>
     </footer>
   );
 }

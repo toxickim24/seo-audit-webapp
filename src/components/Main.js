@@ -10,7 +10,6 @@ import { generateSeoPDF } from "../utils/generateSeoPDF";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import { getOverallScore } from "../utils/calcOverallScore";
-import { getOverallSpeedScore } from "../utils/calcOverallSpeedScore";
 import LeadsManagement from "./LeadsManagement";
 
 function Main({ activeTab }) {
@@ -18,31 +17,37 @@ function Main({ activeTab }) {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
+
+  const [isLoading, setIsLoading] = useState(false); // general SEO loader
+  const [isPerfLoading, setIsPerfLoading] = useState(false); // perf-only loader
+
   const [pageSpeed, setPageSpeed] = useState(null);
   const [desktopRecommendations, setDesktopRecommendations] = useState([]);
   const [mobileRecommendations, setMobileRecommendations] = useState([]);
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const [leads, setLeads] = useState([]);
   const [overallScore, setOverallScore] = useState(null);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [emailStatus, setEmailStatus] = useState("");
-  const [emailStatusType, setEmailStatusType] = useState(""); // "success", "error", "info"
-  const [isEmailSending, setIsEmailSending] = useState(false); // NEW
-  
-  const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+  const [emailStatusType, setEmailStatusType] = useState("");
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
+  const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+  // Run analysis
   const handleAnalyze = async () => {
+    if (!url || !url.trim()) {
+      setError("Website URL cannot be empty.");
+      return;
+    }
     if (!urlPattern.test(url)) {
-      setError("Please enter a valid website.");
-      setIsSubmitted(false);
+      setError("Please enter a valid website (http/https).");
       return;
     }
 
@@ -53,58 +58,67 @@ function Main({ activeTab }) {
     setPageSpeed(null);
     setDesktopPerf(null);
     setMobilePerf(null);
+    setOverallScore(null);
+    setIsPerfLoading(true); // start perf loader
 
     try {
-      // Fetch SEO analysis from backend
-      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`
-      );
+      // ✅ Fetch SEO analysis (on-page, content, technical)
+      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`);
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
+      setSeoData(data);
 
-      const desktop = await fetchSeoPerformance(url, "desktop");
-      const mobile = await fetchSeoPerformance(url, "mobile");
+      // ✅ Start PageSpeed fetch in parallel
+      Promise.all([
+        fetchSeoPerformance(url, "desktop"),
+        fetchSeoPerformance(url, "mobile"),
+      ])
+        .then(([desktop, mobile]) => {
+          setDesktopPerf(desktop);
+          setMobilePerf(mobile);
 
-      setDesktopPerf(desktop);
-      setMobilePerf(mobile);
+          setDesktopRecommendations(
+            (desktop?.opportunities || []).filter((opp) => opp.savingsMs > 0)
+          );
+          setMobileRecommendations(
+            (mobile?.opportunities || []).filter((opp) => opp.savingsMs > 0)
+          );
 
-      const overallSpeedScore = getOverallSpeedScore(desktop?.score, mobile?.score);
-      setPageSpeed(overallSpeedScore);
+          // ✅ Now compute overall PageSpeed score
+          const overallSpeedScore =
+            desktop && mobile
+              ? Math.round((desktop.score + mobile.score) / 2)
+              : desktop?.score || mobile?.score || 0;
 
-      const desktopOpps = (desktop?.opportunities || []).filter(
-        (opp) => opp.savingsMs > 0
-      );
-      const mobileOpps = (mobile?.opportunities || []).filter(
-        (opp) => opp.savingsMs > 0
-      );
+          setPageSpeed(overallSpeedScore); // <-- THIS was missing
+        })
+        .catch((err) => console.error("PSI error:", err))
+        .finally(() => setIsPerfLoading(false));
 
-      setDesktopRecommendations(desktopOpps);
-      setMobileRecommendations(mobileOpps);
-
-      const score = getOverallScore(data, overallSpeedScore);
-      setOverallScore(score);
-
-      setSeoData({
-        ...data,
-        pageSpeed: { desktop, mobile },
-      });
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // stop general loader
     }
   };
 
+  // Send email with PDF
   const handleSendEmail = async () => {
     if (!seoData || !url || !email || !name) {
       let msg = "";
-
       if (!name) msg = "Name is missing";
       else if (!email) msg = "Email is missing";
       else if (!url) msg = "Website URL is missing";
-      else if (!seoData) msg = "SEO data not available";
+      else msg = "SEO data not available";
 
       setEmailStatus(msg);
+      setEmailStatusType("error");
+      return;
+    }
+
+    if (overallScore == null) {
+      setEmailStatus("⚠️ Overall Score is not ready yet. Please wait until PageSpeed finishes.");
       setEmailStatusType("error");
       return;
     }
@@ -136,10 +150,7 @@ function Main({ activeTab }) {
         body: JSON.stringify({ email, pdfBlob: base64Data }),
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-      }
+      if (!res.ok) throw new Error("Failed to send email");
 
       setEmailStatus("SEO Audit Sent!");
       setEmailStatusType("success");
@@ -161,8 +172,8 @@ function Main({ activeTab }) {
     }
   };
 
+  // Save lead to DB
   const handleSaveLead = async () => {
-    // define the object first ⬇
     const newLead = {
       name,
       phone,
@@ -179,20 +190,17 @@ function Main({ activeTab }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
       });
-
       if (!res.ok) throw new Error("Failed to save lead");
-
     } catch (err) {
       console.error("❌ Error saving lead:", err);
     }
   };
 
+  // Combo click → email + save lead
   const handleClick = async () => {
     setIsEmailSending(true);
-
-    await handleSendEmail();   // your email logic
-    await handleSaveLead();    // inserts into DB
-
+    await handleSendEmail();
+    await handleSaveLead();
     setIsEmailSending(false);
   };
 
@@ -202,33 +210,40 @@ function Main({ activeTab }) {
 
   return (
     <main>
-    {/* Default SEO tabs (all inside main-container) */}
-    {activeTab !== "leads-management" && (
-      <section className="main-container">
-        <div className="animation-seo">
-          <DotLottieReact
-            src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-            loop
-            autoplay
-            onError={(err) => console.warn("Lottie error ignored:", err)}
-            onLoad={(data) => console.log("Loaded .lottie", data)}
-          />
-        </div>
+      {/* Default SEO tabs (all inside main-container) */}
+      {activeTab !== "leads-management" && (
+        <section className="main-container">
+          <div className="animation-seo">
+            <DotLottieReact
+              src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+              loop
+              autoplay
+              onError={(err) => console.warn("Lottie error ignored:", err)}
+            />
+          </div>
 
-        <div className="search-box">
-          <input
-            type="url"
-            placeholder="Enter your website URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          <button onClick={handleAnalyze}>Analyze SEO</button>
-          {error && <p className="error-message">{error}</p>}
-        </div>
+          <div className="search-box">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAnalyze();
+              }}
+            >
+              <input
+                type="url"
+                placeholder="Enter your website URL"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
+              <button type="submit">Run Your SEO Audit Now</button>
+            </form>
+            {error && <p className="error-message">{error}</p>}
+          </div>
 
-        {isLoading && (
-          <div className="loader-container">
-            <div className="book-wrapper">
+          {/* Loader */}
+          {isLoading && (
+            <div className="loader-container">
+              <div className="book-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
                 <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
                 <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
@@ -242,44 +257,51 @@ function Main({ activeTab }) {
                 <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
                 <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
               </svg>
+              </div>
+              <p>Analyzing website, please wait...</p>
             </div>
-            <p>Analyzing website, please wait...</p>
-          </div>
-        )}
+          )}
 
-        {!isLoading && isSubmitted && seoData && (
-          <div className="results-container">
+          {!isLoading && isSubmitted && seoData && (
+            <div className="results-container">
+              {activeTab === "overview" && (
+                <Overview
+                  seoData={seoData}
+                  pageSpeed={pageSpeed}
+                  desktopRecommendations={desktopRecommendations}
+                  mobileRecommendations={mobileRecommendations}
+                  onScoreReady={setOverallScore}
+                />
+              )}
 
-            {activeTab === "overview" && (
-              <Overview
-                seoData={seoData}
-                pageSpeed={pageSpeed}
-                desktopRecommendations={desktopRecommendations}
-                mobileRecommendations={mobileRecommendations}
-                overallScore={setOverallScore}
-              />
-            )}
+              {activeTab === "seo-onpage" && seoData.onpage && (
+                <SeoOnPage onpage={seoData.onpage.onpage} passFailStyle={passFailStyle} />
+              )}
 
-            {activeTab === "seo-onpage" && seoData.onpage && (
-              <SeoOnPage onpage={seoData.onpage.onpage} passFailStyle={passFailStyle} />
-            )}
+              {activeTab === "seo-technical" && seoData.technicalSeo && (
+                <SeoTechnicalDisplay
+                  technicalSeo={seoData.technicalSeo.technicalSeo}
+                  passFailStyle={passFailStyle}
+                />
+              )}
 
-            {activeTab === "seo-technical" && seoData.technicalSeo && (
-              <SeoTechnicalDisplay technicalSeo={seoData.technicalSeo.technicalSeo} passFailStyle={passFailStyle} />
-            )}
+              {activeTab === "seo-content" && seoData.contentSeo && (
+                <SeoContentDisplay
+                  contentSeo={seoData.contentSeo.contentSeo}
+                  passFailStyle={passFailStyle}
+                />
+              )}
 
-            {activeTab === "seo-content" && seoData.contentSeo && (
-              <SeoContentDisplay contentSeo={seoData.contentSeo.contentSeo} passFailStyle={passFailStyle} />
-            )}
+              {activeTab === "seo-performance" && (
+                <SeoPerformance
+                  desktopData={desktopPerf}
+                  mobileData={mobilePerf}
+                  isPerfLoading={isPerfLoading}
+                />
+              )}
 
-            {activeTab === "seo-performance" && (
-              <SeoPerformance desktopData={desktopPerf} mobileData={mobilePerf} />
-            )}
-
-            {activeTab === "download-pdf" && (
-              <>
+              {activeTab === "download-pdf" && (
                 <div className="email-sent-container">
-                  
                   <div className="email-sent-card">
                     <h2>Claim Your Free SEO Audit</h2>
                     <input
@@ -310,7 +332,6 @@ function Main({ activeTab }) {
                       Get Report
                     </button>
 
-                    {/* Loader for email sending */}
                     {isEmailSending && (
                       <div className="loader-container email-loader">
                         <div className="loader"></div>
@@ -319,19 +340,16 @@ function Main({ activeTab }) {
                     )}
 
                     {emailStatus && (
-                      <p className={`email-status ${emailStatusType}`}>
-                        {emailStatus}
-                      </p>
+                      <p className={`email-status ${emailStatusType}`}>{emailStatus}</p>
                     )}
                   </div>
                 </div>
-              </>
-            )}
-          </div>
-        )}
-      </section>
+              )}
+            </div>
+          )}
+        </section>
       )}
-      
+
       {/* Leads Management outside main-container */}
       {activeTab === "leads-management" && <LeadsManagement />}
     </main>

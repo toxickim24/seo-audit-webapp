@@ -2,10 +2,39 @@ import React from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import styles from "./SeoPerformance.module.css";
-import { getOverallSpeedScore } from "../../utils/calcOverallSpeedScore"; // adjust path if needed
+import { getOverallSpeedScore } from "../../utils/calcOverallSpeedScore"; 
 
-function SeoPerformance({ desktopData, mobileData }) {
-  // Metric renderer with rating + explanation
+function SeoPerformance({ desktopData, mobileData, isPerfLoading }) {
+  // Loader while performance data is still scanning
+  if (isPerfLoading) {
+    return (
+      <div className="loader-container">
+        <div className="book-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+            <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+            <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
+            <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
+            <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+          </svg>
+        </div>
+        <p>Fetching PageSpeed Insights… This may take up to a minute.</p>
+      </div>
+    );
+  }
+
+  // If nothing returned yet
+  if (!desktopData && !mobileData) {
+    return <p>No performance data available yet.</p>;
+  }
+
+  // Helper: render metric card
   const renderMetric = (label, value, unit, desc, easyDesc, rating) => {
     const getBadge = () => {
       if (!rating) return null;
@@ -27,7 +56,7 @@ function SeoPerformance({ desktopData, mobileData }) {
     );
   };
 
-  // Grouped recommendations (cards inside metricsGrid)
+  // Recommendations
   const renderRecommendations = (desktopOpps = [], mobileOpps = []) => {
     const processOpps = (opps) =>
       opps
@@ -62,7 +91,6 @@ function SeoPerformance({ desktopData, mobileData }) {
               <ul>{desktopList}</ul>
             </div>
           )}
-
           {mobileList.length > 0 && (
             <div className={styles.metricCard}>
               <h4>Mobile Recommendations</h4>
@@ -74,7 +102,7 @@ function SeoPerformance({ desktopData, mobileData }) {
     );
   };
 
-  // Results section for Desktop/Mobile (metrics only, no recos)
+  // Metrics block
   const renderResults = (data, device) => {
     if (!data) return null;
 
@@ -104,7 +132,7 @@ function SeoPerformance({ desktopData, mobileData }) {
             Math.round(data.fcp),
             "ms",
             "When the first content (text or image) renders on screen.",
-            "Tells you how quickly users see something appear after clicking.",
+            "Tells you how quickly users see something appear.",
             data.fcp <= 1800 ? "good" : data.fcp <= 3000 ? "needs" : "poor"
           )}
           {renderMetric(
@@ -112,14 +140,14 @@ function SeoPerformance({ desktopData, mobileData }) {
             Math.round(data.lcp),
             "ms",
             "When the largest element becomes visible.",
-            "Shows how fast the main part of the page loads for visitors.",
+            "Shows how fast the main part of the page loads.",
             data.lcp <= 2500 ? "good" : data.lcp <= 4000 ? "needs" : "poor"
           )}
           {renderMetric(
             "Time to Interactive (TTI)",
             Math.round(data.tti),
             "ms",
-            "When the page is fully ready for user interaction.",
+            "When the page is fully ready for interaction.",
             "How long before someone can click or type without delay.",
             data.tti <= 3800 ? "good" : data.tti <= 7300 ? "needs" : "poor"
           )}
@@ -136,7 +164,7 @@ function SeoPerformance({ desktopData, mobileData }) {
             Math.round(data.tbt),
             "ms",
             "How long tasks block user input.",
-            "Shorter times mean fewer lags when clicking around.",
+            "Shorter times mean fewer lags.",
             data.tbt <= 200 ? "good" : data.tbt <= 600 ? "needs" : "poor"
           )}
           {renderMetric(
@@ -144,7 +172,7 @@ function SeoPerformance({ desktopData, mobileData }) {
             data.cls?.toFixed(2),
             "",
             "How much the layout shifts while loading.",
-            "Low CLS = less annoying page jumps while reading or clicking.",
+            "Low CLS = less annoying jumps.",
             data.cls <= 0.1 ? "good" : data.cls <= 0.25 ? "needs" : "poor"
           )}
           {renderMetric(
@@ -152,7 +180,7 @@ function SeoPerformance({ desktopData, mobileData }) {
             Math.round(data.fid),
             "ms",
             "Delay when the user first interacts.",
-            "How quickly the site responds the first time you click.",
+            "How quickly the site responds to first click.",
             data.fid <= 100 ? "good" : data.fid <= 300 ? "needs" : "poor"
           )}
         </div>
@@ -160,7 +188,7 @@ function SeoPerformance({ desktopData, mobileData }) {
     );
   };
 
-  // Calculate overall average score
+  // Overall score
   const overallSpeedScore = getOverallSpeedScore(desktopData?.score, mobileData?.score);
 
   return (
@@ -183,15 +211,13 @@ function SeoPerformance({ desktopData, mobileData }) {
             />
             <p className={styles.scoreLabel}>Performance Score</p>
           </div>
-
-          {/* Grouped Recommendations */}
           {renderRecommendations(desktopData?.opportunities, mobileData?.opportunities)}
         </div>
 
-        {/* Desktop (metrics only) */}
+        {/* Desktop */}
         {renderResults(desktopData, "Desktop")}
 
-        {/* Mobile (metrics only) */}
+        {/* Mobile */}
         {renderResults(mobileData, "Mobile")}
       </div>
     </div>
