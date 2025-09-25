@@ -91,8 +91,8 @@ function LeadsManagement() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>📊 Lead Management Dashboard</h2>
-      <span>Manage and analyze your SEO audit leads</span>
+      <h1 className={styles.title}>📊 Lead Management Dashboard</h1>
+      <span className={styles.subtitle}>Manage and analyze your SEO audit leads</span>
 
       {/* Search + Export Row */}
       <div className={styles.actions}>

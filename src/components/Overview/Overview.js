@@ -62,7 +62,6 @@ function Overview({
   return (
     <div className="overview-container">
       <div className="overview-wrapper">
-        <h2 className="result-title">Overview</h2>
 
         {/* Overall SEO Score */}
         {overallScore !== null && (

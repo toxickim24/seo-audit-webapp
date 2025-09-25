@@ -14,11 +14,12 @@ function getCachedResult(url, strategy) {
 
   try {
     const parsed = JSON.parse(cached);
-    const expired = Date.now() - parsed.time > CACHE_TTL;
-    if (expired) {
-      localStorage.removeItem(key);
-      return null;
-    }
+    // Remove cache expiry temporarily
+    // const expired = Date.now() - parsed.time > CACHE_TTL;
+    // if (expired) {
+    //   localStorage.removeItem(key);
+    //   return null;
+    // }
     return parsed.data;
   } catch {
     localStorage.removeItem(key); // corrupted data

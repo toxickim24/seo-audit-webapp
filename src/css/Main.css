@@ -1,13 +1,15 @@
 /* Main Section */
 .main-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 80px 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: start;
   min-height: calc(100vh - 120px);
   text-align: center;
-  padding: 100px 10px;
-  gap: 20px;
+  gap: 30px;
 }
 
 /* Animation Lottie */
@@ -484,4 +486,126 @@
   font-size: 18px;
   font-weight: 700;
   text-transform: capitalize;
+}
+
+/*Body Tabs*/
+
+/* Body Tabs */
+.body-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.body-tabs button {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #22354d;
+  cursor: pointer;
+  padding: 10px 16px;
+  position: relative;
+  transition: color 0.3s ease;
+  text-transform: capitalize;
+}
+
+.body-tabs button::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #fb6a45;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.body-tabs button.active {
+  color: #fb6a45;
+}
+
+.body-tabs button.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.body-tabs button:hover {
+  color: #fb6a45;
+}
+
+/* Report Actions */
+.report-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.report-actions button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Primary button (Download) */
+.report-actions button:first-of-type {
+  background: #22354d; /* navy */
+  color: #fff;
+}
+
+.report-actions button:first-of-type:hover {
+  background: #1a273b;
+}
+
+/* Secondary button (Email) */
+.report-actions button:last-of-type {
+  background: #fb6a45; /* orange */
+  color: #fff;
+}
+
+.report-actions button:last-of-type:hover {
+  background: #e95a39;
+}
+
+/* Status message */
+.email-status {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.email-status.success {
+  color: #2a8b3c;
+}
+
+.email-status.error {
+  color: #e63946;
+}
+
+/* ===========================
+   Tablet breakpoint (≤1024px)
+=========================== */
+@media (max-width: 1024px) {
+
+}
+
+/* ===========================
+   Mobile breakpoint (≤767px)
+=========================== */
+@media (max-width: 767px) {
+
+  .search-box form {
+    flex-direction: column;
+  }
+
 }

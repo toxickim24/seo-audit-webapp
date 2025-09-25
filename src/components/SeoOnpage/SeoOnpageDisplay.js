@@ -2,7 +2,6 @@ const SeoOnPage = ({ onpage, passFailStyle }) => {
   return (
     <div className="overview-container">
       <div className="overview-wrapper">
-        <h2 className="result-title">On-Page SEO</h2>
 
         {/* Title */}
         <div className="onpage-box" style={passFailStyle(onpage.titlePass)}>

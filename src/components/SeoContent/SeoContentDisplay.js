@@ -2,7 +2,6 @@ function SeoContentDisplay({ contentSeo, passFailStyle }) {
   return (
     <div className="seo-content-container">
       <div className="seo-content-wrapper">
-        <h2 className="result-title">Content SEO</h2>
 
         {/* Title */}
         <div

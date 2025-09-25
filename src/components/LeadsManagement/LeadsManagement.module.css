@@ -2,12 +2,11 @@
   padding: 100px 40px;
   min-height: calc(100vh - 120px);
   background: #f9fafb;
-  font-family: "Inter", Arial, sans-serif;
   text-align: center;
 }
 
 /* Title */
-.container h2 {
+.title {
   font-size: 40px;
   font-weight: 700;
   color: #333;
@@ -15,7 +14,7 @@
   padding-bottom: 20px;
 }
 
-.container span {
+.subtitle {
   display: block;
   font-size: 20px;
   font-weight: 500;

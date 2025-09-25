@@ -4,7 +4,6 @@ function SeoTechnicalDisplay({ technicalSeo, passFailStyle }) {
   return (
     <div className="seo-technical-container">
       <div className="seo-technical-wrapper">
-        <h2 className="result-title">Technical SEO</h2>
 
         {/* Canonical */}
         <div className="seo-technical-box" style={passFailStyle(!!technicalSeo.canonical)}>
