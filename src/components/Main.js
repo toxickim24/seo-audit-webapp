@@ -126,6 +126,15 @@ function Main({ activeTab }) {
       setEmail("");
       setEmailStatus("SEO Audit Sent!");
       setEmailStatusType("success");
+
+      setTimeout(() => {
+        setName("");
+        setEmail("");
+        setPhone("");
+        setCompany("");
+        setEmailStatus("");
+        setEmailStatusType("");
+      }, 3000);
     } catch (err) {
       console.error("Send email error:", err);
       setEmailStatus("Failed to send email.");
