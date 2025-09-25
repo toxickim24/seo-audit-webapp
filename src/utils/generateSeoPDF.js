@@ -126,13 +126,15 @@ export const generateSeoPDF = (seoData, url, overallScore, pageSpeed, performanc
   }
 
   // Overview
+  const technicalSeo = seoData.technicalSeo?.technicalSeo || {};
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   addText("SEO Analysis Report");
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
-  addText(`Website URL: ${url}`);
+  addText(`Website URL: ${technicalSeo.canonical}`);
 
   const onpageScore = seoData.onpage?.overview?.score || 0;
   const technicalScore = seoData.technicalSeo?.overview?.score || 0;
@@ -226,7 +228,6 @@ export const generateSeoPDF = (seoData, url, overallScore, pageSpeed, performanc
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
 
-  const technicalSeo = seoData.technicalSeo?.technicalSeo || {};
   const techFields = [
     ["Canonical", technicalSeo.canonical || "Missing", !!technicalSeo.canonical],
     ["Robots Meta", technicalSeo.hasRobotsMeta ? "Pass" : "Fail", technicalSeo.hasRobotsMeta],
