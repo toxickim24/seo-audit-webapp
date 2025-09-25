@@ -18,8 +18,8 @@ function Main({ activeTab }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [seoData, setSeoData] = useState(null);
 
-  const [isLoading, setIsLoading] = useState(false); // general SEO loader
-  const [isPerfLoading, setIsPerfLoading] = useState(false); // perf-only loader
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPerfLoading, setIsPerfLoading] = useState(false);
 
   const [pageSpeed, setPageSpeed] = useState(null);
   const [desktopRecommendations, setDesktopRecommendations] = useState([]);
@@ -37,19 +37,66 @@ function Main({ activeTab }) {
   const [emailStatusType, setEmailStatusType] = useState("");
   const [isEmailSending, setIsEmailSending] = useState(false);
 
-  const urlPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+  // Normalize URL
+  const normalizeUrl = (rawUrl) => {
+    if (!rawUrl) return "";
+    let val = rawUrl.trim();
+    if (!/^https?:\/\//i.test(val)) {
+      val = "https://" + val;
+    }
+    return val;
+  };
+
+  // Validate URL with custom messages
+  const validateUrl = (rawUrl) => {
+  if (!rawUrl || !rawUrl.trim()) return "Website URL cannot be empty.";
+
+    const normalized = normalizeUrl(rawUrl);
+
+    try {
+      const parsed = new URL(normalized);
+      const hostname = parsed.hostname;
+
+      if (!hostname) return "Invalid website address.";
+
+      // Reject unfinished inputs like "http://"
+      if (!hostname.includes(".")) {
+        return "Website must include a valid domain (e.g., example.com).";
+      }
+
+      // Block localhost/private IPs
+      if (/^(localhost|127\.|192\.168\.|10\.)/.test(hostname)) {
+        return "Local or private addresses are not allowed.";
+      }
+
+      // ✅ Strict hostname validation
+      const hostnameRegex = /^(?!-)(?!.*--)[A-Za-z0-9-]{1,63}(?<!-)$/;
+      const labels = hostname.split(".");
+      if (
+        labels.some((label) => !hostnameRegex.test(label)) ||
+        !/\.[A-Za-z]{2,}$/.test(hostname)
+      ) {
+        return "Website must be a valid domain name (letters, numbers, hyphens only).";
+      }
+
+      return null; // ✅ valid
+    } catch {
+      return "Please enter a valid website URL.";
+    }
+  };
 
   // Run analysis
   const handleAnalyze = async () => {
-    if (!url || !url.trim()) {
-      setError("Website URL cannot be empty.");
+    const errMsg = validateUrl(url);
+    if (errMsg) {
+      setError(errMsg);
       return;
     }
-    if (!urlPattern.test(url)) {
-      setError("Please enter a valid website (http/https).");
-      return;
-    }
+
+    const normalizedUrl = normalizeUrl(url);
+    setUrl(normalizedUrl);
 
     setError("");
     setIsSubmitted(true);
@@ -59,19 +106,19 @@ function Main({ activeTab }) {
     setDesktopPerf(null);
     setMobilePerf(null);
     setOverallScore(null);
-    setIsPerfLoading(true); // start perf loader
+    setIsPerfLoading(true);
 
     try {
-      // ✅ Fetch SEO analysis (on-page, content, technical)
-      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`);
+      const res = await fetch(
+        `${API_BASE_URL}/analyze?url=${encodeURIComponent(normalizedUrl)}`
+      );
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
       setSeoData(data);
 
-      // ✅ Start PageSpeed fetch in parallel
       Promise.all([
-        fetchSeoPerformance(url, "desktop"),
-        fetchSeoPerformance(url, "mobile"),
+        fetchSeoPerformance(normalizedUrl, "desktop"),
+        fetchSeoPerformance(normalizedUrl, "mobile"),
       ])
         .then(([desktop, mobile]) => {
           setDesktopPerf(desktop);
@@ -84,22 +131,20 @@ function Main({ activeTab }) {
             (mobile?.opportunities || []).filter((opp) => opp.savingsMs > 0)
           );
 
-          // ✅ Now compute overall PageSpeed score
           const overallSpeedScore =
             desktop && mobile
               ? Math.round((desktop.score + mobile.score) / 2)
               : desktop?.score || mobile?.score || 0;
 
-          setPageSpeed(overallSpeedScore); // <-- THIS was missing
+          setPageSpeed(overallSpeedScore);
         })
         .catch((err) => console.error("PSI error:", err))
         .finally(() => setIsPerfLoading(false));
-
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to fetch SEO data.");
     } finally {
-      setIsLoading(false); // stop general loader
+      setIsLoading(false);
     }
   };
 
@@ -118,7 +163,7 @@ function Main({ activeTab }) {
     }
 
     if (overallScore == null) {
-      setEmailStatus("⚠️ Overall Score is not ready yet. Please wait until PageSpeed finishes.");
+      setEmailStatus("⚠️ Overall Score is not ready yet. Please wait.");
       setEmailStatusType("error");
       return;
     }
@@ -172,7 +217,6 @@ function Main({ activeTab }) {
     }
   };
 
-  // Save lead to DB
   const handleSaveLead = async () => {
     const newLead = {
       name,
@@ -196,7 +240,6 @@ function Main({ activeTab }) {
     }
   };
 
-  // Combo click → email + save lead
   const handleClick = async () => {
     setIsEmailSending(true);
     await handleSendEmail();
@@ -210,7 +253,6 @@ function Main({ activeTab }) {
 
   return (
     <main>
-      {/* Default SEO tabs (all inside main-container) */}
       {activeTab !== "leads-management" && (
         <section className="main-container">
           <div className="animation-seo">
@@ -230,33 +272,33 @@ function Main({ activeTab }) {
               }}
             >
               <input
-                type="url"
+                type="text"
                 placeholder="Enter your website URL"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
               <button type="submit">Run Your SEO Audit Now</button>
+              {error && <p className="error-message">{error}</p>}
             </form>
-            {error && <p className="error-message">{error}</p>}
           </div>
 
-          {/* Loader */}
           {isLoading && (
             <div className="loader-container">
               <div className="book-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
-                <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
-                <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
-                <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
-                <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
-              </svg>
+                {/* SVG loader kept exactly as before */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+                  <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+                  <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
+                  <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+                </svg>
               </div>
               <p>Analyzing website, please wait...</p>
             </div>
@@ -350,7 +392,6 @@ function Main({ activeTab }) {
         </section>
       )}
 
-      {/* Leads Management outside main-container */}
       {activeTab === "leads-management" && <LeadsManagement />}
     </main>
   );

@@ -27,8 +27,8 @@
 .search-box .error-message{
   position: absolute;
   left: 5px;
-  bottom: -15px;
-  font-size: 10px;
+  bottom: -20px;
+  font-size: 14px;
   font-weight: 400;
   color: #ff3333;
 }
