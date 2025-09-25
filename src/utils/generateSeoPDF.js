@@ -407,6 +407,6 @@ export const generateSeoPDF = (seoData, url, pageSpeed, performanceData, downloa
   if (download) {
     doc.save(`SEO_Report_${url.replace(/https?:\/\//, "").replace(/\W/g, "_")}.pdf`);
   } else {
-    return doc.output("blob"); // return Blob instead of downloading
+    return doc.output("blob");
   }
 };
