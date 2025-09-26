@@ -11,6 +11,8 @@ import { generateSeoPDF } from "../utils/generateSeoPDF";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import { getOverallScore } from "../utils/calcOverallScore";
+import SeoPricing from "./SeoPricing";
+import SeoTools from "./SeoTools";
 import LeadsManagement from "./LeadsManagement";
 
 function Main({ activeTab }) {
@@ -203,7 +205,7 @@ function Main({ activeTab }) {
 
   return (
     <main>
-      {activeTab !== "leads-management" && (
+      { activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "leads-management" && (
         <section className="main-container">
           {/* Animation stays visible BEFORE & DURING scan */}
           {(!seoData || isLoading) && (
@@ -343,7 +345,9 @@ function Main({ activeTab }) {
           )}
         </section>
       )}
-
+      
+      {activeTab === "seo-pricing" && <SeoPricing />}
+      {activeTab === "seo-tools" && <SeoTools />}
       {activeTab === "leads-management" && <LeadsManagement />}
     </main>
   );

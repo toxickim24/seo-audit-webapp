@@ -27,32 +27,68 @@
   gap: 30px;
 }
 
-/* Equal columns */
+/* Left column */
 .left {
+  flex: 60;
   display: flex;
   flex-direction: column;
-  flex: 60;
-  box-sizing: border-box;
   background: #fff;
   border-radius: 12px;
   padding: 24px;
   border: 1px solid #e5e7eb;
-  box-sizing: border-box;
   gap: 20px;
 }
 
 .sectionTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center;
   color: #111827;
 }
 
-.gauge { display: block; margin: 0 auto 12px; width: 260px; max-width: 100%; }
-.gaugeValue { font: 700 28px 'Poppins', sans-serif; fill: #111827; }
-.gaugeLabel { font: 500 12px 'Roboto', sans-serif; fill: #6b7280; }
+/* ✅ Gauge container (centers the gauge) */
+.gaugeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
 
+.gaugeBox p {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.gaugeScore {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.gaugeStatus {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.statusRed {
+  color: #ef4444;
+}
+
+.statusYellow {
+  color: #f59e0b;
+}
+
+.statusGreen {
+  color: #22c55e;
+}
+
+/* Cards */
 .cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -83,13 +119,13 @@
   color: #111827;
 }
 
+/* Right column */
 .right {
   flex: 40;
   background: #fff;
   border-radius: 12px;
   padding: 24px;
   border: 1px solid #e5e7eb;
-  box-sizing: border-box;
 }
 
 .right span {
@@ -180,9 +216,12 @@ label {
 /* Responsive: stack */
 @media (max-width: 767px) {
   .container {
-    padding: 0px;
+    padding: 0;
   }
   .contentWrapper {
     flex-direction: column;
+  }
+  .gaugeBox {
+    margin-bottom: 30px;
   }
 }

@@ -5,9 +5,12 @@ function LeadsManagement() {
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
+
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  // ✅ Fetch leads from backend
+  // ✅ Fetch leads
   const fetchLeads = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/leads`);
@@ -26,9 +29,7 @@ function LeadsManagement() {
   // ✅ Search filter
   const filteredLeads = leads.filter((lead) =>
     Object.values(lead).some((val) =>
-      String(val || "")
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      String(val || "").toLowerCase().includes(search.toLowerCase())
     )
   );
 
@@ -36,12 +37,20 @@ function LeadsManagement() {
   const sortedLeads = [...filteredLeads].sort((a, b) => {
     const aVal = a[sortConfig.key] || "";
     const bVal = b[sortConfig.key] || "";
-
-    if (sortConfig.direction === "asc") {
-      return aVal > bVal ? 1 : -1;
-    }
+    if (sortConfig.direction === "asc") return aVal > bVal ? 1 : -1;
     return aVal < bVal ? 1 : -1;
   });
+
+  // ✅ Pagination
+  const totalPages = Math.ceil(sortedLeads.length / itemsPerPage);
+  const paginatedLeads = sortedLeads.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   // ✅ Toggle sort
   const handleSort = (key) => {
@@ -51,19 +60,13 @@ function LeadsManagement() {
     }));
   };
 
-  // ✅ Delete lead from DB
+  // ✅ Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
-
     try {
-      const res = await fetch(`${API_BASE_URL}/leads/${id}`, {
-        method: "DELETE",
-      });
-
+      const res = await fetch(`${API_BASE_URL}/leads/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete lead");
-
       setLeads((prev) => prev.filter((lead) => lead.id !== id));
-      console.log(`✅ Lead ${id} deleted from DB`);
     } catch (err) {
       console.error("❌ Error deleting lead:", err.message);
       alert("Failed to delete lead. Check server logs.");
@@ -73,7 +76,6 @@ function LeadsManagement() {
   // ✅ Export CSV
   const exportToCSV = () => {
     if (!leads.length) return;
-
     const headers = Object.keys(leads[0]).join(",");
     const rows = leads.map((lead) =>
       Object.values(lead)
@@ -81,7 +83,6 @@ function LeadsManagement() {
         .join(",")
     );
     const csv = [headers, ...rows].join("\n");
-
     const blob = new Blob([csv], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -94,7 +95,7 @@ function LeadsManagement() {
       <h1 className={styles.title}>📊 Lead Management Dashboard</h1>
       <span className={styles.subtitle}>Manage and analyze your SEO audit leads</span>
 
-      {/* Search + Export Row */}
+      {/* Search + Export */}
       <div className={styles.actions}>
         <input
           type="text"
@@ -103,7 +104,6 @@ function LeadsManagement() {
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchBox}
         />
-
         {leads.length > 0 && (
           <button onClick={exportToCSV} className={styles.exportBtn}>
             Export CSV
@@ -116,45 +116,35 @@ function LeadsManagement() {
         <table className={styles.table}>
           <thead>
             <tr>
-              {[
-                "id",
-                "name",
-                "email",
-                "phone",
-                "company",
-                "website",
-                "score",
-                "date",
-              ].map((col) => (
-                <th key={col} onClick={() => handleSort(col)}>
-                  {col.toUpperCase()}{" "}
-                  {sortConfig.key === col
-                    ? sortConfig.direction === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
-                </th>
-              ))}
+              {["name", "email", "phone", "company", "website", "score", "date"].map(
+                (col) => (
+                  <th key={col} onClick={() => handleSort(col)}>
+                    {col.toUpperCase()}{" "}
+                    {sortConfig.key === col
+                      ? sortConfig.direction === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                )
+              )}
               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
-            {sortedLeads.length ? (
-              sortedLeads.map((lead) => (
+            {paginatedLeads.length ? (
+              paginatedLeads.map((lead) => (
                 <tr key={lead.id}>
-                  <td>{lead.id}</td>
-                  <td>{lead.name || "-"}</td>
-                  <td>{lead.email || "-"}</td>
-                  <td>{lead.phone || "-"}</td>
-                  <td>{lead.company || "-"}</td>
-                  <td>{lead.website || "-"}</td>
-                  <td>{lead.score ?? "-"}</td>
-                  <td>
-                    {lead.date
-                      ? new Date(lead.date).toLocaleString()
-                      : "-"}
+                  <td data-label="Name">{lead.name || "-"}</td>
+                  <td data-label="Email">{lead.email || "-"}</td>
+                  <td data-label="Phone">{lead.phone || "-"}</td>
+                  <td data-label="Company">{lead.company || "-"}</td>
+                  <td data-label="Website">{lead.website || "-"}</td>
+                  <td data-label="Score">{lead.score ?? "-"}</td>
+                  <td data-label="Date">
+                    {lead.date ? new Date(lead.date).toLocaleString() : "-"}
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <button
                       onClick={() => handleDelete(lead.id)}
                       className={styles.deleteBtn}
@@ -166,12 +156,29 @@ function LeadsManagement() {
               ))
             ) : (
               <tr>
-                <td colSpan="9">No leads found</td>
+                <td colSpan="8">No leads found</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i + 1}
+              className={`${styles.pageBtn} ${
+                currentPage === i + 1 ? styles.activePage : ""
+              }`}
+              onClick={() => handlePageChange(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,51 +1,6 @@
 import { useMemo, useEffect } from "react";
+import GaugeChart from "react-gauge-chart";
 import styles from "./PostOverview.module.css";
-
-function Gauge({ score }) {
-  const pct = Math.max(0, Math.min(score ?? 0, 100)); // clamp 0–100
-
-  return (
-    <svg viewBox="0 0 240 140" className={styles.gauge}>
-      <defs>
-        <linearGradient id="seoGaugeGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#ef4444" />
-          <stop offset="0.6" stopColor="#f59e0b" />
-          <stop offset="1" stopColor="#22c55e" />
-        </linearGradient>
-      </defs>
-
-      {/* background half-circle */}
-      <path
-        d="M30,110 A90,90 0 0 1 210,110"
-        fill="none"
-        stroke="#e5e7eb"
-        strokeWidth="16"
-        strokeLinecap="round"
-        pathLength="100"
-      />
-
-      {/* progress, revealed by dasharray so it always aligns */}
-      <path
-        d="M30,110 A90,90 0 0 1 210,110"
-        fill="none"
-        stroke="url(#seoGaugeGrad)"
-        strokeWidth="16"
-        strokeLinecap="round"
-        pathLength="100"
-        strokeDasharray={`${pct} ${100 - pct}`}
-        /* tiny offset hides the left start nub; bump to 1–2 if you still see it */
-        strokeDashoffset="0.5"
-      />
-
-      <text x="120" y="80" textAnchor="middle" className={styles.gaugeValue}>
-        {pct}%
-      </text>
-      <text x="120" y="102" textAnchor="middle" className={styles.gaugeLabel}>
-        {pct < 40 ? "Needs Work" : pct < 70 ? "Moderate" : "Strong"}
-      </text>
-    </svg>
-  );
-}
 
 function PostOverview({
   seoData,
@@ -94,7 +49,36 @@ function PostOverview({
         {/* Left: Gauge + scores */}
         <div className={styles.left}>
           <h2 className={styles.sectionTitle}>Overall SEO Health</h2>
-          {overallScore !== null && <Gauge score={overallScore} />}
+          {overallScore !== null && (
+          <div className={styles.gaugeBox}>
+            <GaugeChart
+              id="post-overall-seo-gauge"
+              nrOfLevels={20}
+              percent={overallScore / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              textColor="#22354d"
+              style={{ width: "clamp(200px, 60vw, 400px)" }}
+            />
+
+            {/* ✅ New Strength Label */}
+            <p
+              className={`${styles.gaugeStatus} ${
+                overallScore < 40
+                  ? styles.statusRed
+                  : overallScore < 70
+                  ? styles.statusYellow
+                  : styles.statusGreen
+              }`}
+            >
+              {overallScore < 40
+                ? "Needs Work"
+                : overallScore < 70
+                ? "Moderate"
+                : "Strong"}
+            </p>
+          </div>
+          )}
 
           <div className={styles.cards}>
             <div className={styles.card}>

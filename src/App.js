@@ -8,9 +8,8 @@ function App() {
   // Main header tabs (always visible)
   const tabs = [
     { id: "seo-audit", label: "SEO Audit" },
-    { id: "pricing", label: "Pricing" },
-    { id: "extension", label: "Extension" },
-    { id: "widget", label: "Widget" },
+    { id: "seo-pricing", label: "Pricing" },
+    { id: "seo-tools", label: "Tools" },
     { id: "leads-management", label: "Lead Management" }, // always last
   ];
 
