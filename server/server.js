@@ -155,7 +155,7 @@ app.get("/leads", async (req, res) => {
   }
 
   try {
-    const [rows] = await db.execute("SELECT * FROM leads ORDER BY date DESC");
+    const [rows] = await db.execute("SELECT * FROM leads WHERE is_deleted = 0 ORDER BY date DESC");
     res.json(rows);
   } catch (err) {
     console.error("❌ Failed to fetch leads:", err.message);
@@ -186,16 +186,16 @@ app.post("/leads", async (req, res) => {
   }
 });
 
-// Delete lead by ID
+// Soft delete lead
 app.delete("/leads/:id", async (req, res) => {
   if (!db) return res.status(500).json({ error: "Database not connected" });
 
   try {
     const { id } = req.params;
-    await db.execute("DELETE FROM leads WHERE id = ?", [id]);
-    res.json({ success: true, message: "Lead deleted" });
+    await db.execute("UPDATE leads SET is_deleted = 1 WHERE id = ?", [id]);
+    res.json({ success: true, message: "Lead marked as deleted" });
   } catch (err) {
-    console.error("❌ Failed to delete lead:", err.message);
+    console.error("❌ Failed to soft delete lead:", err.message);
     res.status(500).json({ error: "Failed to delete lead" });
   }
 });

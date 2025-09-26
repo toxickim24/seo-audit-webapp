@@ -41,6 +41,48 @@
   gap: 20px;
 }
 
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #111827;
+}
+
+.gauge { display: block; margin: 0 auto 12px; width: 260px; max-width: 100%; }
+.gaugeValue { font: 700 28px 'Poppins', sans-serif; fill: #111827; }
+.gaugeLabel { font: 500 12px 'Roboto', sans-serif; fill: #6b7280; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.card p {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
 .right {
   flex: 40;
   background: #fff;

@@ -10,7 +10,7 @@ function Footer() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Web Dev Davao
+          Web Design Davao
         </a>
       </p>
     </footer>
