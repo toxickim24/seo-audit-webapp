@@ -1,0 +1,267 @@
+.overviewContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 30px;
+}
+
+.overviewWrapper {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Gauge */
+.gaugeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Make the gauge value text bold (works with CSS Modules) */
+:global(#overall-seo-gauge .percent-text),
+:global(#overall-seo-gauge .value-text),
+:global(#overall-seo-gauge svg text) {
+  font-weight: 900;
+}
+
+:global(#overall-seo-gauge .percent-text),
+:global(#overall-seo-gauge .value-text) {
+  font-size: 20px;
+}
+
+.overallText {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.overallText span {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Score cards */
+.scoreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.scoreCard {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+/* Progress bar */
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background: #f1f1f1;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+/* Score text */
+.scoreCard p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Badge colors (used to color the fill) */
+.badgeRed   { background: #ff5f6d; }
+.badgeYellow{ background: #FB6A45; }
+.badgeGreen { background: #00c49f; }
+
+/* =========================
+   Suggestions + Recommendations
+   Masonry (2 columns)
+========================= */
+.suggestionsGrid {
+  /* Masonry using multi-column layout */
+  column-count: 2;
+  column-gap: 20px;
+}
+
+/* Each card becomes a column item */
+.suggestionsGrid > * {
+  /* Prevent splitting across columns */
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  /* Make them render as discrete blocks in columns */
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 20px;
+}
+
+.seoSuggestions,
+.seoRecommendations {
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.seoSuggestions h3,
+.seoRecommendations h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #22354d;
+  margin: 0 0 6px 0;
+}
+
+.seoSuggestions ul,
+.seoRecommendations ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seoSuggestions li,
+.seoRecommendations li {
+  padding: 10px 16px;
+  border-left: 5px solid maroon;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  text-align: left;
+}
+
+.impact {
+  font-size: 12px;
+  color: #666;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+/* ===== Performance list look (icon first + badge) ===== */
+.perfList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perfItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* override any old left border from generic styles */
+.perfItem { border-left: 1px solid #e6e6e6 !important; }
+
+/* left group (icon + title) */
+.perfLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.perfTitle {
+  font-size: 14px;
+  color: #22354d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* right group (badge + savings) */
+.perfRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.savings {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* Shared status colors (used by both icon and badge) */
+.statusHigh   { background: #ef4444; } /* red */
+.statusMedium { background: #f59e0b; } /* amber */
+.statusLow    { background: #10b981; } /* green */
+
+/* tiny colored icon (first) */
+.icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.iconBlue   { background: #3b82f6; }  /* JS/CSS/rendering */
+.iconOrange { background: #f59e0b; }  /* redirects/blocking */
+.iconGreen  { background: #10b981; }  /* ALT/images */
+.iconGray   { background: #9ca3af; }
+
+/* impact pill backgrounds */
+.impactBadge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+}
+.impactHigh   { background: #ef4444; } /* red */
+.impactMedium { background: #f59e0b; } /* amber */
+.impactLow    { background: #10b981; } /* green */
+
+/* Responsive */
+@media (max-width: 767px) {
+  .suggestionsGrid {
+    column-count: 1; /* single column on mobile */
+  }
+  .overviewContainer {
+    padding: 0;
+  }
+}

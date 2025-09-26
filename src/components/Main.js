@@ -22,6 +22,8 @@ function Main({ activeTab }) {
   const [seoData, setSeoData] = useState(null);
   const [pageSpeed, setPageSpeed] = useState(null);
   const [desktopPerf, setDesktopPerf] = useState(null);
+  const [desktopRecommendations, setDesktopRecommendations] = useState([]);
+  const [mobileRecommendations, setMobileRecommendations] = useState([]);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [overallScore, setOverallScore] = useState(null);
 
@@ -99,6 +101,16 @@ function Main({ activeTab }) {
       setPageSpeed(perfScore);
 
       setOverallScore(getOverallScore(data));
+
+      const desktopOpps = (desktop?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
+      const mobileOpps = (mobile?.opportunities || []).filter(
+        (opp) => opp.savingsMs > 0
+      );
+
+      setDesktopRecommendations(desktopOpps);
+      setMobileRecommendations(mobileOpps);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch SEO data.");
@@ -285,10 +297,9 @@ function Main({ activeTab }) {
                       <Overview
                         seoData={seoData}
                         pageSpeed={pageSpeed}
+                        desktopRecommendations={desktopRecommendations}
+                        mobileRecommendations={mobileRecommendations}
                         onScoreReady={setOverallScore}
-                        showSuggestions={true}
-                        desktopRecommendations={desktopPerf?.opportunities || []}
-                        mobileRecommendations={mobilePerf?.opportunities || []}
                       />
                     )}
                     {bodyTab === "seo-onpage" && seoData.onpage && (

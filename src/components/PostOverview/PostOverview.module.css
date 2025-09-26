@@ -179,6 +179,9 @@ label {
 
 /* Responsive: stack */
 @media (max-width: 767px) {
+  .container {
+    padding: 0px;
+  }
   .contentWrapper {
     flex-direction: column;
   }

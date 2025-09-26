@@ -87,6 +87,7 @@
   gap: 20px;
 }
 
+/*
 .seo-suggestions,
 .seo-score-box,
 .seo-recommendations {
@@ -141,7 +142,7 @@
   background-color: #fb6a45;
   border-radius: 10px 0 0 10px;
   transition: width 0.2s linear;
-}
+}*/
 
 /* On Page */
 .onpage-box{
@@ -569,7 +570,7 @@
 
 /* Secondary button (Email) */
 .report-actions button:last-of-type {
-  background: #fb6a45; /* orange */
+  background: #FF8E3A; /* orange */
   color: #fff;
 }
 
@@ -604,8 +605,26 @@
 =========================== */
 @media (max-width: 767px) {
 
+  .main-container {
+    padding: 40px 20px;
+  }
+
   .search-box form {
     flex-direction: column;
+  }
+
+  .report-actions {
+    flex-direction: column;
+  }
+
+  .body-tabs {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .body-tabs button {
+    width: 100%;
+    text-align: left;
   }
 
 }

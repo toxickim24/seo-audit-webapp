@@ -1,76 +1,112 @@
-function SeoContentSuggestions({ contentSeo }) {
-  if (!contentSeo) return null;
+// src/components/SeoContent/SeoContentSuggestions.js
+import React from "react";
+import styles from "./SeoContent.module.css"; // scoped styles
 
+// Build { text, level } items so we can style by severity
+const buildRecs = (c = {}) => {
   const recs = [];
+  const push = (text, level = "low") => recs.push({ text, level });
 
   // Title
-  if (contentSeo.titleLength < 50 || contentSeo.titleLength > 60) {
-    recs.push("Make your title between 50–60 characters for better search results display.");
+  if (c.titleLength < 50 || c.titleLength > 60) {
+    push("Make your title between 50–60 characters for better search results display.", "medium");
   }
-  if (!contentSeo.hasKeywordInTitle) {
-    recs.push("Include your main keyword in the title to improve relevance.");
+  if (!c.hasKeywordInTitle) {
+    push("Include your main keyword in the title to improve relevance.", "high");
   }
 
-  // Meta
-  if (contentSeo.metaDescLength < 120 || contentSeo.metaDescLength > 160) {
-    recs.push("Write a meta description between 120–160 characters.");
+  // Meta description
+  if (c.metaDescLength < 120 || c.metaDescLength > 160) {
+    push("Write a meta description between 120–160 characters.", "medium");
   }
-  if (!contentSeo.hasKeywordInMeta) {
-    recs.push("Add your keyword in the meta description for better visibility.");
+  if (!c.hasKeywordInMeta) {
+    push("Add your keyword in the meta description for better visibility.", "medium");
   }
 
   // Keyword usage
-  if (parseFloat(contentSeo.keywordDensity) <= 0 || parseFloat(contentSeo.keywordDensity) >= 5) {
-    recs.push("Keep keyword density around 1–3%. Avoid stuffing.");
+  const kd = parseFloat(c.keywordDensity);
+  if (Number.isFinite(kd)) {
+    if (kd <= 0 || kd >= 5) {
+      push("Keep keyword density around 1–3%. Avoid stuffing.", "high");
+    } else if (kd < 1 || kd > 3) {
+      push("Tune keyword density toward 1–3% for best balance.", "medium");
+    }
+  } else {
+    push("Set a clear primary keyword and use it naturally.", "medium");
   }
-  if (!contentSeo.keywordInHeadings) {
-    recs.push("Use your main keyword at least once in headings (H1, H2, etc.).");
+
+  if (!c.keywordInHeadings) {
+    push("Use your main keyword at least once in headings (H1, H2, etc.).", "medium");
   }
-  if (!contentSeo.keywordInFirstParagraph) {
-    recs.push("Add your keyword in the first paragraph so search engines catch it early.");
+  if (!c.keywordInFirstParagraph) {
+    push("Add your keyword in the first paragraph so search engines catch it early.", "medium");
   }
 
   // Word Count / Body
-  if (contentSeo.wordCount < 300) {
-    recs.push("Increase word count. Aim for at least 300+ words for stronger SEO.");
+  if (c.wordCount < 300) {
+    push("Increase word count. Aim for at least 300+ words for stronger SEO.", "medium");
   }
-  if (contentSeo.bodyLength < 500) {
-    recs.push("Add more detailed content for better context and ranking chances.");
+  if (c.bodyLength < 500) {
+    push("Add more detailed content for better context and ranking chances.", "medium");
   }
 
   // Readability
-  if (contentSeo.avgSentenceLength > 20) {
-    recs.push("Shorten sentences. Keep average sentence length under 20 words for easier reading.");
+  if (c.avgSentenceLength > 20) {
+    push("Shorten sentences. Keep average sentence length under 20 words for easier reading.", "low");
   }
 
   // Images
-  if (contentSeo.totalImages > 0 && contentSeo.imagesWithAlt < contentSeo.totalImages) {
-    recs.push("Add ALT text to all images so search engines understand them.");
-  }
-  if (contentSeo.totalImages === 0) {
-    recs.push("Add at least one relevant image to make content engaging.");
+  if (c.totalImages === 0) {
+    push("Add at least one relevant image to make content engaging.", "medium");
+  } else if (c.totalImages > 0 && c.imagesWithAlt < c.totalImages) {
+    const allMissing = c.imagesWithAlt === 0;
+    push(
+      allMissing
+        ? "All images are missing ALT text—add descriptive ALT text to every image."
+        : "Add ALT text to all images so search engines understand them.",
+      allMissing ? "high" : "medium"
+    );
   }
 
   // Links
-  if (contentSeo.internalLinks === 0) {
-    recs.push("Add internal links to connect your content with other pages.");
+  if (c.internalLinks === 0) {
+    push("Add internal links to connect your content with other pages.", "medium");
   }
-  if (contentSeo.externalLinks === 0) {
-    recs.push("Add at least one external link to a trusted source.");
+  if (c.externalLinks === 0) {
+    push("Add at least one external link to a trusted source.", "low");
   }
 
+  return recs;
+};
+
+const SeoContentSuggestions = ({ contentSeo, className = "" }) => {
+  if (!contentSeo) return null;
+
+  const recs = buildRecs(contentSeo);
+
   return (
-    <div className="seo-suggestions">
-      <h3>Content SEO Recommendations</h3>
-      <ul>
-        {recs.length > 0 ? (
-          recs.map((r, i) => <li key={i}>{r}</li>)
-        ) : (
-          <p>Your content looks well-optimized!</p>
-        )}
-      </ul>
-    </div>
+    <section className={className}>
+      <h3 className={styles.title}>Content SEO Recommendations</h3>
+
+      {recs.length > 0 ? (
+        <ul className={styles.list}>
+          {recs.map(({ text, level }, i) => (
+            <li key={i} className={styles.item}>
+              <div className={styles.left}>
+                <span className={`${styles.dot} ${styles[level]}`} />
+                <span className={styles.text}>{text}</span>
+              </div>
+              <span className={`${styles.badge} ${styles[level]}`}>
+                {level === "high" ? "High" : level === "medium" ? "Medium" : "Low"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.ok}>Your content looks well-optimized!</p>
+      )}
+    </section>
   );
-}
+};
 
 export default SeoContentSuggestions;

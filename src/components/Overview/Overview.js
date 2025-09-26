@@ -1,19 +1,15 @@
 import { useEffect, useMemo } from "react";
-import AnimatedProgress from "../AnimatedProgress/AnimatedProgress";
+import GaugeChart from "react-gauge-chart";
 import SeoSuggestions from "../SeoOnpage/SeoOnPageSuggestions";
 import SeoTechnicalSuggestions from "../SeoTechnical/SeoTechnicalSuggestions";
 import SeoContentSuggestions from "../SeoContent/SeoContentSuggestions";
+import styles from "./Overview.module.css";
 
-function Overview({
-  seoData,
-  pageSpeed,
-  desktopRecommendations,
-  mobileRecommendations,
-  onScoreReady,
-}) {
-  // ✅ Compute overall score only after PageSpeed is ready
+function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommendations, onScoreReady }) {
+
+  // ✅ Compute overall score
   const overallScore = useMemo(() => {
-    if (pageSpeed === null) return null; // wait for PageSpeed explicitly
+    if (pageSpeed === null) return null;
 
     const scores = [
       seoData?.onpage?.overview?.score ?? 0,
@@ -21,112 +17,184 @@ function Overview({
       seoData?.technicalSeo?.overview?.score ?? 0,
       pageSpeed,
     ];
-
     const validScores = scores.filter((s) => s > 0);
     return validScores.length
       ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
       : 0;
   }, [seoData, pageSpeed]);
 
-  // ✅ Send score to parent only when it's final
+  // ✅ Send score to parent
   useEffect(() => {
     if (onScoreReady && overallScore !== null) {
       onScoreReady(overallScore);
     }
   }, [overallScore, onScoreReady]);
 
-  const renderPerformanceRecommendations = (recommendations, label) =>
-    recommendations?.length > 0 && (
-      <div className="seo-recommendations">
-        <h3>{label}</h3>
-        <ul>
-          {recommendations.map((opp, i) => {
-            const seconds = opp.savingsMs / 1000;
-            const impact =
-              opp.savingsMs > 1000
-                ? "High impact ⚡"
-                : opp.savingsMs > 200
-                ? "Medium impact 👍"
-                : "Low impact ✅";
+  // ✅ Badge color based on score
+  const getScoreClass = (score) => {
+    if (score < 40) return styles.badgeRed;
+    if (score < 70) return styles.badgeYellow;
+    return styles.badgeGreen;
+  };
 
-            return (
-              <li key={`${label}-${i}`}>
-                {opp.title} — {impact} (about {seconds.toFixed(1)}s faster)
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
+  // Put these small helpers above the component (or above the function)
+  const impactMeta = (ms = 0) =>
+  ms > 1000
+    ? { label: "High", statusCls: "statusHigh" }
+    : ms > 200
+    ? { label: "Medium", statusCls: "statusMedium" }
+    : { label: "Low", statusCls: "statusLow" };
+
+  // Simple keyword → icon color mapping (tweak as you like)
+  const iconClassFor = (title = "") => {
+    const t = title.toLowerCase();
+    if (t.includes("javascript") || t.includes("css") || t.includes("render")) return "iconBlue";
+    if (t.includes("redirect") || t.includes("blocking")) return "iconOrange";
+    if (t.includes("alt") || t.includes("image")) return "iconGreen";
+    return "iconGray";
+  };
+
+  // ✅ NEW renderer: icon first + impact pill + savings at right
+  const renderPerformanceRecommendations = (recommendations, label) =>
+  (recommendations?.length ?? 0) > 0 && (
+    <div className={styles.seoRecommendations}>
+      <h3>{label}</h3>
+      <ul className={styles.perfList}>
+        {recommendations.map((opp, i) => {
+          const seconds = (opp.savingsMs / 1000).toFixed(1);
+          const { label: impactLabel, statusCls } = impactMeta(opp.savingsMs);
+
+          return (
+            <li key={`${label}-${i}`} className={styles.perfItem}>
+              <div className={styles.perfLeft}>
+                <span className={`${styles.icon} ${styles[statusCls]}`} />
+                <span className={styles.perfTitle}>{opp.title}</span>
+              </div>
+
+              <div className={styles.perfRight}>
+                <span className={`${styles.impactBadge} ${styles[statusCls]}`}>
+                  {impactLabel}
+                </span>
+                <span className={styles.savings}>+{seconds}s faster</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
 
   return (
-    <div className="overview-container">
-      <div className="overview-wrapper">
-
-        {/* Overall SEO Score */}
+    <div className={styles.overviewContainer}>
+      <div className={styles.overviewWrapper}>
+        {/* Overall SEO Gauge */}
         {overallScore !== null && (
-          <AnimatedProgress
-            score={overallScore}
-            maxScore={100}
-            label="Overall SEO Score"
-          />
+          <div className={styles.gaugeBox}>
+            <GaugeChart
+              id="overall-seo-gauge"
+              nrOfLevels={20}
+              percent={overallScore / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              textColor="#22354d"
+              style={{ width: "clamp(200px, 60vw, 500px)" }}
+            />
+            <h2 className={styles.overallText}>
+              {/*{overallScore}%*/}
+              <span>Overall SEO Score</span>
+            </h2>
+          </div>
         )}
 
-        {/* Individual Scores */}
-        {seoData?.onpage && (
-          <AnimatedProgress
-            score={seoData.onpage.overview?.score ?? 0}
-            maxScore={100}
-            label="On-Page SEO"
-          />
-        )}
-        {seoData?.contentSeo && (
-          <AnimatedProgress
-            score={seoData.contentSeo.overview?.score ?? 0}
-            maxScore={100}
-            label="Content SEO"
-          />
-        )}
-        {seoData?.technicalSeo && (
-          <AnimatedProgress
-            score={seoData.technicalSeo.overview?.score ?? 0}
-            maxScore={100}
-            label="Technical SEO"
-          />
-        )}
-        {pageSpeed !== null && (
-          <AnimatedProgress
-            score={pageSpeed}
-            maxScore={100}
-            label="Performance SEO"
-          />
-        )}
+        {/* Score Cards */}
+        <div className={styles.scoreGrid}>
+          <div className={styles.scoreCard}>
+            <div className={styles.circle}>📝</div>
+            <h4>On-Page SEO</h4>
+            <div className={styles.progressBar}>
+              <div
+                className={`${styles.progressFill} ${getScoreClass(
+                  seoData?.onpage?.overview?.score ?? 0
+                )}`}
+                style={{ width: `${seoData?.onpage?.overview?.score ?? 0}%` }}
+              />
+            </div>
+            <p>{seoData?.onpage?.overview?.score ?? 0}%</p>
+          </div>
 
-        {/* Suggestions */}
-        {seoData?.onpage && (
-          <SeoSuggestions
-            onpage={seoData.onpage.onpage}
-            contentSeo={seoData.contentSeo}
-          />
-        )}
-        {seoData?.technicalSeo && (
-          <SeoTechnicalSuggestions
-            technicalSeo={seoData.technicalSeo.technicalSeo}
-          />
-        )}
-        {seoData?.contentSeo && (
-          <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
-        )}
+          <div className={styles.scoreCard}>
+            <div className={styles.circle}>📄</div>
+            <h4>Content SEO</h4>
+            <div className={styles.progressBar}>
+              <div
+                className={`${styles.progressFill} ${getScoreClass(
+                  seoData?.contentSeo?.overview?.score ?? 0
+                )}`}
+                style={{ width: `${seoData?.contentSeo?.overview?.score ?? 0}%` }}
+              />
+            </div>
+            <p>{seoData?.contentSeo?.overview?.score ?? 0}%</p>
+          </div>
 
-        {/* Performance Recommendations */}
-        {renderPerformanceRecommendations(
-          desktopRecommendations,
-          "Performance Recommendations Desktop"
-        )}
-        {renderPerformanceRecommendations(
-          mobileRecommendations,
-          "Performance Recommendations Mobile"
-        )}
+          <div className={styles.scoreCard}>
+            <div className={styles.circle}>⚙️</div>
+            <h4>Technical SEO</h4>
+            <div className={styles.progressBar}>
+              <div
+                className={`${styles.progressFill} ${getScoreClass(
+                  seoData?.technicalSeo?.overview?.score ?? 0
+                )}`}
+                style={{
+                  width: `${seoData?.technicalSeo?.overview?.score ?? 0}%`,
+                }}
+              />
+            </div>
+            <p>{seoData?.technicalSeo?.overview?.score ?? 0}%</p>
+          </div>
+
+          <div className={styles.scoreCard}>
+            <div className={styles.circle}>🚀</div>
+            <h4>Performance SEO</h4>
+            <div className={styles.progressBar}>
+              <div
+                className={`${styles.progressFill} ${getScoreClass(pageSpeed ?? 0)}`}
+                style={{ width: `${pageSpeed ?? 0}%` }}
+              />
+            </div>
+            <p>{pageSpeed ?? 0}%</p>
+          </div>
+        </div>
+
+        {/* Suggestions + Recommendations (two columns) */}
+        <div className={styles.suggestionsGrid}>
+          {seoData?.onpage && (
+            <div className={styles.seoSuggestions}>
+              <SeoSuggestions
+                onpage={seoData.onpage.onpage}
+                contentSeo={seoData.contentSeo}
+              />
+            </div>
+          )}
+
+          {seoData?.technicalSeo && (
+            <div className={styles.seoSuggestions}>
+              <SeoTechnicalSuggestions
+                technicalSeo={seoData.technicalSeo.technicalSeo}
+              />
+            </div>
+          )}
+
+          {seoData?.contentSeo && (
+            <div className={styles.seoSuggestions}>
+              <SeoContentSuggestions contentSeo={seoData.contentSeo.contentSeo} />
+            </div>
+          )}
+
+          {/* Performance Recommendations */}
+          {renderPerformanceRecommendations(desktopRecommendations, "Performance Recommendations Desktop")}
+          {renderPerformanceRecommendations(mobileRecommendations, "Performance Recommendations Mobile")}
+
+        </div>
       </div>
     </div>
   );
