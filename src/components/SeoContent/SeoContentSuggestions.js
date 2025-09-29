@@ -85,7 +85,7 @@ const SeoContentSuggestions = ({ contentSeo, className = "" }) => {
   const recs = buildRecs(contentSeo);
 
   return (
-    <section className={className}>
+    <>
       <h3 className={styles.title}>Content SEO Recommendations</h3>
 
       {recs.length > 0 ? (
@@ -105,7 +105,7 @@ const SeoContentSuggestions = ({ contentSeo, className = "" }) => {
       ) : (
         <p className={styles.ok}>Your content looks well-optimized!</p>
       )}
-    </section>
+    </>
   );
 };
 

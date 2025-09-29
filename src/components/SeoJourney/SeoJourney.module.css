@@ -1,0 +1,84 @@
+.journeyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 10px;
+  border-right: 2px solid #e5e7eb; /* ✅ keep right border */
+  gap: 50px;
+}
+
+.journeyHeader {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.journeyHeader h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #22354d; /* navy */
+  margin: 0;
+}
+
+.journeySubtitle {
+  font-size: 14px;
+  color: #6b7280; /* gray */
+  margin: 4px 0 0;
+}
+
+.stepWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: #f9fafb;
+  color: #374151;
+  z-index: 2;
+}
+
+.circle.active {
+  border-color: #fb6a45;
+  background: #fff;
+  color: #fb6a45;
+}
+
+.circle.completed {
+  border-color: #10b981;
+  background: #10b981;
+  color: #fff;
+}
+
+.label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.labelActive {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Vertical line connector */
+.connector {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  width: 3px;
+  height: 50px;
+  background: #d1d5db;
+  z-index: 1;
+}
+
+.connectorCompleted {
+  background: #10b981;
+}

@@ -1,15 +1,11 @@
 .overviewContainer {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
   gap: 30px;
 }
 
 .overviewWrapper {
-  width: 100%;
-  max-width: 1200px;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -49,7 +45,7 @@
 /* Score cards */
 .scoreGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
 
@@ -208,7 +204,6 @@
 .perfTitle {
   font-size: 14px;
   color: #22354d;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }

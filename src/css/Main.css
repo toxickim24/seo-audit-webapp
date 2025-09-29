@@ -1,8 +1,6 @@
 /* Main Section */
 .main-container {
-  max-width: 1140px;
   margin: 0 auto;
-  padding: 80px 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,6 +8,33 @@
   min-height: calc(100vh - 120px);
   text-align: center;
   gap: 30px;
+}
+
+/* === Main Layout with Sidebar === */
+.main-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 80px 0px;
+}
+
+/* Sidebar */
+.sidebar {
+  flex: 0 0 250px; /* fixed width */
+  position: sticky;
+  top: 100px; /* stays visible when scrolling */
+  /*height: fit-content;*/
+}
+
+/* Content Area (SEO Audit main flow) */
+.content-area {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Animation Lottie */
@@ -303,7 +328,6 @@
 
 .seo-technical-wrapper{
   width: 100%;
-  max-width: 1440px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -343,7 +367,7 @@
 }
 .seo-technical-box a{
   text-decoration: none;
-  font-size: 18px;
+  /*font-size: 18px;*/
   font-weight: 400;
   color: black;
   text-align: start;
@@ -607,6 +631,16 @@
 
   .main-container {
     padding: 60px 20px;
+  }
+
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
   }
 
   .search-box form {

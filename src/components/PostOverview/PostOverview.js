@@ -16,6 +16,7 @@ function PostOverview({
   setPhone,
   handleLeadSubmit,
   error,
+  setJourneyStep, // ✅ NEW: accept journey step updater
 }) {
   // ✅ Compute overall score
   const overallScore = useMemo(() => {
@@ -36,7 +37,10 @@ function PostOverview({
     if (onScoreReady && overallScore !== null) {
       onScoreReady(overallScore);
     }
-  }, [overallScore, onScoreReady]);
+    if (setJourneyStep) {
+      setJourneyStep("form"); // ✅ Highlight Submit Form step
+    }
+  }, [overallScore, onScoreReady, setJourneyStep]);
 
   return (
     <div className={styles.container}>
@@ -50,34 +54,34 @@ function PostOverview({
         <div className={styles.left}>
           <h2 className={styles.sectionTitle}>Overall SEO Health</h2>
           {overallScore !== null && (
-          <div className={styles.gaugeBox}>
-            <GaugeChart
-              id="post-overall-seo-gauge"
-              nrOfLevels={20}
-              percent={overallScore / 100}
-              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
-              arcWidth={0.3}
-              textColor="#22354d"
-              style={{ width: "clamp(200px, 60vw, 400px)" }}
-            />
+            <div className={styles.gaugeBox}>
+              <GaugeChart
+                id="post-overall-seo-gauge"
+                nrOfLevels={20}
+                percent={overallScore / 100}
+                colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+                arcWidth={0.3}
+                textColor="#22354d"
+                style={{ width: "clamp(200px, 60vw, 400px)" }}
+              />
 
-            {/* ✅ New Strength Label */}
-            <p
-              className={`${styles.gaugeStatus} ${
-                overallScore < 40
-                  ? styles.statusRed
+              {/* ✅ New Strength Label */}
+              <p
+                className={`${styles.gaugeStatus} ${
+                  overallScore < 40
+                    ? styles.statusRed
+                    : overallScore < 70
+                    ? styles.statusYellow
+                    : styles.statusGreen
+                }`}
+              >
+                {overallScore < 40
+                  ? "Needs Work"
                   : overallScore < 70
-                  ? styles.statusYellow
-                  : styles.statusGreen
-              }`}
-            >
-              {overallScore < 40
-                ? "Needs Work"
-                : overallScore < 70
-                ? "Moderate"
-                : "Strong"}
-            </p>
-          </div>
+                  ? "Moderate"
+                  : "Strong"}
+              </p>
+            </div>
           )}
 
           <div className={styles.cards}>
