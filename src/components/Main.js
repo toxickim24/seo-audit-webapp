@@ -310,6 +310,7 @@ function Main({ activeTab }) {
                       phone={phone}
                       setPhone={setPhone}
                       handleLeadSubmit={handleLeadSubmit}
+                      url={url}
                     />
                   ) : (
                     <div className="results-container">

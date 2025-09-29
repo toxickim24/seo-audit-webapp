@@ -16,8 +16,13 @@
   font-weight: 500;
   color: #555;
   text-align: center;
+  margin-bottom: 20px;
+}
+
+.intro {
   margin-bottom: 40px;
 }
+
 
 /* Two-column wrapper */
 .contentWrapper {

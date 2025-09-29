@@ -17,6 +17,7 @@ function PostOverview({
   handleLeadSubmit,
   error,
   setJourneyStep, // ✅ NEW: accept journey step updater
+  url,
 }) {
   // ✅ Compute overall score
   const overallScore = useMemo(() => {
@@ -42,17 +43,32 @@ function PostOverview({
     }
   }, [overallScore, onScoreReady, setJourneyStep]);
 
+  // ✅ Helper: score color
+  const getScoreColor = (score) => {
+    if (score < 40) return styles.statusRed;
+    if (score < 70) return styles.statusYellow;
+    return styles.statusGreen;
+  };
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>🎉 Great SEO Audit Complete!</h1>
-      <span className={styles.subtitle}>
-        Get your detailed PDF report delivered to your inbox
-      </span>
+      {/* ✅ New headline */}
+      <h1 className={styles.title}>
+        Good news — the SEO checkup for <span className={styles.url}>{url}</span> is done! 🎉
+      </h1>
+      {overallScore !== null && (
+        <span className={`${styles.subtitle} ${getScoreColor(overallScore)}`}>
+          Your site scored <b>{overallScore}</b>/100.
+        </span>
+      )}
+      <p className={styles.intro}>
+        Want to see the full breakdown with fixes and opportunities? Just fill
+        in the form and we’ll email you your complete SEO report.
+      </p>
 
       <div className={styles.contentWrapper}>
         {/* Left: Gauge + scores */}
         <div className={styles.left}>
-          <h2 className={styles.sectionTitle}>Overall SEO Health</h2>
           {overallScore !== null && (
             <div className={styles.gaugeBox}>
               <GaugeChart
@@ -65,15 +81,9 @@ function PostOverview({
                 style={{ width: "clamp(200px, 60vw, 400px)" }}
               />
 
-              {/* ✅ New Strength Label */}
+              {/* ✅ Strength Label */}
               <p
-                className={`${styles.gaugeStatus} ${
-                  overallScore < 40
-                    ? styles.statusRed
-                    : overallScore < 70
-                    ? styles.statusYellow
-                    : styles.statusGreen
-                }`}
+                className={`${styles.gaugeStatus} ${getScoreColor(overallScore)}`}
               >
                 {overallScore < 40
                   ? "Needs Work"
@@ -106,9 +116,10 @@ function PostOverview({
 
         {/* Right: Form */}
         <div className={styles.right}>
-          <h2>Get Your Free SEO Report</h2>
+          <h2>Get Your Complete SEO Report</h2>
           <span className={styles.formSubtitle}>
-            Enter your details to receive the comprehensive PDF report
+            Enter your details below and we’ll send the full PDF with fixes and
+            opportunities straight to your inbox.
           </span>
           <form onSubmit={handleLeadSubmit} className={styles.form}>
             <label>Full Name *</label>
@@ -145,7 +156,7 @@ function PostOverview({
               onChange={(e) => setPhone(e.target.value)}
             />
 
-            <button type="submit">Get My SEO Report</button>
+            <button type="submit">📩 Send Me My Report</button>
             {error && <p className={styles.error}>{error}</p>}
 
             <p className={styles.privacyNote}>
