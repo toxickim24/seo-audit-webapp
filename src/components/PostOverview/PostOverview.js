@@ -1,5 +1,6 @@
-import { useMemo, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import GaugeChart from "react-gauge-chart";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import styles from "./PostOverview.module.css";
 
 function PostOverview({
@@ -16,32 +17,31 @@ function PostOverview({
   setPhone,
   handleLeadSubmit,
   error,
-  setJourneyStep, // ✅ NEW: accept journey step updater
+  setJourneyStep,
   url,
 }) {
-  // ✅ Compute overall score
-  const overallScore = useMemo(() => {
-    if (pageSpeed === null) return null;
-    const scores = [
-      seoData?.onpage?.overview?.score ?? 0,
-      seoData?.contentSeo?.overview?.score ?? 0,
-      seoData?.technicalSeo?.overview?.score ?? 0,
-      pageSpeed,
-    ];
-    const validScores = scores.filter((s) => s > 0);
-    return validScores.length
-      ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
-      : 0;
-  }, [seoData, pageSpeed]);
+  // ✅ Store final score so it doesn’t change on every keystroke
+  const [finalScore, setFinalScore] = useState(null);
 
   useEffect(() => {
-    if (onScoreReady && overallScore !== null) {
-      onScoreReady(overallScore);
+    if (pageSpeed !== null) {
+      const scores = [
+        Number(seoData?.onpage?.overview?.score) || 0,
+        Number(seoData?.contentSeo?.overview?.score) || 0,
+        Number(seoData?.technicalSeo?.overview?.score) || 0,
+        Number(pageSpeed) || 0,
+      ];
+      const validScores = scores.filter((s) => s > 0);
+      const newScore = validScores.length
+        ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
+        : 0;
+
+      setFinalScore(newScore);
+
+      if (onScoreReady) onScoreReady(newScore);
+      if (setJourneyStep) setJourneyStep("form"); // ✅ Highlight Submit Form step
     }
-    if (setJourneyStep) {
-      setJourneyStep("form"); // ✅ Highlight Submit Form step
-    }
-  }, [overallScore, onScoreReady, setJourneyStep]);
+  }, [seoData, pageSpeed, onScoreReady, setJourneyStep]);
 
   // ✅ Helper: score color
   const getScoreColor = (score) => {
@@ -52,42 +52,41 @@ function PostOverview({
 
   return (
     <div className={styles.container}>
-      {/* ✅ New headline */}
       <h1 className={styles.title}>
-        Good news — the SEO checkup for <span className={styles.url}>{url}</span> is done! 🎉
+        Good news — the SEO checkup for{" "}
+        <span className={styles.url}>{url}</span> is done! 🎉
       </h1>
-      {overallScore !== null && (
-        <span className={`${styles.subtitle} ${getScoreColor(overallScore)}`}>
-          Your site scored <b>{overallScore}</b>/100.
+      {finalScore !== null && (
+        <span className={`${styles.subtitle} ${getScoreColor(finalScore)}`}>
+          Your site scored <b>{finalScore}</b>/100
         </span>
       )}
       <p className={styles.intro}>
         Want to see the full breakdown with fixes and opportunities? Just fill
-        in the form and we’ll email you your complete SEO report.
+        in the form below and we’ll email you your complete SEO report.
       </p>
 
       <div className={styles.contentWrapper}>
         {/* Left: Gauge + scores */}
         <div className={styles.left}>
-          {overallScore !== null && (
+          {finalScore !== null && (
             <div className={styles.gaugeBox}>
               <GaugeChart
                 id="post-overall-seo-gauge"
                 nrOfLevels={20}
-                percent={overallScore / 100}
+                percent={finalScore / 100}
+                animate={false} // ✅ stops moving on form input
                 colors={["#FF5F6D", "#FFC371", "#00C49F"]}
                 arcWidth={0.3}
                 textColor="#22354d"
                 style={{ width: "clamp(200px, 60vw, 400px)" }}
               />
-
-              {/* ✅ Strength Label */}
               <p
-                className={`${styles.gaugeStatus} ${getScoreColor(overallScore)}`}
+                className={`${styles.gaugeStatus} ${getScoreColor(finalScore)}`}
               >
-                {overallScore < 40
+                {finalScore < 40
                   ? "Needs Work"
-                  : overallScore < 70
+                  : finalScore < 70
                   ? "Moderate"
                   : "Strong"}
               </p>
@@ -97,19 +96,64 @@ function PostOverview({
           <div className={styles.cards}>
             <div className={styles.card}>
               <h3>On-Page SEO</h3>
-              <p>{seoData?.onpage?.overview?.score ?? 0}%</p>
+              <div className={styles.progressWrapper}>
+                <CircularProgressbar
+                  value={Number(seoData?.onpage?.overview?.score) || 0}
+                  text={`${Number(seoData?.onpage?.overview?.score) || 0}%`}
+                  styles={buildStyles({
+                    pathColor: "#fb6a45",
+                    textColor: "#22354d",
+                    trailColor: "#eee",
+                  })}
+                />
+              </div>
             </div>
+
             <div className={styles.card}>
               <h3>Content SEO</h3>
-              <p>{seoData?.contentSeo?.overview?.score ?? 0}%</p>
+              <div className={styles.progressWrapper}>
+                <CircularProgressbar
+                  value={Number(seoData?.contentSeo?.overview?.score) || 0}
+                  text={`${Number(seoData?.contentSeo?.overview?.score) || 0}%`}
+                  styles={buildStyles({
+                    pathColor: "#fb6a45",
+                    textColor: "#22354d",
+                    trailColor: "#eee",
+                  })}
+                />
+              </div>
             </div>
+
             <div className={styles.card}>
               <h3>Technical SEO</h3>
-              <p>{seoData?.technicalSeo?.overview?.score ?? 0}%</p>
+              <div className={styles.progressWrapper}>
+                <CircularProgressbar
+                  value={Number(seoData?.technicalSeo?.overview?.score) || 0}
+                  text={`${
+                    Number(seoData?.technicalSeo?.overview?.score) || 0
+                  }%`}
+                  styles={buildStyles({
+                    pathColor: "#fb6a45",
+                    textColor: "#22354d",
+                    trailColor: "#eee",
+                  })}
+                />
+              </div>
             </div>
+
             <div className={styles.card}>
               <h3>Performance SEO</h3>
-              <p>{pageSpeed ?? 0}%</p>
+              <div className={styles.progressWrapper}>
+                <CircularProgressbar
+                  value={Number(pageSpeed) || 0}
+                  text={`${Number(pageSpeed) || 0}%`}
+                  styles={buildStyles({
+                    pathColor: "#fb6a45",
+                    textColor: "#22354d",
+                    trailColor: "#eee",
+                  })}
+                />
+              </div>
             </div>
           </div>
         </div>

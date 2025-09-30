@@ -15,6 +15,7 @@ import SeoPricing from "./SeoPricing";
 import SeoTools from "./SeoTools";
 import LeadsManagement from "./LeadsManagement";
 import SeoJourney from "../components/SeoJourney"; // ✅ sidebar journey
+import GetFullReport from "../components/GetFullReport";
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -159,7 +160,7 @@ function Main({ activeTab }) {
 
       setLeadCaptured(true);
       setError("");
-      setJourneyStep("results"); // ✅ move to results after form submit
+      setJourneyStep("get-report"); // ✅ go to Step 4
     } catch (err) {
       console.error(err);
       setError("Failed to save lead.");
@@ -190,7 +191,9 @@ function Main({ activeTab }) {
       setEmailStatusType("error");
       return;
     }
-    setJourneyStep("report"); // 🔶 highlight report while sending
+
+    // ✅ Stay in Step 4 during sending
+    setJourneyStep("get-report");
     try {
       setIsEmailSending(true);
       const pdfBlob = generateSeoPDF(
@@ -213,9 +216,10 @@ function Main({ activeTab }) {
         body: JSON.stringify({ email, pdfBlob: base64Data }),
       });
       if (!res.ok) throw new Error("Email failed");
+
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
-      setJourneyStep("done"); // ✅ mark as completed
+      // ⚠️ Do NOT auto-jump to step 5 — user must click "View Results"
     } catch (err) {
       console.error(err);
       setEmailStatus("Failed to send email.");
@@ -235,7 +239,7 @@ function Main({ activeTab }) {
       activeTab !== "seo-tools" &&
       activeTab !== "leads-management" ? (
         <>
-          <aside className="sidebar">
+          <aside className="top-journey">
             <SeoJourney step={journeyStep} />
           </aside>
 
@@ -275,7 +279,6 @@ function Main({ activeTab }) {
               {isLoading && (
                 <div className="loader-container">
                   <div className="book-wrapper">
-                    {/* SVG loader intact */}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
                       <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
                       <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
@@ -312,82 +315,35 @@ function Main({ activeTab }) {
                       handleLeadSubmit={handleLeadSubmit}
                       url={url}
                     />
-                  ) : (
+                  ) : journeyStep === "get-report" ? (
+                    <GetFullReport
+                      email={email}
+                      name={name}
+                      handleEmailPDF={handleEmailPDF}
+                      isEmailSending={isEmailSending}
+                      emailStatus={emailStatus}
+                      emailStatusType={emailStatusType}
+                      onScanAnother={() => {
+                        setLeadCaptured(false);
+                        setSeoData(null);
+                        setUrl("");
+                        setJourneyStep("enter"); // go back to start
+                      }}
+                      onViewResults={() => setJourneyStep("done")} // go to final step
+                    />
+                  ) : journeyStep === "done" ? (
                     <div className="results-container">
-                      <div className="body-tabs">
-                        {[
-                          "overview",
-                          "seo-onpage",
-                          "seo-technical",
-                          "seo-content",
-                          "seo-performance",
-                        ].map((id) => (
-                          <button
-                            key={id}
-                            className={bodyTab === id ? "active" : ""}
-                            onClick={() => setBodyTab(id)}
-                          >
-                            {id === "overview"
-                              ? "Overview"
-                              : id.replace("seo-", "SEO ").replace("-", " ")}
-                          </button>
-                        ))}
-                      </div>
-
                       <div className="body-tab-content">
-                        {bodyTab === "overview" && (
-                          <Overview
-                            seoData={seoData}
-                            pageSpeed={pageSpeed}
-                            desktopRecommendations={desktopRecommendations}
-                            mobileRecommendations={mobileRecommendations}
-                            onScoreReady={setOverallScore}
-                          />
-                        )}
-                        {bodyTab === "seo-onpage" && seoData.onpage && (
-                          <SeoOnPage
-                            onpage={seoData.onpage.onpage}
-                            passFailStyle={passFailStyle}
-                          />
-                        )}
-                        {bodyTab === "seo-technical" && seoData.technicalSeo && (
-                          <SeoTechnicalDisplay
-                            technicalSeo={seoData.technicalSeo.technicalSeo}
-                            passFailStyle={passFailStyle}
-                          />
-                        )}
-                        {bodyTab === "seo-content" && seoData.contentSeo && (
-                          <SeoContentDisplay
-                            contentSeo={seoData.contentSeo.contentSeo}
-                            passFailStyle={passFailStyle}
-                          />
-                        )}
-                        {bodyTab === "seo-performance" && (
-                          <SeoPerformance
-                            desktopData={desktopPerf}
-                            mobileData={mobilePerf}
-                          />
-                        )}
-                      </div>
-
-                      <div className="report-actions">
-                        <button onClick={handleDownloadPDF}>
-                          📄 Download PDF Report
-                        </button>
-                        <button
-                          onClick={handleEmailPDF}
-                          disabled={isEmailSending}
-                        >
-                          {isEmailSending ? "Sending..." : "📧 Email PDF Report"}
-                        </button>
-                        {emailStatus && (
-                          <p className={`email-status ${emailStatusType}`}>
-                            {emailStatus}
-                          </p>
-                        )}
+                        <Overview
+                          seoData={seoData}
+                          pageSpeed={pageSpeed}
+                          desktopRecommendations={desktopRecommendations}
+                          mobileRecommendations={mobileRecommendations}
+                          onScoreReady={setOverallScore}
+                        />
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
             </section>

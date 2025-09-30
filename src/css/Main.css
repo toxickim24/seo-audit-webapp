@@ -13,6 +13,7 @@
 /* === Main Layout with Sidebar === */
 .main-layout {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 24px;
@@ -27,6 +28,13 @@
   position: sticky;
   top: 100px; /* stays visible when scrolling */
   /*height: fit-content;*/
+}
+
+.top-journey {
+  width: 100%;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
 }
 
 /* Content Area (SEO Audit main flow) */
@@ -111,63 +119,6 @@
   flex-direction: column;
   gap: 20px;
 }
-
-/*
-.seo-suggestions,
-.seo-score-box,
-.seo-recommendations {
-  width: 100%;
-  min-width: 100%;
-  border: 1px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  border-radius: 10px;
-  padding: 50px;
-  gap: 20px;
-}
-
-.seo-suggestions ul,
-.seo-recommendations ul {
-  list-style-type: none;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  justify-content: start;
-  gap: 20px;
-  width: 100%;
-}
-
-.seo-suggestions li,
-.seo-recommendations li {
-  padding: 10px 20px;
-  border-left: 5px solid maroon;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  width: 100%;
-  background: white;
-  text-align: start;
-  border-radius: 5px;
-}
-
-.progress-container {
-  width: 100%;
-  height: 20px;
-  background-color: #eee;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 5px;
-}
-
-.progress-fill {
-  height: 100%;
-  background-color: #fb6a45;
-  border-radius: 10px 0 0 10px;
-  transition: width 0.2s linear;
-}*/
 
 /* On Page */
 .onpage-box{
@@ -512,8 +463,6 @@
   font-weight: 700;
   text-transform: capitalize;
 }
-
-/*Body Tabs*/
 
 /* Body Tabs */
 .body-tabs {

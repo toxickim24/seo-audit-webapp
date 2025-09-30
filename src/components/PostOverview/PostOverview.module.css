@@ -1,5 +1,10 @@
+/* ==========================
+   Main Container & Sections
+========================== */
 .container {
   max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .title {
@@ -12,7 +17,7 @@
 
 .subtitle {
   display: block;
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 500;
   color: #555;
   text-align: center;
@@ -22,7 +27,6 @@
 .intro {
   margin-bottom: 40px;
 }
-
 
 /* Two-column wrapper */
 .contentWrapper {
@@ -50,7 +54,7 @@
   color: #111827;
 }
 
-/* ✅ Gauge container (centers the gauge) */
+/* Gauge container */
 .gaugeBox {
   display: flex;
   flex-direction: column;
@@ -66,32 +70,17 @@
   color: #374151;
 }
 
-.gaugeScore {
-  margin-top: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #374151;
-}
-
 .gaugeStatus {
   margin-top: 4px;
   font-size: 0.95rem;
   font-weight: 600;
 }
 
-.statusRed {
-  color: #ef4444;
-}
+.statusRed { color: #ef4444; }
+.statusYellow { color: #f59e0b; }
+.statusGreen { color: #22c55e; }
 
-.statusYellow {
-  color: #f59e0b;
-}
-
-.statusGreen {
-  color: #22c55e;
-}
-
-/* Cards */
+/* Cards grid */
 .cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -106,20 +95,44 @@
   padding: 16px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .card h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0;
   color: #374151;
 }
 
 .card p {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin: 0;
   color: #111827;
+}
+
+/* Progress circle wrapper */
+.progressWrapper {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto;
+}
+
+.progressWrapper .CircularProgressbar {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.progressWrapper .CircularProgressbar-text {
+  font-size: 1rem !important;
+  font-weight: 700;
+  fill: #22354d;
 }
 
 /* Right column */
@@ -159,17 +172,8 @@ label {
   align-items: flex-start;
 }
 
-.required {
-  color: #e63946;
-  font-weight: 600;
-}
-
-.optional {
-  color: #888;
-  font-weight: 400;
-  font-size: 0.85rem;
-  margin-left: 4px;
-}
+.required { color: #e63946; font-weight: 600; }
+.optional { color: #888; font-weight: 400; font-size: 0.85rem; margin-left: 4px; }
 
 .form input {
   padding: 12px;
@@ -188,7 +192,7 @@ label {
 .form button {
   margin-top: 10px;
   padding: 14px;
-  background: #fb6a45; /* brand orange */
+  background: #fb6a45;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -216,15 +220,34 @@ label {
   line-height: 1.4;
 }
 
-/* Responsive: stack */
-@media (max-width: 767px) {
-  .container {
-    padding: 0;
-  }
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 1024px) {
   .contentWrapper {
     flex-direction: column;
   }
-  .gaugeBox {
-    margin-bottom: 30px;
+}
+
+@media (max-width: 767px) {
+  .progressWrapper {
+    width: 70px;
+    height: 70px;
+  }
+
+  .progressWrapper .CircularProgressbar-text {
+    font-size: 0.8rem !important;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .card h3 {
+    font-size: 0.85rem;
+  }
+
+  .card p {
+    font-size: 1rem;
   }
 }
