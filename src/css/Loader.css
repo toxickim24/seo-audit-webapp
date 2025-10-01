@@ -33,6 +33,18 @@
     animation: paging 0.15s linear infinite;
     transform-origin: left;
 }
+
+.book-page {
+  animation: flip 1.2s infinite ease-in-out;
+  transform-origin: left center;
+}
+
+@keyframes flip {
+  0%   { transform: rotateY(0deg); }
+  50%  { transform: rotateY(-160deg); }
+  100% { transform: rotateY(0deg); }
+}
+
 @keyframes paging {
     0% {
         transform: rotateY(0deg) skewY(0deg);

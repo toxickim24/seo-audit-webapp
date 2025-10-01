@@ -1,6 +1,6 @@
 import "../css/Main.css";
 import "../css/Loader.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
@@ -14,8 +14,34 @@ import { getOverallScore } from "../utils/calcOverallScore";
 import SeoPricing from "./SeoPricing";
 import SeoTools from "./SeoTools";
 import LeadsManagement from "./LeadsManagement";
-import SeoJourney from "../components/SeoJourney"; // ✅ sidebar journey
+import SeoJourney from "../components/SeoJourney";
 import GetFullReport from "../components/GetFullReport";
+
+function SuccessNotification({ email, clearStatus }) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 5000); // auto-hide after 5s
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="success-notification">
+      <span>✅ Report sent! Check your inbox ({email})</span>
+      <button
+        className="close-btn"
+        onClick={() => {
+          setVisible(false);
+          if (clearStatus) clearStatus();
+        }}
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
 
 function Main({ activeTab }) {
   const [url, setUrl] = useState("");
@@ -43,10 +69,7 @@ function Main({ activeTab }) {
   const [emailStatusType, setEmailStatusType] = useState("");
   const [isEmailSending, setIsEmailSending] = useState(false);
 
-  // Secondary tabs after submission
-  const [bodyTab, setBodyTab] = useState("overview");
-
-  // Journey state
+  // Journey
   const [journeyStep, setJourneyStep] = useState("enter");
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -54,9 +77,7 @@ function Main({ activeTab }) {
   const normalizeUrl = (rawUrl) => {
     if (!rawUrl) return "";
     let val = rawUrl.trim();
-    if (!/^https?:\/\//i.test(val)) {
-      val = "https://" + val;
-    }
+    if (!/^https?:\/\//i.test(val)) val = "https://" + val;
     return val;
   };
 
@@ -85,16 +106,16 @@ function Main({ activeTab }) {
     setSeoData(null);
     setPageSpeed(null);
     setOverallScore(null);
+    setEmailStatus("");
+    setEmailStatusType("");
 
-    setJourneyStep("scanning"); // ✅ move to Scanning
+    setJourneyStep("scanning"); // Step 2
 
     const normalized = normalizeUrl(url);
     setUrl(normalized);
 
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/analyze?url=${encodeURIComponent(normalized)}`
-      );
+      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(normalized)}`);
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
       setSeoData(data);
@@ -114,17 +135,10 @@ function Main({ activeTab }) {
 
       setOverallScore(getOverallScore(data));
 
-      const desktopOpps = (desktop?.opportunities || []).filter(
-        (opp) => opp.savingsMs > 0
-      );
-      const mobileOpps = (mobile?.opportunities || []).filter(
-        (opp) => opp.savingsMs > 0
-      );
+      setDesktopRecommendations((desktop?.opportunities || []).filter((opp) => opp.savingsMs > 0));
+      setMobileRecommendations((mobile?.opportunities || []).filter((opp) => opp.savingsMs > 0));
 
-      setDesktopRecommendations(desktopOpps);
-      setMobileRecommendations(mobileOpps);
-
-      setJourneyStep("form"); // ✅ after scan, show form step
+      setJourneyStep("form"); // Step 3
     } catch (err) {
       console.error(err);
       setError("Failed to fetch SEO data.");
@@ -140,15 +154,7 @@ function Main({ activeTab }) {
       return;
     }
 
-    const newLead = {
-      name,
-      email,
-      phone,
-      company,
-      website: url,
-      overallScore,
-      date: new Date().toISOString(),
-    };
+    const newLead = { name, email, phone, company, website: url, overallScore, date: new Date().toISOString() };
 
     try {
       const res = await fetch(`${API_BASE_URL}/leads`, {
@@ -160,28 +166,10 @@ function Main({ activeTab }) {
 
       setLeadCaptured(true);
       setError("");
-      setJourneyStep("get-report"); // ✅ go to Step 4
+      setJourneyStep("get-report"); // Step 4
     } catch (err) {
       console.error(err);
       setError("Failed to save lead.");
-    }
-  };
-
-  const handleDownloadPDF = () => {
-    if (!seoData) return;
-    setJourneyStep("report"); // 🔶 highlight report while working
-    try {
-      generateSeoPDF(
-        seoData,
-        url,
-        overallScore,
-        pageSpeed,
-        { desktopData: desktopPerf, mobileData: mobilePerf },
-        true
-      );
-      setJourneyStep("done"); // ✅ mark as completed
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -192,8 +180,7 @@ function Main({ activeTab }) {
       return;
     }
 
-    // ✅ Stay in Step 4 during sending
-    setJourneyStep("get-report");
+    setJourneyStep("results"); // Step 5
     try {
       setIsEmailSending(true);
       const pdfBlob = generateSeoPDF(
@@ -216,10 +203,8 @@ function Main({ activeTab }) {
         body: JSON.stringify({ email, pdfBlob: base64Data }),
       });
       if (!res.ok) throw new Error("Email failed");
-
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
-      // ⚠️ Do NOT auto-jump to step 5 — user must click "View Results"
     } catch (err) {
       console.error(err);
       setEmailStatus("Failed to send email.");
@@ -229,15 +214,9 @@ function Main({ activeTab }) {
     }
   };
 
-  const passFailStyle = (pass) => ({
-    backgroundColor: pass ? "lightgreen" : "#ff9999",
-  });
-
   return (
     <main className="main-layout">
-      {activeTab !== "seo-pricing" &&
-      activeTab !== "seo-tools" &&
-      activeTab !== "leads-management" ? (
+      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "leads-management" ? (
         <>
           <aside className="top-journey">
             <SeoJourney step={journeyStep} />
@@ -245,106 +224,147 @@ function Main({ activeTab }) {
 
           <div className="content-area">
             <section className="main-container">
-              {(!seoData || isLoading) && (
-                <div className="animation-seo">
-                  <DotLottieReact
-                    src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-                    loop
-                    autoplay
-                  />
-                </div>
-              )}
-
-              {!seoData && !isLoading && (
-                <div className="search-box">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleAnalyze();
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Enter your website URL"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                    />
-                    <button type="submit">Run Your SEO Audit Now</button>
-                    {error && <p className="error-message">{error}</p>}
-                  </form>
-                </div>
-              )}
-
-              {/* Loader DURING scan */}
-              {isLoading && (
-                <div className="loader-container">
-                  <div className="book-wrapper">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
-                      <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
-                      <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
-                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
-                      <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
-                    </svg>
-                  </div>
-                  <p>Analyzing website, please wait...</p>
-                </div>
-              )}
-
-              {!isLoading && isSubmitted && seoData && (
+              {/* Step 1: Enter Website */}
+              {!seoData && !isLoading && journeyStep === "enter" && (
                 <>
-                  {!leadCaptured ? (
-                    <PostOverview
-                      seoData={seoData}
-                      pageSpeed={pageSpeed}
-                      onScoreReady={setOverallScore}
-                      name={name}
-                      setName={setName}
-                      email={email}
-                      setEmail={setEmail}
-                      company={company}
-                      setCompany={setCompany}
-                      phone={phone}
-                      setPhone={setPhone}
-                      handleLeadSubmit={handleLeadSubmit}
-                      url={url}
+                  <div className="animation-seo">
+                    <DotLottieReact
+                      src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                      loop
+                      autoplay
                     />
-                  ) : journeyStep === "get-report" ? (
-                    <GetFullReport
-                      email={email}
-                      name={name}
-                      handleEmailPDF={handleEmailPDF}
-                      isEmailSending={isEmailSending}
-                      emailStatus={emailStatus}
-                      emailStatusType={emailStatusType}
-                      onScanAnother={() => {
-                        setLeadCaptured(false);
-                        setSeoData(null);
-                        setUrl("");
-                        setJourneyStep("enter"); // go back to start
+                  </div>
+
+                  <div className="search-box">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAnalyze();
                       }}
-                      onViewResults={() => setJourneyStep("done")} // go to final step
-                    />
-                  ) : journeyStep === "done" ? (
-                    <div className="results-container">
-                      <div className="body-tab-content">
-                        <Overview
-                          seoData={seoData}
-                          pageSpeed={pageSpeed}
-                          desktopRecommendations={desktopRecommendations}
-                          mobileRecommendations={mobileRecommendations}
-                          onScoreReady={setOverallScore}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Enter your website URL"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                      />
+                      <button type="submit">Run Your SEO Audit Now</button>
+                      {error && <p className="error-message">{error}</p>}
+                    </form>
+                  </div>
                 </>
+              )}
+
+              {/* Step 2: Scanning */}
+              {isLoading && journeyStep === "scanning" && (
+                <>
+                  <div className="animation-seo">
+                    <DotLottieReact
+                      src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                      loop
+                      autoplay
+                    />
+                  </div>
+                  <div className="loader-container">
+                    <div className="book-wrapper">
+                      {/* Book Loader SVGs */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+                        <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
+                        <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
+                        <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
+                        <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+                      </svg>
+                    </div>
+                    <p>Analyzing website, please wait...</p>
+                  </div>
+                </>
+              )}
+
+              {/* Step 3: PostOverview */}
+              {!isLoading && isSubmitted && seoData && !leadCaptured && journeyStep === "form" && (
+                <PostOverview
+                  seoData={seoData}
+                  pageSpeed={pageSpeed}
+                  onScoreReady={setOverallScore}
+                  name={name}
+                  setName={setName}
+                  email={email}
+                  setEmail={setEmail}
+                  company={company}
+                  setCompany={setCompany}
+                  phone={phone}
+                  setPhone={setPhone}
+                  handleLeadSubmit={handleLeadSubmit}
+                  url={url}
+                />
+              )}
+
+              {/* Step 4: Confirm & Send Report */}
+              {leadCaptured && journeyStep === "get-report" && (
+                <GetFullReport
+                  email={email}
+                  name={name}
+                  handleEmailPDF={handleEmailPDF}
+                  isEmailSending={isEmailSending}
+                  emailStatus={emailStatus}
+                  emailStatusType={emailStatusType}
+                />
+              )}
+
+              {/* Step 5: Results */}
+              {journeyStep === "results" && (
+                <div className="results-container">
+                  {/* Success message always on top */}
+                  {emailStatusType === "success" && (
+                    <SuccessNotification
+                      email={email}
+                      clearStatus={() => setEmailStatusType("")}
+                    />
+                  )}
+                  {emailStatusType === "error" && (
+                    <p className="email-status error">{emailStatus}</p>
+                  )}
+
+                  {/* Email sending loader */}
+                  {isEmailSending ? (
+                    <div className="loader-container email-loader">
+                      <div className="loader"></div>
+                      <p>Sending email, please wait...</p>
+                    </div>
+                  ) : (
+                    <div className="body-tab-content">
+                      <Overview
+                        seoData={seoData}
+                        pageSpeed={pageSpeed}
+                        desktopRecommendations={desktopRecommendations}
+                        mobileRecommendations={mobileRecommendations}
+                        onScoreReady={setOverallScore}
+                      />
+                      <button
+                        className="secondary-btn"
+                        onClick={() => {
+                          setLeadCaptured(false);
+                          setSeoData(null);
+                          setUrl("");
+                          setJourneyStep("enter");
+
+                          // ✅ Reset email state so notification doesn’t reappear
+                          setEmailStatus("");
+                          setEmailStatusType("");
+                        }}
+                      >
+                        🔄 Scan Another URL
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </section>
           </div>

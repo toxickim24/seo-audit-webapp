@@ -46,9 +46,19 @@
 }
 
 /* Animation Lottie */
-.animation-seo{
+.animation-seo {
   width: 100%;
+  min-width: 400px;
   max-width: 400px;
+  margin: 0 auto 24px; /* center + spacing */
+}
+
+.animation-seo canvas,
+.animation-seo svg,
+.animation-seo div {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
 }
 
 /* Search Box */
@@ -513,15 +523,9 @@
   color: #fb6a45;
 }
 
-/* Report Actions */
-.report-actions {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 30px;
-}
-
-.report-actions button {
+/* Secondary button (Email) */
+.secondary-btn {
+  margin-top: 40px;
   padding: 12px 24px;
   border-radius: 6px;
   border: none;
@@ -529,41 +533,48 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-/* Primary button (Download) */
-.report-actions button:first-of-type {
   background: #22354d; /* navy */
   color: #fff;
 }
 
-.report-actions button:first-of-type:hover {
+.secondary-btn:hover {
   background: #1a273b;
 }
 
-/* Secondary button (Email) */
-.report-actions button:last-of-type {
-  background: #FF8E3A; /* orange */
-  color: #fff;
-}
-
-.report-actions button:last-of-type:hover {
-  background: #e95a39;
-}
-
 /* Status message */
-.email-status {
-  margin-top: 12px;
-  font-size: 0.9rem;
+.success-notification {
+  background: #e6f9f0;
+  border: 1px solid #28a745;
+  color: #155724;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 0 auto 20px;
   text-align: center;
+  width: 100%;
+  max-width: 550px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.email-status.success {
-  color: #2a8b3c;
+.success-notification .close-btn {
+  background: transparent;
+  border: none;
+  color: #155724;
+  font-size: 1.1rem;
+  cursor: pointer;
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  font-weight: bold;
 }
 
-.email-status.error {
-  color: #e63946;
+.success-notification .close-btn:hover {
+  color: #0b3d1f;
 }
 
 /* ===========================
@@ -579,7 +590,7 @@
 @media (max-width: 767px) {
 
   .main-container {
-    padding: 60px 20px;
+    padding: 0px 20px;
   }
 
   .main-layout {

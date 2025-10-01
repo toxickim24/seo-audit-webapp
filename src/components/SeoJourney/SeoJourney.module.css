@@ -6,9 +6,8 @@
   align-items: center;
   justify-content: center;
   gap: clamp(18px, 4vw, 32px);
-  margin: 32px auto 40px;
-  padding: 0 12px;
   flex-wrap: wrap;
+  widows: 100%;
 }
 
 /* ==========================
