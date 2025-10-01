@@ -5,6 +5,8 @@
   "proxy": "http://localhost:5000",
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.16.4",
+    "ajv": "^6.12.6",
+    "ajv-keywords": "^3.5.2",
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "dotenv": "^17.2.2",
