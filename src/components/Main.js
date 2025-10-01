@@ -391,14 +391,6 @@ function Main({ activeTab }) {
                     </div>
                   ) : (
                     <div className="body-tab-content">
-                      <Overview
-                        seoData={seoData}
-                        pageSpeed={pageSpeed}
-                        desktopRecommendations={desktopRecommendations}
-                        mobileRecommendations={mobileRecommendations}
-                        onScoreReady={setOverallScore}
-                      />
-
                       {emailStatusType === "success" && (
                         <SuccessNotification
                           email={email}
@@ -408,6 +400,14 @@ function Main({ activeTab }) {
                       {emailStatusType === "error" && (
                         <p className="email-status error">{emailStatus}</p>
                       )}
+
+                      <Overview
+                        seoData={seoData}
+                        pageSpeed={pageSpeed}
+                        desktopRecommendations={desktopRecommendations}
+                        mobileRecommendations={mobileRecommendations}
+                        onScoreReady={setOverallScore}
+                      />
 
                       <button
                         className="secondary-btn"
