@@ -29,3 +29,6 @@ stderr.log
 
 # temporary files
 tmp/
+
+# Ignore all OpenAI test files
+test-openai*.js

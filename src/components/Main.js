@@ -8,6 +8,7 @@ import SeoContentDisplay from "./SeoContent/SeoContentDisplay";
 import Overview from "../components/Overview/Overview";
 import PostOverview from "../components/PostOverview/PostOverview";
 import { generateSeoPDF } from "../utils/generateSeoPDF";
+import { generateAiSeoPDF } from "../utils/generateAiSeoPDF";
 import SeoPerformance from "./SeoPerformance";
 import { fetchSeoPerformance } from "../api/SeoPerformance";
 import { getOverallScore } from "../utils/calcOverallScore";
@@ -21,7 +22,7 @@ function SuccessNotification({ email, clearStatus }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 5000); // auto-hide after 5s
+    const timer = setTimeout(() => setVisible(false), 5000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -69,6 +70,11 @@ function Main({ activeTab }) {
   const [emailStatusType, setEmailStatusType] = useState("");
   const [isEmailSending, setIsEmailSending] = useState(false);
 
+  // AI Audit
+  const [aiAudit, setAiAudit] = useState(null);
+  const [aiAuditLoading, setAiAuditLoading] = useState(false);
+  const [aiAuditError, setAiAuditError] = useState("");
+
   // Journey
   const [journeyStep, setJourneyStep] = useState("enter");
 
@@ -109,7 +115,7 @@ function Main({ activeTab }) {
     setEmailStatus("");
     setEmailStatusType("");
 
-    setJourneyStep("scanning"); // Step 2
+    setJourneyStep("scanning");
 
     const normalized = normalizeUrl(url);
     setUrl(normalized);
@@ -138,7 +144,7 @@ function Main({ activeTab }) {
       setDesktopRecommendations((desktop?.opportunities || []).filter((opp) => opp.savingsMs > 0));
       setMobileRecommendations((mobile?.opportunities || []).filter((opp) => opp.savingsMs > 0));
 
-      setJourneyStep("form"); // Step 3
+      setJourneyStep("form");
     } catch (err) {
       console.error(err);
       setError("Failed to fetch SEO data.");
@@ -166,53 +172,109 @@ function Main({ activeTab }) {
 
       setLeadCaptured(true);
       setError("");
-      setJourneyStep("get-report"); // Step 4
+      setJourneyStep("get-report");
     } catch (err) {
       console.error(err);
       setError("Failed to save lead.");
     }
   };
 
-  const handleEmailPDF = async () => {
-    if (!seoData || !url || !email || !name) {
+  const handleAiEmailPDF = async () => {
+    if (!aiAudit || !url || !email || !name) {
       setEmailStatus("Missing details for email.");
       setEmailStatusType("error");
       return;
     }
 
-    setJourneyStep("results"); // Step 5
     try {
       setIsEmailSending(true);
-      const pdfBlob = generateSeoPDF(
-        seoData,
-        url,
-        overallScore,
-        pageSpeed,
-        { desktopData: desktopPerf, mobileData: mobilePerf },
-        false
-      );
+      setEmailStatus("");
+      setEmailStatusType("");
+
+      // ✅ Generate AI-enhanced PDF (only AI data, no scores/recos)
+      const pdfBlob = generateAiSeoPDF(url, aiAudit, false);
+
       const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsDataURL(pdfBlob);
       });
+
       const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, pdfBlob: base64Data }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data }),
       });
+
       if (!res.ok) throw new Error("Email failed");
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
     } catch (err) {
-      console.error(err);
+      console.error("AI Email failed:", err);
       setEmailStatus("Failed to send email.");
       setEmailStatusType("error");
     } finally {
       setIsEmailSending(false);
     }
   };
+
+  const handleAiAudit = async () => {
+    if (!url) return;
+
+    setAiAuditLoading(true);
+    setAiAuditError("");
+
+    try {
+      const raw = {
+        domain: url,
+        scannedAt: new Date().toISOString(),
+        overall: overallScore,
+        categories: {
+          onpage: seoData?.onpage,
+          content: seoData?.contentSeo,
+          technical: seoData?.technicalSeo,
+        },
+        performance: {
+          desktop: desktopRecommendations,
+          mobile: mobileRecommendations,
+        },
+      };
+
+      const res = await fetch(`${API_BASE_URL}/openai/seo-audit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(raw), // ✅ send full raw audit
+      });
+
+      if (!res.ok) throw new Error("AI audit failed");
+      const data = await res.json();
+      if (!data.success) throw new Error("No analysis returned");
+
+      setAiAudit(data.analysis);
+    } catch (err) {
+      console.error("AI Audit failed:", err);
+      setAiAuditError("Failed to generate AI Audit");
+    } finally {
+      setAiAuditLoading(false);
+    }
+  };
+
+  // Step 4 effect → run AI Audit once
+  useEffect(() => {
+    if (journeyStep === "get-report" && url && !aiAudit && !aiAuditLoading) {
+      console.log("🔄 Running AI Audit for", url);
+      handleAiAudit();
+    }
+  }, [journeyStep, url]); // ❗ only trigger on step/url change
+
+  // Step 5 effect → auto-send email once
+  useEffect(() => {
+    if (journeyStep === "results" && aiAudit && !isEmailSending) {
+      console.log("📧 Sending email report...");
+      handleAiEmailPDF();
+    }
+  }, [journeyStep, aiAudit]); // ❗ only trigger when step changes to results
 
   return (
     <main className="main-layout">
@@ -255,7 +317,7 @@ function Main({ activeTab }) {
                 </>
               )}
 
-              {/* Step 2: Scanning */}
+              {/* Step 2: Scanning (book loader preserved ✅) */}
               {isLoading && journeyStep === "scanning" && (
                 <>
                   <div className="animation-seo">
@@ -267,7 +329,7 @@ function Main({ activeTab }) {
                   </div>
                   <div className="loader-container">
                     <div className="book-wrapper">
-                      {/* Book Loader SVGs */}
+                      {/* your book loader remains unchanged */}
                       <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
                         <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
                         <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
@@ -311,28 +373,17 @@ function Main({ activeTab }) {
                 <GetFullReport
                   email={email}
                   name={name}
-                  handleEmailPDF={handleEmailPDF}
-                  isEmailSending={isEmailSending}
-                  emailStatus={emailStatus}
-                  emailStatusType={emailStatusType}
+                  aiAudit={aiAudit}
+                  aiAuditLoading={aiAuditLoading}
+                  aiAuditError={aiAuditError}
+                  handleAiAudit={handleAiAudit}
+                  setJourneyStep={setJourneyStep}
                 />
               )}
 
               {/* Step 5: Results */}
               {journeyStep === "results" && (
                 <div className="results-container">
-                  {/* Success message always on top */}
-                  {emailStatusType === "success" && (
-                    <SuccessNotification
-                      email={email}
-                      clearStatus={() => setEmailStatusType("")}
-                    />
-                  )}
-                  {emailStatusType === "error" && (
-                    <p className="email-status error">{emailStatus}</p>
-                  )}
-
-                  {/* Email sending loader */}
                   {isEmailSending ? (
                     <div className="loader-container email-loader">
                       <div className="loader"></div>
@@ -347,6 +398,17 @@ function Main({ activeTab }) {
                         mobileRecommendations={mobileRecommendations}
                         onScoreReady={setOverallScore}
                       />
+
+                      {emailStatusType === "success" && (
+                        <SuccessNotification
+                          email={email}
+                          clearStatus={() => setEmailStatusType("")}
+                        />
+                      )}
+                      {emailStatusType === "error" && (
+                        <p className="email-status error">{emailStatus}</p>
+                      )}
+
                       <button
                         className="secondary-btn"
                         onClick={() => {
@@ -354,10 +416,9 @@ function Main({ activeTab }) {
                           setSeoData(null);
                           setUrl("");
                           setJourneyStep("enter");
-
-                          // ✅ Reset email state so notification doesn’t reappear
                           setEmailStatus("");
                           setEmailStatusType("");
+                          setAiAudit(null);
                         }}
                       >
                         🔄 Scan Another URL

@@ -6,7 +6,7 @@ function SeoJourney({ step }) {
     { id: "enter", label: "Enter Website" },
     { id: "scanning", label: "Analyzing Website" },
     { id: "form", label: "Submit Form" },
-    { id: "get-report", label: "Get Full Report" }, // ✅ new step
+    { id: "get-report", label: "Get Full Report" },
     { id: "done", label: "Done" },
   ];
 
