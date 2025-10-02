@@ -1,7 +1,15 @@
 import React from "react";
 import styles from "./GetFullReport.module.css";
 
-function GetFullReport({ email, name, aiAuditLoading, aiAudit, setJourneyStep, aiAuditError, handleAiAudit }) {
+function GetFullReport({
+  email,
+  name,
+  aiAuditLoading,
+  aiAudit,
+  setJourneyStep,
+  aiAuditError,
+  handleAiAudit,
+}) {
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Confirm & Send Report</h2>
@@ -21,9 +29,15 @@ function GetFullReport({ email, name, aiAuditLoading, aiAudit, setJourneyStep, a
       <div className={styles.actions}>
         {/* Step 1: Loader while generating */}
         {aiAuditLoading && (
-          <button className={styles.primaryBtn} disabled>
-            ⏳ Generating Report...
-          </button>
+          <div className={styles.loaderBox}>
+            <div className={styles.pdfLoader}>
+              <div className={styles.line}></div>
+              <div className={styles.line}></div>
+              <div className={styles.line}></div>
+              <div className={styles.line}></div>
+            </div>
+            <p className={styles.loaderText}>Generating PDF Report...</p>
+          </div>
         )}
 
         {/* Step 2: Show Email button when audit is ready */}

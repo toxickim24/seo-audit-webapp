@@ -58,8 +58,9 @@ app.use((req, res, next) => {
   next();
 });
 
+
 /* ===========================
-   ✅ NEW: OpenAI AI Route (with JSON Schema)
+   ✅ OpenAI AI Route (with JSON Schema + Safe Parsing + Perf Fix)
    =========================== */
 app.post("/openai/seo-audit", async (req, res) => {
   const raw = req.body; // full SEOAuditResults JSON from frontend
@@ -68,11 +69,20 @@ app.post("/openai/seo-audit", async (req, res) => {
   }
 
   try {
-    // Gather perf hints (for grounding)
-    const perfHints = [
-      ...(raw.performance?.desktop || []).map((p) => p.description || p.title),
-      ...(raw.performance?.mobile || []).map((p) => p.description || p.title),
-    ].filter(Boolean);
+    // === Collect perf hints safely ===
+    const perfHints = [];
+
+    if (raw.performance?.desktop?.opportunities && Array.isArray(raw.performance.desktop.opportunities)) {
+      raw.performance.desktop.opportunities.forEach((p) => {
+        perfHints.push(p.title || p.description);
+      });
+    }
+
+    if (raw.performance?.mobile?.opportunities && Array.isArray(raw.performance.mobile.opportunities)) {
+      raw.performance.mobile.opportunities.forEach((p) => {
+        perfHints.push(p.title || p.description);
+      });
+    }
 
     const systemPrompt = `You are an expert Technical SEO lead. 
 Return actionable, conservative recommendations:
@@ -88,15 +98,26 @@ Return actionable, conservative recommendations:
       { role: "user", content: "Return the structured JSON for the analysis only." },
     ];
 
-    // ✅ Strict JSON schema (same as tested in test-openai.js)
+    // === Strict JSON schema ===
     const analysisSchema = {
       type: "object",
       additionalProperties: false,
       properties: {
+        headline: { type: "string" },
         overall_summary: { type: "string" },
-        quick_wins: {
-          type: "array",
-          items: { type: "string" }
+        bullets: { type: "array", items: { type: "string" }, minItems: 3 },
+        quick_wins: { type: "array", items: { type: "string" }, minItems: 3 },
+        scores: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            overall: { type: "number" },
+            onpage: { type: "number" },
+            technical: { type: "number" },
+            content: { type: "number" },
+            performance: { type: "number" }
+          },
+          required: ["overall", "onpage", "technical", "content", "performance"]
         },
         category_notes: {
           type: "object",
@@ -116,9 +137,10 @@ Return actionable, conservative recommendations:
             additionalProperties: false,
             properties: {
               issue: { type: "string" },
-              priority: { type: "string", enum: ["High", "Medium", "Low"] }
+              priority: { type: "string", enum: ["High", "Medium", "Low"] },
+              fix_steps: { type: "array", items: { type: "string" }, minItems: 2 }
             },
-            required: ["issue", "priority"]
+            required: ["issue", "priority", "fix_steps"]
           }
         },
         roadmap_weeks: {
@@ -134,15 +156,18 @@ Return actionable, conservative recommendations:
         }
       },
       required: [
+        "headline",
         "overall_summary",
+        "bullets",
         "quick_wins",
+        "scores",
         "category_notes",
         "prioritized_issues",
         "roadmap_weeks"
       ]
     };
 
-    // Call OpenAI
+    // === Call OpenAI ===
     const response = await client.responses.create({
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       input: [
@@ -152,21 +177,33 @@ Return actionable, conservative recommendations:
       text: {
         format: {
           type: "json_schema",
-          name: "SeoAuditSchema",   // required
-          schema: analysisSchema    // required
+          name: "SeoAuditSchema",
+          schema: analysisSchema
         }
       }
     });
 
+    // === Safe JSON Parsing ===
+    let cleaned = response.output_text || "{}";
+
+    // Trim if AI output has duplicate JSON
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (lastBrace !== -1) {
+      cleaned = cleaned.substring(0, lastBrace + 1);
+    }
+
     let parsed;
     try {
-      parsed = JSON.parse(response.output_text || "{}");
+      parsed = JSON.parse(cleaned);
     } catch (e) {
+      console.error("❌ JSON parse failed. Cleaned output:", cleaned);
       return res.status(500).json({
-        error: "Failed to parse AI output",
-        raw: response.output_text
+        error: "Failed to parse AI output (after cleaning)",
+        raw: cleaned
       });
     }
+
+    // console.log("✅ AI Analysis Result:", parsed);
 
     res.json({ success: true, analysis: parsed });
   } catch (err) {
@@ -214,11 +251,12 @@ app.get("/analyze", async (req, res) => {
 
 // Email Route
 app.post("/send-seo-email", async (req, res) => {
-  const { email, pdfBlob } = req.body;
+  const { email, pdfBlob, safeUrl } = req.body;
   if (!email || !pdfBlob) return res.status(400).json({ error: "Email and PDF required" });
 
   try {
     const pdfBuffer = Buffer.from(pdfBlob.split(",")[1], "base64");
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
@@ -228,12 +266,16 @@ app.post("/send-seo-email", async (req, res) => {
       debug: true,
     });
 
+    const filename = safeUrl
+      ? `SEO_Mojo_Report_${safeUrl}.pdf`
+      : "SEO_Mojo_Report.pdf";
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Your SEO Report",
       text: "Attached is your SEO report PDF.",
-      attachments: [{ filename: "SEO_Report.pdf", content: pdfBuffer }],
+      attachments: [{ filename, content: pdfBuffer }],
     });
 
     res.status(200).json({ message: "Email sent successfully!" });

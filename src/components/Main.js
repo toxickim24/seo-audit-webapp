@@ -100,6 +100,27 @@ function Main({ activeTab }) {
     }
   };
 
+  // Utility: shrink performance data before sending to AI
+  const simplifyPerf = (perf) => {
+    if (!perf) return null;
+
+    return {
+      strategy: perf.strategy,   // "desktop" or "mobile"
+      score: perf.score,
+      metrics: {
+        fcp: perf.fcp,
+        lcp: perf.lcp,
+        tti: perf.tti,
+      },
+      opportunities: (perf.opportunities || [])
+        .filter((opp) => opp.savingsMs > 0)
+        .map((opp) => ({
+          title: opp.title,
+          savingsMs: opp.savingsMs,
+        })),
+    };
+  };
+
   const handleAnalyze = async () => {
     const err = validateUrl(url);
     if (err) {
@@ -121,6 +142,7 @@ function Main({ activeTab }) {
     setUrl(normalized);
 
     try {
+
       const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(normalized)}`);
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
@@ -191,9 +213,10 @@ function Main({ activeTab }) {
       setEmailStatus("");
       setEmailStatusType("");
 
-      // ✅ Generate AI-enhanced PDF (only AI data, no scores/recos)
-      const pdfBlob = generateAiSeoPDF(url, aiAudit, false);
+      // Was: const pdfBlob = generateAiSeoPDF(url, aiAudit, false);
+      const pdfBlob = await generateAiSeoPDF(url, aiAudit, false);
 
+      // Convert Blob → Base64
       const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
@@ -201,13 +224,20 @@ function Main({ activeTab }) {
         reader.readAsDataURL(pdfBlob);
       });
 
+      // ✅ Create safe slug from domain for filename
+      const safeUrl = String(url || "")
+        .replace(/^https?:\/\//, "")
+        .replace(/\W/g, "_");
+
+      // Send to backend with safeUrl
       const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
       });
 
       if (!res.ok) throw new Error("Email failed");
+
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
     } catch (err) {
@@ -222,10 +252,23 @@ function Main({ activeTab }) {
   const handleAiAudit = async () => {
     if (!url) return;
 
+    if (!pageSpeed || !desktopPerf || !mobilePerf) {
+      console.warn("⚠️ AI Audit skipped: performance data not ready", {
+        pageSpeed,
+        desktopPerf,
+        mobilePerf,
+      });
+      return;
+    }
+
     setAiAuditLoading(true);
     setAiAuditError("");
 
     try {
+      // 🔎 Shrink payload for AI
+      const simplifiedDesktop = simplifyPerf(desktopPerf);
+      const simplifiedMobile = simplifyPerf(mobilePerf);
+
       const raw = {
         domain: url,
         scannedAt: new Date().toISOString(),
@@ -236,25 +279,31 @@ function Main({ activeTab }) {
           technical: seoData?.technicalSeo,
         },
         performance: {
-          desktop: desktopRecommendations,
-          mobile: mobileRecommendations,
+          score: pageSpeed,
+          desktop: simplifiedDesktop,
+          mobile: simplifiedMobile,
         },
       };
 
       const res = await fetch(`${API_BASE_URL}/openai/seo-audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(raw), // ✅ send full raw audit
+        body: JSON.stringify(raw),
       });
 
-      if (!res.ok) throw new Error("AI audit failed");
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`AI audit failed: ${res.status} ${errText}`);
+      }
+
       const data = await res.json();
+
       if (!data.success) throw new Error("No analysis returned");
 
       setAiAudit(data.analysis);
     } catch (err) {
-      console.error("AI Audit failed:", err);
-      setAiAuditError("Failed to generate AI Audit");
+      console.error("❌ AI Audit failed:", err);
+      setAiAuditError("Failed to generate Audit Report");
     } finally {
       setAiAuditLoading(false);
     }
@@ -263,7 +312,6 @@ function Main({ activeTab }) {
   // Step 4 effect → run AI Audit once
   useEffect(() => {
     if (journeyStep === "get-report" && url && !aiAudit && !aiAuditLoading) {
-      console.log("🔄 Running AI Audit for", url);
       handleAiAudit();
     }
   }, [journeyStep, url]); // ❗ only trigger on step/url change
@@ -271,7 +319,6 @@ function Main({ activeTab }) {
   // Step 5 effect → auto-send email once
   useEffect(() => {
     if (journeyStep === "results" && aiAudit && !isEmailSending) {
-      console.log("📧 Sending email report...");
       handleAiEmailPDF();
     }
   }, [journeyStep, aiAudit]); // ❗ only trigger when step changes to results
