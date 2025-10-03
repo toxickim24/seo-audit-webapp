@@ -425,6 +425,7 @@ function Main({ activeTab }) {
                   aiAuditError={aiAuditError}
                   handleAiAudit={handleAiAudit}
                   setJourneyStep={setJourneyStep}
+                  url={url}
                 />
               )}
 

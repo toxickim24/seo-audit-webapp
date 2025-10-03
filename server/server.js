@@ -63,26 +63,30 @@ app.use((req, res, next) => {
    ✅ OpenAI AI Route (with JSON Schema + Safe Parsing + Perf Fix)
    =========================== */
 app.post("/openai/seo-audit", async (req, res) => {
-  const raw = req.body; // full SEOAuditResults JSON from frontend
+  const raw = req.body;
   if (!raw || !raw.domain) {
     return res.status(400).json({ error: "Missing SEO audit input (expected at least a domain)" });
   }
 
   try {
-    // === Collect perf hints safely ===
+    // === Collect perf hints safely, including savingsMs ===
     const perfHints = [];
 
-    if (raw.performance?.desktop?.opportunities && Array.isArray(raw.performance.desktop.opportunities)) {
-      raw.performance.desktop.opportunities.forEach((p) => {
-        perfHints.push(p.title || p.description);
-      });
-    }
+    const processOpportunities = (ops) => {
+      if (Array.isArray(ops)) {
+        ops.forEach((p) => {
+          if (p.savingsMs && typeof p.savingsMs === "number") {
+            const sec = (p.savingsMs / 1000).toFixed(1);
+            perfHints.push(`${p.title} (~${sec}s savings)`);
+          } else {
+            perfHints.push(p.title || p.description);
+          }
+        });
+      }
+    };
 
-    if (raw.performance?.mobile?.opportunities && Array.isArray(raw.performance.mobile.opportunities)) {
-      raw.performance.mobile.opportunities.forEach((p) => {
-        perfHints.push(p.title || p.description);
-      });
-    }
+    processOpportunities(raw.performance?.desktop?.opportunities);
+    processOpportunities(raw.performance?.mobile?.opportunities);
 
     const systemPrompt = `You are an expert Technical SEO lead. 
 Return actionable, conservative recommendations:
@@ -98,7 +102,7 @@ Return actionable, conservative recommendations:
       { role: "user", content: "Return the structured JSON for the analysis only." },
     ];
 
-    // === Strict JSON schema ===
+    // === Schema stays the same (with total_potential_speed_gain_sec + disclaimers) ===
     const analysisSchema = {
       type: "object",
       additionalProperties: false,
@@ -125,9 +129,10 @@ Return actionable, conservative recommendations:
           properties: {
             onpage: { type: "string" },
             technical: { type: "string" },
-            content: { type: "string" }
+            content: { type: "string" },
+            performance: { type: "string" }
           },
-          required: ["onpage", "technical", "content"]
+          required: ["onpage", "technical", "content", "performance"]
         },
         prioritized_issues: {
           type: "array",
@@ -153,7 +158,9 @@ Return actionable, conservative recommendations:
             week_4: { type: "array", items: { type: "string" } }
           },
           required: ["week_1", "week_2", "week_3", "week_4"]
-        }
+        },
+        total_potential_speed_gain_sec: { type: ["number", "null"] },
+        disclaimers: { type: "array", items: { type: "string" } }
       },
       required: [
         "headline",
@@ -163,11 +170,12 @@ Return actionable, conservative recommendations:
         "scores",
         "category_notes",
         "prioritized_issues",
-        "roadmap_weeks"
+        "roadmap_weeks",
+        "total_potential_speed_gain_sec",
+        "disclaimers"
       ]
     };
 
-    // === Call OpenAI ===
     const response = await client.responses.create({
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
       input: [
@@ -183,14 +191,10 @@ Return actionable, conservative recommendations:
       }
     });
 
-    // === Safe JSON Parsing ===
+    // === Safe JSON parsing ===
     let cleaned = response.output_text || "{}";
-
-    // Trim if AI output has duplicate JSON
     const lastBrace = cleaned.lastIndexOf("}");
-    if (lastBrace !== -1) {
-      cleaned = cleaned.substring(0, lastBrace + 1);
-    }
+    if (lastBrace !== -1) cleaned = cleaned.substring(0, lastBrace + 1);
 
     let parsed;
     try {
@@ -202,8 +206,6 @@ Return actionable, conservative recommendations:
         raw: cleaned
       });
     }
-
-    // console.log("✅ AI Analysis Result:", parsed);
 
     res.json({ success: true, analysis: parsed });
   } catch (err) {

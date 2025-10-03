@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./GetFullReport.module.css";
+import { generateAiSeoPDF } from "../../utils/generateAiSeoPDF";
 
 function GetFullReport({
   email,
@@ -9,6 +10,7 @@ function GetFullReport({
   setJourneyStep,
   aiAuditError,
   handleAiAudit,
+  url,
 }) {
   return (
     <div className={styles.container}>
@@ -40,14 +42,26 @@ function GetFullReport({
           </div>
         )}
 
-        {/* Step 2: Show Email button when audit is ready */}
+        {/* Step 2: Show Email + Dev Download when audit is ready */}
         {aiAudit && !aiAuditLoading && (
-          <button
-            className={styles.primaryBtn}
-            onClick={() => setJourneyStep("results")}
-          >
-            📧 Email My PDF Report
-          </button>
+          <>
+            <button
+              className={styles.primaryBtn}
+              onClick={() => setJourneyStep("results")}
+            >
+              📧 Email My PDF Report
+            </button>
+
+            {/* Dev-only PDF download button */}
+            {process.env.NODE_ENV === "development" && url && (
+              <button
+                className={styles.primaryBtn}
+                onClick={() => generateAiSeoPDF(url, aiAudit, true)}
+              >
+                💾 Download PDF
+              </button>
+            )}
+          </>
         )}
 
         {/* Step 3: Error fallback */}
