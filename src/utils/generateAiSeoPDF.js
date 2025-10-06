@@ -1,6 +1,12 @@
 import jsPDF from "jspdf";
 
-export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
+export const generateAiSeoPDF = async (
+  url,
+  aiAudit,
+  download = true,
+  simplifiedDesktop,
+  simplifiedMobile
+) => {
   if (!aiAudit) return;
 
   const doc = new jsPDF();
@@ -11,7 +17,7 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
   const lineHeight = 8;
   const year = new Date().getFullYear();
 
-  // Clean domain (no http/https/paths)
+  // ✅ Clean domain
   const cleanDomain = (() => {
     try {
       const u = new URL(url);
@@ -24,14 +30,14 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
     }
   })();
 
-  // Professional date
+  // ✅ Date
   const now = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  // Helpers
+  // ✅ Helpers
   const addText = (text, indent = 0, fontStyle = "normal", size = 12) => {
     const safeText = String(text ?? "");
     const maxWidth = pageWidth - margin * 2 - indent;
@@ -68,10 +74,9 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
     doc.text(pageLabel, pageWidth - margin - textWidth, footerY);
   };
 
-  // --- We’ll record section start pages for a reliable TOC
-  const sectionPage = {}; // { label: pageNumber }
+  const sectionPage = {};
 
-  // === Cover + TOC header (we fill items later) ===
+  // === COVER + TOC ===
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.text("SEO Mojo Audit Report", pageWidth / 2, yPos, { align: "center" });
@@ -92,19 +97,78 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
   const tocPage = 1;
   const tocYStart = yPos + 20;
 
-  // === Page 2: Scores Overview ===
+  // === PAGE 2 – Executive Summary + Key Findings + Quick Wins (combined) ===
+  doc.addPage();
+  yPos = 40;
+  const summaryPage = doc.internal.getNumberOfPages();
+  sectionPage["Executive Summary"] = summaryPage;
+  sectionPage["Key Findings"] = summaryPage;
+  sectionPage["Quick Wins"] = summaryPage;
+
+  // Executive Summary
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Executive Summary", margin, yPos);
+  yPos += 12;
+
+  if (typeof aiAudit.overall_summary === "object" && aiAudit.overall_summary) {
+    if (aiAudit.overall_summary.headline) {
+      addText(aiAudit.overall_summary.headline);
+      yPos += 10;
+    }
+    if (Array.isArray(aiAudit.overall_summary.bullets)) {
+      aiAudit.overall_summary.bullets.forEach((b) => addText(`• ${b}`));
+    }
+  } else {
+    addText(aiAudit.overall_summary || "No summary available.");
+  }
+  yPos += 12;
+
+  // Key Findings
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Key Findings", margin, yPos);
+  yPos += 12;
+
+  const allFindings = Array.isArray(aiAudit?.bullets)
+    ? aiAudit.bullets
+    : Array.isArray(aiAudit?.key_findings)
+    ? aiAudit.key_findings
+    : Array.isArray(aiAudit?.findings)
+    ? aiAudit.findings
+    : [];
+
+  const keyFindings = allFindings.filter(
+    (f) => typeof f === "string" && !/score|%|\d{1,3}/i.test(f.trim())
+  );
+
+  if (keyFindings.length) {
+    keyFindings.forEach((b) => addText(`• ${b}`));
+  } else {
+    addText("No descriptive key findings available.");
+  }
+  yPos += 12;
+
+  // Quick Wins
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Quick Wins", margin, yPos);
+  yPos += 12;
+  (aiAudit.quick_wins || []).forEach((q) => addText(`• ${q}`));
+  yPos += 12;
+
+  // === PAGE 3 – Scores Overview ===
   doc.addPage();
   yPos = 40;
   const scoresPage = doc.internal.getNumberOfPages();
   sectionPage["Scores Overview"] = scoresPage;
 
-  if (aiAudit?.scores) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Scores Overview", margin, yPos);
-    yPos += 12;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Scores Overview", margin, yPos);
+  yPos += 12;
 
-    // your current, working bar style (height aligned to text)
+  if (aiAudit?.scores) {
     const barHeight = 7;
     const barWidth = pageWidth - margin * 2 - 65;
 
@@ -134,61 +198,95 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
     };
 
     drawBar("Overall SEO", aiAudit.scores.overall || 0, yPos);
-    yPos += 20;
+    yPos += 10;
     drawBar("On-Page SEO", aiAudit.scores.onpage || 0, yPos);
-    yPos += 20;
+    yPos += 10;
     drawBar("Technical SEO", aiAudit.scores.technical || 0, yPos);
-    yPos += 20;
+    yPos += 10;
     drawBar("Content SEO", aiAudit.scores.content || 0, yPos);
-    yPos += 20;
+    yPos += 10;
     drawBar("Performance SEO", aiAudit.scores.performance || 0, yPos);
-    yPos += 25;
+    yPos += 10;
   }
 
-  // === Page 3: Overall Summary + Key Findings + Quick Wins (same page)
+  // === PAGE 4 – SEO Performance Results ===
   doc.addPage();
   yPos = 40;
-  const overviewPage = doc.internal.getNumberOfPages();
-  sectionPage["Overall Summary"] = overviewPage;
-  sectionPage["Key Findings"] = overviewPage; // force same page in TOC
-  sectionPage["Quick Wins"] = overviewPage;   // force same page in TOC
+  const perfPage = doc.internal.getNumberOfPages();
+  sectionPage["SEO Performance Results"] = perfPage;
 
-  // Overall Summary (supports headline+bullets or plain string)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("Overall Summary", margin, yPos);
+  doc.text("SEO Performance Results", margin, yPos);
   yPos += 12;
 
-  if (typeof aiAudit.overall_summary === "object" && aiAudit.overall_summary) {
-    if (aiAudit.overall_summary.headline) {
-      addText(aiAudit.overall_summary.headline);
-      yPos += 10;
+  const renderPerfBlock = (title, data) => {
+    if (!data || typeof data !== "object") return;
+
+    // Section Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(title, margin, yPos);
+    yPos += 5;
+
+    // Score Bar
+    if (typeof data.score === "number") {
+      const barHeight = 7;
+      const barWidth = pageWidth - margin * 2 - 65;
+      const filledWidth = Math.max(0, (data.score / 100) * barWidth);
+      const percentage = `${data.score}%`;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.text("Score", margin, yPos + barHeight - 1);
+
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(margin + 60, yPos, barWidth, barHeight, 2, 2, "F");
+
+      doc.setFillColor(251, 106, 69);
+      doc.roundedRect(margin + 60, yPos, filledWidth, barHeight, 2, 2, "F");
+
+      doc.setFontSize(10);
+      const textY = yPos + barHeight - 2;
+      if (filledWidth > 25) {
+        doc.setTextColor(255, 255, 255);
+        doc.text(percentage, margin + 62, textY);
+      } else {
+        doc.setTextColor(0, 0, 0);
+        doc.text(percentage, margin + 62 + filledWidth + 2, textY);
+      }
+      doc.setTextColor(0, 0, 0);
+      yPos += 14;
     }
-    if (Array.isArray(aiAudit.overall_summary.bullets)) {
-      aiAudit.overall_summary.bullets.forEach((b) => addText(`• ${b}`));
+
+    // Performance Metrics
+    if (data.metrics) {
+      addText("Core Web Vitals", 0, "bold");
+      addText(`FCP: ${data.metrics.fcp ?? "N/A"} ms`, 6);
+      addText(`LCP: ${data.metrics.lcp ?? "N/A"} ms`, 6);
+      addText(`TTI: ${data.metrics.tti ?? "N/A"} ms`, 6);
+      yPos += 4;
     }
-  } else {
-    addText(aiAudit.overall_summary || "No summary available.");
-  }
-  yPos += 12;
 
-  // Key Findings
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Key Findings", margin, yPos);
-  yPos += 12;
-  (aiAudit.bullets || []).forEach((b) => addText(`• ${b}`));
-  yPos += 12;
+    // Opportunities
+    if (Array.isArray(data.opportunities) && data.opportunities.length) {
+      addText("Opportunities for Improvement:", 0, "bold");
+      data.opportunities.slice(0, 10).forEach((opp, idx) => {
+        const label = opp.title || "Untitled";
+        const val = opp.savingsMs ? `${opp.savingsMs} ms` : "";
+        addText(`${idx + 1}. ${label} ${val}`, 6);
+      });
+    } else {
+      addText("No major performance opportunities detected.", 6);
+    }
 
-  // Quick Wins
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Quick Wins", margin, yPos);
-  yPos += 12;
-  (aiAudit.quick_wins || []).forEach((q) => addText(`• ${q}`));
-  yPos += 12;
+    yPos += 14;
+  };
 
-  // === Prioritized Issues (revert to your original style)
+  renderPerfBlock("Desktop Performance", simplifiedDesktop);
+  renderPerfBlock("Mobile Performance", simplifiedMobile);
+
+  // === PAGE 5 – Prioritized Issues ===
   doc.addPage();
   yPos = 40;
   const issuesPage = doc.internal.getNumberOfPages();
@@ -200,15 +298,14 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
   yPos += 12;
 
   (aiAudit.prioritized_issues || []).forEach((issue, i) => {
-    // Backward/forward compatible: title or issue + priority/severity
     const title = issue?.title || issue?.issue || "Untitled";
-    const priority = issue?.priority || issue?.severity; // keep your original "Priority:" label
+    const priority = issue?.priority || issue?.severity;
     yPos += 6;
     addText(`${i + 1}. ${title}${priority ? ` (Priority: ${priority})` : ""}`);
     (issue?.fix_steps || []).forEach((step) => addText(`- ${step}`, 6));
   });
 
-  // === 30-Day Roadmap
+  // === PAGE 6 – 30-Day Roadmap ===
   doc.addPage();
   yPos = 40;
   const roadmapPage = doc.internal.getNumberOfPages();
@@ -225,7 +322,7 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
     (tasks || []).forEach((task) => addText(`- ${task}`, 6));
   });
 
-  // === Category Notes (+ Performance note included)
+  // === PAGE 7 – Category Notes ===
   doc.addPage();
   yPos = 40;
   const notesPage = doc.internal.getNumberOfPages();
@@ -242,38 +339,37 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
     addText(`- ${note}`, 6);
   });
 
-  // === Total Potential Speed Gain (hide if 0/null/undefined)
+  // === TOTAL POTENTIAL SPEED GAIN ===
   const tps = aiAudit.total_potential_speed_gain_sec;
   if (typeof tps === "number" && tps > 0) {
     yPos += 20;
     const tpsPage = doc.internal.getNumberOfPages();
     sectionPage["Total Potential Speed Gain"] = tpsPage;
-
     addText("Total Potential Speed Gain", 0, "bold", 16);
     addText(`${tps} seconds (estimated)`);
   }
 
-  // === Disclaimers
+  // === DISCLAIMERS ===
   if (Array.isArray(aiAudit.disclaimers) && aiAudit.disclaimers.length > 0) {
     yPos += 20;
     const discPage = doc.internal.getNumberOfPages();
     sectionPage["Disclaimers"] = discPage;
-
     addText("Disclaimers", 0, "bold", 16);
     aiAudit.disclaimers.forEach((d) => addText(`- ${d}`, 6));
   }
 
-  // === Build TOC dynamically on page 1
+  // === TOC ===
   doc.setPage(tocPage);
   yPos = tocYStart;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
 
   const tocOrder = [
-    "Scores Overview",
-    "Overall Summary",
+    "Executive Summary",
     "Key Findings",
     "Quick Wins",
+    "Scores Overview",
+    "SEO Performance Results",
     "Prioritized Issues",
     "30-Day Roadmap",
     "Category Notes",
@@ -282,37 +378,31 @@ export const generateAiSeoPDF = async (url, aiAudit, download = true) => {
   ];
 
   tocOrder.forEach((label) => {
-    // skip entries not present (e.g., TPS hidden)
     if (!(label in sectionPage)) return;
-
     const pageNo = sectionPage[label];
     const leftText = label;
     const rightText = String(pageNo);
-
     const leftWidth = doc.getTextWidth(leftText);
     const rightWidth = doc.getTextWidth(rightText);
-    const availableWidth = pageWidth - margin * 2 - leftWidth - rightWidth - 4;
+    const availableWidth =
+      pageWidth - margin * 2 - leftWidth - rightWidth - 4;
     const dotWidth = doc.getTextWidth(".");
     const dotCount = Math.max(0, Math.floor(availableWidth / dotWidth));
     const dots = ".".repeat(dotCount);
-
-    // Left label
     doc.text(leftText, margin, yPos);
-    // Dots
     doc.text(dots, margin + leftWidth + 2, yPos);
-    // Right page number (right aligned)
     doc.text(rightText, pageWidth - margin - rightWidth, yPos);
-
     yPos += 8;
   });
 
-  // === Footer for all pages
+  // === FOOTERS ===
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     addHeaderFooter(i, totalPages);
   }
 
+  // === OUTPUT ===
   if (download) {
     const safeUrl = cleanDomain.replace(/\W/g, "_");
     doc.save(`SEO_Mojo_Report_${safeUrl}.pdf`);

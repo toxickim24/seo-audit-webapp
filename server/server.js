@@ -89,12 +89,17 @@ app.post("/openai/seo-audit", async (req, res) => {
     processOpportunities(raw.performance?.mobile?.opportunities);
 
     const systemPrompt = `You are an expert Technical SEO lead. 
-Return actionable, conservative recommendations:
-- NEVER fabricate numbers.
-- Only include est_speed_gain_sec when numeric hints exist.
-- Prefer low-effort/high-impact items for quick wins.
-- Write in friendly, non-technical English.
-- Group fixes into a 4-week roadmap.`;
+    Return actionable, conservative recommendations for improving a website's SEO.
+
+    Rules:
+    - DO NOT repeat numeric scores or percentages in 'bullets' (Key Findings).
+    - The 'scores' object must ONLY contain numeric values for each category.
+    - 'bullets' = descriptive, human-readable insights (e.g., missing headings, image alt tags, etc.)
+    - Write in friendly, non-technical English.
+    - Prefer low-effort/high-impact items for 'quick_wins'.
+    - Group fixes into a clear 4-week roadmap.
+    - NEVER fabricate numbers or metrics.
+    - Only include 'total_potential_speed_gain_sec' if numeric hints exist.`;
 
     const userMessages = [
       { role: "user", content: `RAW_AUDIT_RESULTS_JSON:\n${JSON.stringify(raw)}` },

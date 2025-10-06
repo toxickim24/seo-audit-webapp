@@ -11,6 +11,8 @@ function GetFullReport({
   aiAuditError,
   handleAiAudit,
   url,
+  simplifiedDesktop,
+  simplifiedMobile,
 }) {
   return (
     <div className={styles.container}>
@@ -56,7 +58,7 @@ function GetFullReport({
             {process.env.NODE_ENV === "development" && url && (
               <button
                 className={styles.primaryBtn}
-                onClick={() => generateAiSeoPDF(url, aiAudit, true)}
+                onClick={() => generateAiSeoPDF(url, aiAudit, true, simplifiedDesktop, simplifiedMobile)}
               >
                 💾 Download PDF
               </button>

@@ -75,6 +75,10 @@ function Main({ activeTab }) {
   const [aiAuditLoading, setAiAuditLoading] = useState(false);
   const [aiAuditError, setAiAuditError] = useState("");
 
+  // Seo Performance
+  const [simplifiedDesktop, setSimplifiedDesktop] = useState(null);
+  const [simplifiedMobile, setSimplifiedMobile] = useState(null);
+
   // Journey
   const [journeyStep, setJourneyStep] = useState("enter");
 
@@ -201,54 +205,6 @@ function Main({ activeTab }) {
     }
   };
 
-  const handleAiEmailPDF = async () => {
-    if (!aiAudit || !url || !email || !name) {
-      setEmailStatus("Missing details for email.");
-      setEmailStatusType("error");
-      return;
-    }
-
-    try {
-      setIsEmailSending(true);
-      setEmailStatus("");
-      setEmailStatusType("");
-
-      // Was: const pdfBlob = generateAiSeoPDF(url, aiAudit, false);
-      const pdfBlob = await generateAiSeoPDF(url, aiAudit, false);
-
-      // Convert Blob → Base64
-      const base64Data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(pdfBlob);
-      });
-
-      // ✅ Create safe slug from domain for filename
-      const safeUrl = String(url || "")
-        .replace(/^https?:\/\//, "")
-        .replace(/\W/g, "_");
-
-      // Send to backend with safeUrl
-      const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
-      });
-
-      if (!res.ok) throw new Error("Email failed");
-
-      setEmailStatus("✅ Report emailed!");
-      setEmailStatusType("success");
-    } catch (err) {
-      console.error("AI Email failed:", err);
-      setEmailStatus("Failed to send email.");
-      setEmailStatusType("error");
-    } finally {
-      setIsEmailSending(false);
-    }
-  };
-
   const handleAiAudit = async () => {
     if (!url) return;
 
@@ -268,6 +224,9 @@ function Main({ activeTab }) {
       // 🔎 Shrink payload for AI
       const simplifiedDesktop = simplifyPerf(desktopPerf);
       const simplifiedMobile = simplifyPerf(mobilePerf);
+
+      setSimplifiedDesktop(simplifiedDesktop);
+      setSimplifiedMobile(simplifiedMobile);
 
       const raw = {
         domain: url,
@@ -306,6 +265,60 @@ function Main({ activeTab }) {
       setAiAuditError("Failed to generate Audit Report");
     } finally {
       setAiAuditLoading(false);
+    }
+  };
+
+  const handleAiEmailPDF = async () => {
+
+    if (!aiAudit || !url || !email || !name) {
+      setEmailStatus("Missing details for email.");
+      setEmailStatusType("error");
+      return;
+    }
+
+    try {
+      setIsEmailSending(true);
+      setEmailStatus("");
+      setEmailStatusType("");
+
+      const pdfBlob = await generateAiSeoPDF(
+        url,
+        aiAudit,
+        false,
+        simplifiedDesktop,
+        simplifiedMobile
+      );
+
+      // Convert Blob → Base64
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      // ✅ Create safe slug from domain for filename
+      const safeUrl = String(url || "")
+        .replace(/^https?:\/\//, "")
+        .replace(/\W/g, "_");
+
+      // Send to backend with safeUrl
+      const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
+      });
+
+      if (!res.ok) throw new Error("Email failed");
+
+      setEmailStatus("✅ Report emailed!");
+      setEmailStatusType("success");
+    } catch (err) {
+      console.error("AI Email failed:", err);
+      setEmailStatus("Failed to send email.");
+      setEmailStatusType("error");
+    } finally {
+      setIsEmailSending(false);
     }
   };
 
@@ -426,6 +439,8 @@ function Main({ activeTab }) {
                   handleAiAudit={handleAiAudit}
                   setJourneyStep={setJourneyStep}
                   url={url}
+                  simplifiedDesktop={simplifiedDesktop}
+                  simplifiedMobile={simplifiedMobile}
                 />
               )}
 
