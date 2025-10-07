@@ -13,6 +13,7 @@ function GetFullReport({
   url,
   simplifiedDesktop,
   simplifiedMobile,
+  seoData
 }) {
   return (
     <div className={styles.container}>
@@ -58,7 +59,7 @@ function GetFullReport({
             {process.env.NODE_ENV === "development" && url && (
               <button
                 className={styles.primaryBtn}
-                onClick={() => generateAiSeoPDF(url, aiAudit, true, simplifiedDesktop, simplifiedMobile)}
+                onClick={() => generateAiSeoPDF(url, aiAudit, true, simplifiedDesktop, simplifiedMobile, seoData)}
               >
                 💾 Download PDF
               </button>

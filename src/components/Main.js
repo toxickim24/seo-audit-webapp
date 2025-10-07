@@ -206,6 +206,7 @@ function Main({ activeTab }) {
   };
 
   const handleAiAudit = async () => {
+
     if (!url) return;
 
     if (!pageSpeed || !desktopPerf || !mobilePerf) {
@@ -281,12 +282,15 @@ function Main({ activeTab }) {
       setEmailStatus("");
       setEmailStatusType("");
 
+      console.log("🧩 SEO Data:", seoData);
+
       const pdfBlob = await generateAiSeoPDF(
         url,
         aiAudit,
         false,
         simplifiedDesktop,
-        simplifiedMobile
+        simplifiedMobile,
+        seoData
       );
 
       // Convert Blob → Base64
@@ -441,6 +445,7 @@ function Main({ activeTab }) {
                   url={url}
                   simplifiedDesktop={simplifiedDesktop}
                   simplifiedMobile={simplifiedMobile}
+                  seoData={seoData}
                 />
               )}
 

@@ -66,3 +66,4 @@ const SeoSuggestions = ({ onpage, contentSeo, className = "" }) => {
 };
 
 export default SeoSuggestions;
+export { generateSeoSuggestions };

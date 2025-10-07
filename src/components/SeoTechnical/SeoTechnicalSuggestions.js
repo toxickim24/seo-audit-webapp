@@ -91,3 +91,4 @@ const SeoTechnicalSuggestions = ({ technicalSeo, className = "" }) => {
 };
 
 export default SeoTechnicalSuggestions;
+export { buildRecs as buildTechnicalRecs };

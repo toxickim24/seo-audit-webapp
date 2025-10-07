@@ -110,3 +110,4 @@ const SeoContentSuggestions = ({ contentSeo, className = "" }) => {
 };
 
 export default SeoContentSuggestions;
+export { buildRecs as buildContentRecs };

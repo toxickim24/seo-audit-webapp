@@ -1,11 +1,15 @@
 import jsPDF from "jspdf";
+import { generateSeoSuggestions } from "../components/SeoOnpage/SeoOnPageSuggestions";
+import { buildTechnicalRecs } from "../components/SeoTechnical/SeoTechnicalSuggestions";
+import { buildContentRecs } from "../components/SeoContent/SeoContentSuggestions";
 
 export const generateAiSeoPDF = async (
   url,
   aiAudit,
   download = true,
   simplifiedDesktop,
-  simplifiedMobile
+  simplifiedMobile,
+  seoData
 ) => {
   if (!aiAudit) return;
 
@@ -97,7 +101,7 @@ export const generateAiSeoPDF = async (
   const tocPage = 1;
   const tocYStart = yPos + 20;
 
-  // === PAGE 2 – Executive Summary + Key Findings + Quick Wins (combined) ===
+  // === PAGE 2 – Executive Summary + Key Findings + Quick Wins ===
   doc.addPage();
   yPos = 40;
   const summaryPage = doc.internal.getNumberOfPages();
@@ -105,7 +109,6 @@ export const generateAiSeoPDF = async (
   sectionPage["Key Findings"] = summaryPage;
   sectionPage["Quick Wins"] = summaryPage;
 
-  // Executive Summary
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Executive Summary", margin, yPos);
@@ -124,7 +127,6 @@ export const generateAiSeoPDF = async (
   }
   yPos += 12;
 
-  // Key Findings
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Key Findings", margin, yPos);
@@ -149,7 +151,6 @@ export const generateAiSeoPDF = async (
   }
   yPos += 12;
 
-  // Quick Wins
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Quick Wins", margin, yPos);
@@ -166,25 +167,21 @@ export const generateAiSeoPDF = async (
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Scores Overview", margin, yPos);
-  yPos += 12;
+  yPos += 7;
 
   if (aiAudit?.scores) {
     const barHeight = 7;
     const barWidth = pageWidth - margin * 2 - 65;
-
     const drawBar = (label, value, y) => {
       const percentage = `${value}%`;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
       doc.text(label, margin, y + barHeight - 1);
-
       doc.setFillColor(240, 240, 240);
       doc.roundedRect(margin + 60, y, barWidth, barHeight, 2, 2, "F");
-
       const filledWidth = Math.max(0, (value / 100) * barWidth);
       doc.setFillColor(251, 106, 69);
       doc.roundedRect(margin + 60, y, filledWidth, barHeight, 2, 2, "F");
-
       doc.setFontSize(10);
       const textY = y + barHeight - 2;
       if (filledWidth > 25) {
@@ -196,7 +193,6 @@ export const generateAiSeoPDF = async (
       }
       doc.setTextColor(0, 0, 0);
     };
-
     drawBar("Overall SEO", aiAudit.scores.overall || 0, yPos);
     yPos += 10;
     drawBar("On-Page SEO", aiAudit.scores.onpage || 0, yPos);
@@ -206,7 +202,49 @@ export const generateAiSeoPDF = async (
     drawBar("Content SEO", aiAudit.scores.content || 0, yPos);
     yPos += 10;
     drawBar("Performance SEO", aiAudit.scores.performance || 0, yPos);
-    yPos += 10;
+    yPos += 20; // increased spacing before suggestions
+  }
+
+  // === Colored Suggestions ===
+  if (seoData) {
+    const onPageRecs = generateSeoSuggestions(seoData.onpage?.onpage, seoData.contentSeo);
+    const techRecs = buildTechnicalRecs(seoData.technicalSeo?.technicalSeo);
+    const contentRecs = buildContentRecs(seoData.contentSeo?.contentSeo);
+
+    const renderSuggestions = (title, list) => {
+      if (!list || !list.length) return;
+      const ordered = [...list].sort((a, b) => {
+        const order = { high: 1, medium: 2, low: 3 };
+        return order[a.level] - order[b.level];
+      });
+      yPos += 0;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text(title, margin, yPos);
+      yPos += 8;
+      ordered.forEach(({ text, level }) => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage();
+          yPos = 45;
+        }
+        if (level === "high") doc.setTextColor(220, 53, 69);
+        else if (level === "medium") doc.setTextColor(255, 165, 0);
+        else doc.setTextColor(40, 167, 69);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(level.toUpperCase(), margin, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.text(`- ${text}`, margin + 25, yPos);
+        yPos += 7;
+      });
+      yPos += 10;
+    };
+
+    renderSuggestions("On-Page SEO Suggestions", onPageRecs);
+    renderSuggestions("Technical SEO Suggestions", techRecs);
+    renderSuggestions("Content SEO Suggestions", contentRecs);
   }
 
   // === PAGE 4 – SEO Performance Results ===
@@ -214,38 +252,28 @@ export const generateAiSeoPDF = async (
   yPos = 40;
   const perfPage = doc.internal.getNumberOfPages();
   sectionPage["SEO Performance Results"] = perfPage;
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("SEO Performance Results", margin, yPos);
   yPos += 12;
-
   const renderPerfBlock = (title, data) => {
     if (!data || typeof data !== "object") return;
-
-    // Section Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.text(title, margin, yPos);
     yPos += 5;
-
-    // Score Bar
     if (typeof data.score === "number") {
       const barHeight = 7;
       const barWidth = pageWidth - margin * 2 - 65;
       const filledWidth = Math.max(0, (data.score / 100) * barWidth);
       const percentage = `${data.score}%`;
-
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
       doc.text("Score", margin, yPos + barHeight - 1);
-
       doc.setFillColor(240, 240, 240);
       doc.roundedRect(margin + 60, yPos, barWidth, barHeight, 2, 2, "F");
-
       doc.setFillColor(251, 106, 69);
       doc.roundedRect(margin + 60, yPos, filledWidth, barHeight, 2, 2, "F");
-
       doc.setFontSize(10);
       const textY = yPos + barHeight - 2;
       if (filledWidth > 25) {
@@ -258,8 +286,6 @@ export const generateAiSeoPDF = async (
       doc.setTextColor(0, 0, 0);
       yPos += 14;
     }
-
-    // Performance Metrics
     if (data.metrics) {
       addText("Core Web Vitals", 0, "bold");
       addText(`FCP: ${data.metrics.fcp ?? "N/A"} ms`, 6);
@@ -267,8 +293,6 @@ export const generateAiSeoPDF = async (
       addText(`TTI: ${data.metrics.tti ?? "N/A"} ms`, 6);
       yPos += 4;
     }
-
-    // Opportunities
     if (Array.isArray(data.opportunities) && data.opportunities.length) {
       addText("Opportunities for Improvement:", 0, "bold");
       data.opportunities.slice(0, 10).forEach((opp, idx) => {
@@ -279,10 +303,8 @@ export const generateAiSeoPDF = async (
     } else {
       addText("No major performance opportunities detected.", 6);
     }
-
     yPos += 14;
   };
-
   renderPerfBlock("Desktop Performance", simplifiedDesktop);
   renderPerfBlock("Mobile Performance", simplifiedMobile);
 
@@ -297,12 +319,37 @@ export const generateAiSeoPDF = async (
   doc.text("Prioritized Issues", margin, yPos);
   yPos += 12;
 
-  (aiAudit.prioritized_issues || []).forEach((issue, i) => {
-    const title = issue?.title || issue?.issue || "Untitled";
-    const priority = issue?.priority || issue?.severity;
-    yPos += 6;
+  const cleanText = (str) => {
+    if (!str) return "";
+    return String(str)
+      .replace(/[\]\[\{\}'"]/g, "")
+      .replace(/-+\s?(issue|roadmap_weeks|total_potential_speed_gain_sec|priority|fix_steps)[^:]*:?/gi, "")
+      .replace(/ref:.*$/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
+  (Array.isArray(aiAudit.prioritized_issues) ? aiAudit.prioritized_issues : []).forEach((issue, i) => {
+    if (!issue) return;
+    const title = cleanText(issue?.title || issue?.issue || `Issue ${i + 1}`);
+    const priority = cleanText(issue?.priority || issue?.severity || "");
     addText(`${i + 1}. ${title}${priority ? ` (Priority: ${priority})` : ""}`);
-    (issue?.fix_steps || []).forEach((step) => addText(`- ${step}`, 6));
+
+    let steps = [];
+
+    if (Array.isArray(issue.fix_steps)) steps = issue.fix_steps;
+    else if (typeof issue.fix_steps === "string") {
+      try {
+        const parsed = JSON.parse(issue.fix_steps);
+        if (Array.isArray(parsed)) steps = parsed;
+        else steps = [issue.fix_steps];
+      } catch {
+        steps = issue.fix_steps.split(/[-•]\s*/).filter((s) => s.length > 5);
+      }
+    }
+
+    steps.forEach((step) => addText(`- ${cleanText(step)}`, 6));
+    yPos += 5;
   });
 
   // === PAGE 6 – 30-Day Roadmap ===
@@ -310,12 +357,10 @@ export const generateAiSeoPDF = async (
   yPos = 40;
   const roadmapPage = doc.internal.getNumberOfPages();
   sectionPage["30-Day Roadmap"] = roadmapPage;
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("30-Day Roadmap", margin, yPos);
   yPos += 12;
-
   Object.entries(aiAudit.roadmap_weeks || {}).forEach(([week, tasks]) => {
     yPos += 6;
     addText(`${String(week).toUpperCase()}`, 2, "bold");
@@ -327,19 +372,16 @@ export const generateAiSeoPDF = async (
   yPos = 40;
   const notesPage = doc.internal.getNumberOfPages();
   sectionPage["Category Notes"] = notesPage;
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Category Notes", margin, yPos);
   yPos += 12;
-
   Object.entries(aiAudit.category_notes || {}).forEach(([cat, note]) => {
     yPos += 6;
     addText(String(cat).toUpperCase(), 0, "bold");
     addText(`- ${note}`, 6);
   });
 
-  // === TOTAL POTENTIAL SPEED GAIN ===
   const tps = aiAudit.total_potential_speed_gain_sec;
   if (typeof tps === "number" && tps > 0) {
     yPos += 20;
@@ -349,7 +391,6 @@ export const generateAiSeoPDF = async (
     addText(`${tps} seconds (estimated)`);
   }
 
-  // === DISCLAIMERS ===
   if (Array.isArray(aiAudit.disclaimers) && aiAudit.disclaimers.length > 0) {
     yPos += 20;
     const discPage = doc.internal.getNumberOfPages();
@@ -363,7 +404,6 @@ export const generateAiSeoPDF = async (
   yPos = tocYStart;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
-
   const tocOrder = [
     "Executive Summary",
     "Key Findings",
@@ -376,7 +416,6 @@ export const generateAiSeoPDF = async (
     "Total Potential Speed Gain",
     "Disclaimers",
   ];
-
   tocOrder.forEach((label) => {
     if (!(label in sectionPage)) return;
     const pageNo = sectionPage[label];
@@ -384,8 +423,7 @@ export const generateAiSeoPDF = async (
     const rightText = String(pageNo);
     const leftWidth = doc.getTextWidth(leftText);
     const rightWidth = doc.getTextWidth(rightText);
-    const availableWidth =
-      pageWidth - margin * 2 - leftWidth - rightWidth - 4;
+    const availableWidth = pageWidth - margin * 2 - leftWidth - rightWidth - 4;
     const dotWidth = doc.getTextWidth(".");
     const dotCount = Math.max(0, Math.floor(availableWidth / dotWidth));
     const dots = ".".repeat(dotCount);
