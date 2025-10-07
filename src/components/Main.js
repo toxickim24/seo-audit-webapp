@@ -282,8 +282,6 @@ function Main({ activeTab }) {
       setEmailStatus("");
       setEmailStatusType("");
 
-      console.log("🧩 SEO Data:", seoData);
-
       const pdfBlob = await generateAiSeoPDF(
         url,
         aiAudit,
