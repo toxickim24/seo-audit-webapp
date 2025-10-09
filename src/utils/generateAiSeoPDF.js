@@ -264,6 +264,14 @@ export const generateAiSeoPDF = async (
 
   // Scores Overview
   addSectionTitleSinglePage("Scores Overview");
+  addTextSinglePage(
+    "SEO (Search Engine Optimization) — the scores below show your site's performance across key categories.",
+    0,
+    "normal",
+    10,
+    COLOR_MUTED
+  );
+  
   if (aiAudit?.scores) {
     drawProgressBarSinglePage("Overall SEO", aiAudit.scores.overall ?? 0);
     drawProgressBarSinglePage("On-Page SEO", aiAudit.scores.onpage ?? 0);
@@ -292,6 +300,8 @@ export const generateAiSeoPDF = async (
   addSectionTitleSinglePage("Key Findings");
   const keyFindings = Array.isArray(aiAudit?.key_findings)
     ? aiAudit.key_findings
+    : Array.isArray(aiAudit?.bullets)
+    ? aiAudit.bullets
     : Array.isArray(aiAudit?.findings)
     ? aiAudit.findings
     : [];
@@ -399,9 +409,9 @@ export const generateAiSeoPDF = async (
 
     if (data.metrics) {
       addText("Core Web Vitals", 0, "bold");
-      addText(`FCP: ${data.metrics.fcp ?? "N/A"} ms`, 6);
-      addText(`LCP: ${data.metrics.lcp ?? "N/A"} ms`, 6);
-      addText(`TTI: ${data.metrics.tti ?? "N/A"} ms`, 6);
+      addText(`FCP (First Contentful Paint): ${data.metrics.fcp ?? "N/A"} ms`, 6);
+      addText(`LCP (Largest Contentful Paint): ${data.metrics.lcp ?? "N/A"} ms`, 6);
+      addText(`TTI (Time to Interactive): ${data.metrics.tti ?? "N/A"} ms`, 6);
       yPos += 2;
     }
 

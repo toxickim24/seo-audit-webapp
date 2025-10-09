@@ -2,9 +2,7 @@
    Main Container & Sections
 ========================== */
 .container {
-  max-width: 1140px;
   margin: 0 auto;
-  padding: 0 20px;
 }
 
 .title {
@@ -224,12 +222,27 @@ label {
    Responsive Design
 ========================== */
 @media (max-width: 1024px) {
+
   .contentWrapper {
     flex-direction: column;
   }
+
 }
 
 @media (max-width: 767px) {
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+  }
+
+  .intro {
+    font-size: 16px;
+  }
+
   .progressWrapper {
     width: 70px;
     height: 70px;

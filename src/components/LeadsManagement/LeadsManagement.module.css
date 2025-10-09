@@ -150,10 +150,24 @@
   font-weight: bold;
 }
 
-/* ---------- Mobile: Card View ---------- */
+
+
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 1024px) {
+
+  /* Table wrapper */
+  .tableWrapper {
+    width: 700px;
+  }
+
+}
+
 @media (max-width: 767px) {
-  .container {
-    padding: 60px 20px;
+
+  .title {
+    font-size: 24px;
   }
 
   .actions {
@@ -167,6 +181,7 @@
 
   /* Table to card view */
   .tableWrapper {
+    width: 100%;
     overflow-x: hidden !important; /* kill horizontal scroll */
     box-shadow: none;
   }
@@ -223,4 +238,3 @@
   }content: none !important;
   
 }
-

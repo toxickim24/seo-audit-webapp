@@ -226,6 +226,12 @@
 .statusMedium { background: #f59e0b; } /* amber */
 .statusLow    { background: #10b981; } /* green */
 
+.statusHigh,
+.statusMedium,
+.statusLow  { 
+  min-width: 12px;
+}
+
 /* tiny colored icon (first) */
 .icon {
   width: 12px;
@@ -251,12 +257,25 @@
 .impactMedium { background: #f59e0b; } /* amber */
 .impactLow    { background: #10b981; } /* green */
 
-/* Responsive */
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 1024px) {
+
+  .perfRight {
+    flex-direction: column;
+  }
+
+}
+
 @media (max-width: 767px) {
+  
   .suggestionsGrid {
     column-count: 1; /* single column on mobile */
   }
+
   .overviewContainer {
     padding: 0;
   }
+
 }
