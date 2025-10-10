@@ -5,12 +5,13 @@ import Footer from "./components/Footer";
 import "./App.css";
 
 function App() {
-  // Main header tabs (always visible)
+
   const tabs = [
     { id: "seo-audit", label: "SEO Audit" },
     { id: "seo-pricing", label: "Pricing" },
     { id: "seo-tools", label: "Tools" },
-    { id: "leads-management", label: "Lead Management" }, // always last
+    { id: "seo-contact", label: "Contact" },
+    { id: "leads-management", label: "Lead Management" },
   ];
 
   const [activeTab, setActiveTab] = useState("seo-audit");
@@ -18,7 +19,7 @@ function App() {
   return (
     <div>
       <Header tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      {/* Main handles the secondary tabs after lead form */}
+
       <Main activeTab={activeTab} />
       <Footer />
     </div>

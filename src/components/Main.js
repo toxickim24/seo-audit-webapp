@@ -194,6 +194,7 @@ function Main({ activeTab }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
       });
+      
       if (!res.ok) throw new Error("Failed to save lead");
 
       setLeadCaptured(true);
@@ -311,7 +312,13 @@ function Main({ activeTab }) {
         body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
       });
 
-      if (!res.ok) throw new Error("Email failed");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Email API error:", err);
+        throw new Error(err.error || err.hint || "Email failed");
+      }
+
+      // if (!res.ok) throw new Error("Email failed");
 
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
