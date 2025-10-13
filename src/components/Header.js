@@ -1,28 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import "../css/Header.css";
 
-function Header({ tabs, activeTab, setActiveTab }) {
+function Header({ tabs }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-  const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
-    setMenuOpen(false); // close mobile menu after selecting
+  useEffect(() => {
+    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
+    checkAuth();
+    window.addEventListener("authChange", checkAuth);
+    return () => window.removeEventListener("authChange", checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.dispatchEvent(new Event("authChange"));
+    navigate("/");
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".partner-dropdown-container")) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <header className="header-container">
       <div className="header-container-wrapper">
-        {/* Left: Logo */}
-        <a href="/" className="logo">
+        {/* === Logo === */}
+        <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
           <img src="/seo-logo.png" alt="SEO Mojo Logo" />
-        </a>
+        </Link>
 
-        {/* ✅ Right: Nav + Partner grouped together */}
+        {/* === Navigation + Partner Area === */}
         <div className="nav-group">
-          {/* Navigation */}
           <nav className="navbar-container">
-            {/* Mobile toggle */}
+            {/* Mobile menu toggle */}
             <button
               className={`menu-toggle ${menuOpen ? "open" : ""}`}
               onClick={() => setMenuOpen(!menuOpen)}
@@ -34,38 +54,87 @@ function Header({ tabs, activeTab, setActiveTab }) {
             </button>
 
             <ul className={`navbar-menu ${menuOpen ? "show" : ""}`}>
-              {tabs.map((tab) => (
-                <li className="navbar-item" key={tab.id}>
-                  <button
-                    className={activeTab === tab.id ? "active" : ""}
-                    onClick={() => handleTabClick(tab.id)}
-                  >
-                    {tab.label}
-                  </button>
-                </li>
-              ))}
+              {!isLoggedIn &&
+                tabs.map((tab) => (
+                  <li className="navbar-item" key={tab.id}>
+                    <NavLink
+                      to={`/${tab.id}`}
+                      className={({ isActive }) => (isActive ? "active" : "")}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {tab.label}
+                    </NavLink>
+                  </li>
+                ))}
+
+              {isLoggedIn && (
+                <>
+                  <li className="navbar-item">
+                    <NavLink
+                      to="/partner-dashboard"
+                      className={({ isActive }) => (isActive ? "active" : "")}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Dashboard
+                    </NavLink>
+                  </li>
+                  <li className="navbar-item">
+                    <NavLink
+                      to="/partner-settings"
+                      className={({ isActive }) => (isActive ? "active" : "")}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Settings
+                    </NavLink>
+                  </li>
+                </>
+              )}
             </ul>
           </nav>
 
-          {/* Partner Button */}
-          <div className="partner-dropdown-container">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              onBlur={() => setTimeout(() => setDropdownOpen(false), 200)}
-              className="partner-button"
-            >
-              Partners ▾
-            </button>
+          {/* === Right-side buttons (Partners dropdown or Logout) === */}
+          <div className="auth-controls">
+            {!isLoggedIn ? (
+              <div className="partner-dropdown-container">
+                <button
+                  className="partner-button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  Partners ▾
+                </button>
 
-            {dropdownOpen && (
-              <div className="partner-dropdown-menu">
-                <a href="/partner-login" className="dropdown-item">
-                  Login
-                </a>
-                <a href="/partner-register" className="dropdown-item">
-                  Register
-                </a>
+                <div
+                  className={`partner-dropdown-menu ${
+                    dropdownOpen ? "show" : ""
+                  }`}
+                  onMouseLeave={() => setDropdownOpen(false)}
+                >
+                  <Link
+                    to="/partner-login"
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/partner-register"
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Register
+                  </Link>
+                </div>
               </div>
+            ) : (
+              <button className="partner-button logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
             )}
           </div>
         </div>

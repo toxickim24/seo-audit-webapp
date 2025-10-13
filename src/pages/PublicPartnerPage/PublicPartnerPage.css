@@ -1,0 +1,12 @@
+.public-partner-page {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+.public-partner-page .partner-logo {
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}

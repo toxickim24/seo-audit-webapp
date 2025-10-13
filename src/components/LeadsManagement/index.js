@@ -13,7 +13,7 @@ function LeadsManagement() {
   // ✅ Fetch leads
   const fetchLeads = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/leads`);
+      const res = await fetch(`${API_BASE_URL}/api/leads`);
       const data = await res.json();
       setLeads(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -64,7 +64,7 @@ function LeadsManagement() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/leads/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/api/leads/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete lead");
       setLeads((prev) => prev.filter((lead) => lead.id !== id));
     } catch (err) {
