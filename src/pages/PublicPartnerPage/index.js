@@ -7,11 +7,28 @@ import SeoJourney from "../../components/SeoJourney";
 import PostOverview from "../../components/PostOverview/PostOverview";
 import Overview from "../../components/Overview/Overview";
 import GetFullReport from "../../components/GetFullReport";
-import SeoPricing from "../../components/SeoPricing";
-import SeoTools from "../../components/SeoTools";
 import { fetchSeoPerformance } from "../../api/SeoPerformance";
 import { getOverallScore } from "../../utils/calcOverallScore";
 import { generateAiSeoPDF } from "../../utils/generateAiSeoPDF";
+
+function SuccessNotification({ email, clearStatus }) {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 10000);
+    return () => clearTimeout(timer);
+  }, []);
+  if (!visible) return null;
+
+  return (
+    <div className="success-notification">
+      <span>✅ Report sent! Check your inbox ({email})</span>
+      <button className="close-btn" onClick={() => {
+        setVisible(false);
+        if (clearStatus) clearStatus();
+      }}>✕</button>
+    </div>
+  );
+}
 
 export default function PublicPartnerPage() {
   const { slug } = useParams();
@@ -29,27 +46,32 @@ export default function PublicPartnerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [seoData, setSeoData] = useState(null);
   const [pageSpeed, setPageSpeed] = useState(null);
-  const [overallScore, setOverallScore] = useState(null);
-  const [journeyStep, setJourneyStep] = useState("enter");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
-  const [phone, setPhone] = useState("");
-  const [leadCaptured, setLeadCaptured] = useState(false);
-
-  // ===== Performance =====
   const [desktopPerf, setDesktopPerf] = useState(null);
   const [mobilePerf, setMobilePerf] = useState(null);
+  const [overallScore, setOverallScore] = useState(null);
 
-  // ===== AI Audit & Email =====
+  // ===== Lead form =====
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
+  const [email, setEmail] = useState("");
+  const [leadCaptured, setLeadCaptured] = useState(false);
+
+  // ===== Email status =====
+  const [emailStatus, setEmailStatus] = useState("");
+  const [emailStatusType, setEmailStatusType] = useState("");
+  const [isEmailSending, setIsEmailSending] = useState(false);
+
+  // ===== AI Audit =====
   const [aiAudit, setAiAudit] = useState(null);
   const [aiAuditLoading, setAiAuditLoading] = useState(false);
   const [aiAuditError, setAiAuditError] = useState("");
-  const [isEmailSending, setIsEmailSending] = useState(false);
-  const [emailStatus, setEmailStatus] = useState("");
-  const [emailStatusType, setEmailStatusType] = useState("");
+  const [simplifiedDesktop, setSimplifiedDesktop] = useState(null);
+  const [simplifiedMobile, setSimplifiedMobile] = useState(null);
 
-  // ===== Fetch Partner Data =====
+  const [journeyStep, setJourneyStep] = useState("enter");
+
+  // ===== Fetch Partner =====
   useEffect(() => {
     const fetchPartner = async () => {
       try {
@@ -57,8 +79,6 @@ export default function PublicPartnerPage() {
         if (!res.ok) throw new Error("Partner not found");
         const data = await res.json();
         setPartner(data);
-
-        // apply partner theme
         document.documentElement.style.setProperty("--primary-color", data.primary_color || "#22354d");
         document.documentElement.style.setProperty("--secondary-color", data.secondary_color || "#fb6a45");
       } catch (err) {
@@ -73,7 +93,6 @@ export default function PublicPartnerPage() {
     fetchPartner();
   }, [slug]);
 
-  // ===== Utility Functions =====
   const normalizeUrl = (rawUrl) => {
     if (!rawUrl) return "";
     let val = rawUrl.trim();
@@ -94,7 +113,22 @@ export default function PublicPartnerPage() {
     }
   };
 
-  // ===== Handle SEO Analyze =====
+  const simplifyPerf = (perf) => {
+    if (!perf) return null;
+    return {
+      strategy: perf.strategy,
+      score: perf.score,
+      metrics: {
+        fcp: perf.fcp,
+        lcp: perf.lcp,
+        tti: perf.tti,
+      },
+      opportunities: (perf.opportunities || [])
+        .filter((opp) => opp.savingsMs > 0)
+        .map((opp) => ({ title: opp.title, savingsMs: opp.savingsMs })),
+    };
+  };
+
   const handleAnalyze = async () => {
     const err = validateUrl(url);
     if (err) {
@@ -109,6 +143,7 @@ export default function PublicPartnerPage() {
     setJourneyStep("scanning");
 
     const normalized = normalizeUrl(url);
+    setUrl(normalized);
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/seo/analyze?url=${encodeURIComponent(normalized)}`);
@@ -120,7 +155,6 @@ export default function PublicPartnerPage() {
         fetchSeoPerformance(normalized, "desktop"),
         fetchSeoPerformance(normalized, "mobile"),
       ]);
-
       setDesktopPerf(desktop);
       setMobilePerf(mobile);
 
@@ -140,10 +174,8 @@ export default function PublicPartnerPage() {
     }
   };
 
-  // ===== Handle Lead Submit =====
-  const handleLeadSubmit = async (e, partnerId = null) => {
+  const handleLeadSubmit = async (e) => {
     e.preventDefault();
-
     if (!name || !email) {
       setError("Name and Email are required.");
       return;
@@ -158,8 +190,7 @@ export default function PublicPartnerPage() {
       overallScore,
       date: new Date().toISOString(),
     };
-
-    if (partnerId) newLead.partner_id = partnerId;
+    if (partner?.id) newLead.partner_id = partner.id;
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/leads`, {
@@ -177,35 +208,18 @@ export default function PublicPartnerPage() {
     }
   };
 
-  // ===== Handle AI Audit =====
   const handleAiAudit = async () => {
-    if (!url || !seoData || !pageSpeed) return;
+    if (!url) return;
+    if (!pageSpeed || !desktopPerf || !mobilePerf) return;
 
     setAiAuditLoading(true);
     setAiAuditError("");
 
     try {
-      const simplifyPerf = (perf) => {
-        if (!perf) return null;
-        return {
-          strategy: perf.strategy,
-          score: perf.score,
-          metrics: {
-            fcp: perf.fcp,
-            lcp: perf.lcp,
-            tti: perf.tti,
-          },
-          opportunities: (perf.opportunities || [])
-            .filter((opp) => opp.savingsMs > 0)
-            .map((opp) => ({
-              title: opp.title,
-              savingsMs: opp.savingsMs,
-            })),
-        };
-      };
-
       const simplifiedDesktop = simplifyPerf(desktopPerf);
       const simplifiedMobile = simplifyPerf(mobilePerf);
+      setSimplifiedDesktop(simplifiedDesktop);
+      setSimplifiedMobile(simplifiedMobile);
 
       const raw = {
         domain: url,
@@ -229,16 +243,10 @@ export default function PublicPartnerPage() {
         body: JSON.stringify(raw),
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`AI audit failed: ${res.status} ${errText}`);
-      }
-
+      if (!res.ok) throw new Error("AI audit failed");
       const data = await res.json();
       if (!data.success) throw new Error("No analysis returned");
-
       setAiAudit(data.analysis);
-      setJourneyStep("results");
     } catch (err) {
       console.error("❌ AI Audit failed:", err);
       setAiAuditError("Failed to generate Audit Report");
@@ -247,7 +255,6 @@ export default function PublicPartnerPage() {
     }
   };
 
-  // ===== Handle AI Email PDF =====
   const handleAiEmailPDF = async () => {
     if (!aiAudit || !url || !email || !name) {
       setEmailStatus("Missing details for email.");
@@ -260,7 +267,14 @@ export default function PublicPartnerPage() {
       setEmailStatus("");
       setEmailStatusType("");
 
-      const pdfBlob = await generateAiSeoPDF(url, aiAudit, false, desktopPerf, mobilePerf, seoData);
+      const pdfBlob = await generateAiSeoPDF(
+        url,
+        aiAudit,
+        false,
+        simplifiedDesktop,
+        simplifiedMobile,
+        seoData
+      );
 
       const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -269,9 +283,7 @@ export default function PublicPartnerPage() {
         reader.readAsDataURL(pdfBlob);
       });
 
-      const safeUrl = String(url || "")
-        .replace(/^https?:\/\//, "")
-        .replace(/\W/g, "_");
+      const safeUrl = String(url || "").replace(/^https?:\/\//, "").replace(/\W/g, "_");
 
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
@@ -279,11 +291,7 @@ export default function PublicPartnerPage() {
         body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error("Email API error:", err);
-        throw new Error(err.error || err.hint || "Email failed");
-      }
+      if (!res.ok) throw new Error("Email failed");
 
       setEmailStatus("✅ Report emailed!");
       setEmailStatusType("success");
@@ -296,12 +304,11 @@ export default function PublicPartnerPage() {
     }
   };
 
-  // ===== Effects =====
   useEffect(() => {
-    if (journeyStep === "get-report" && url && seoData && !aiAudit && !aiAuditLoading) {
+    if (journeyStep === "get-report" && url && !aiAudit && !aiAuditLoading) {
       handleAiAudit();
     }
-  }, [journeyStep, url, seoData]);
+  }, [journeyStep, url]);
 
   useEffect(() => {
     if (journeyStep === "results" && aiAudit && !isEmailSending) {
@@ -309,42 +316,18 @@ export default function PublicPartnerPage() {
     }
   }, [journeyStep, aiAudit]);
 
-  // ===== Render =====
   if (partnerLoading) return <p className="loading">Loading partner...</p>;
   if (!partner && partnerError)
-    return (
-      <main className="main-layout">
-        <section className="main-container" style={{ textAlign: "center", padding: "60px 20px" }}>
-          <h2 style={{ color: "var(--primary-color)" }}>Partner Not Found</h2>
-          <p style={{ marginTop: "10px", fontSize: "16px", color: "#555" }}>
-            The partner link you tried to access doesn’t exist or is no longer active.
-          </p>
-          <a
-            href="/seo-audit"
-            style={{
-              display: "inline-block",
-              marginTop: "20px",
-              padding: "10px 20px",
-              backgroundColor: "var(--primary-color)",
-              color: "#fff",
-              borderRadius: "6px",
-              textDecoration: "none",
-            }}
-          >
-            Go Back to SEO Audit
-          </a>
-        </section>
-      </main>
-    );
+    return <p className="error-message">{partnerError}</p>;
 
   return (
     <main className="main-layout">
-      <section className="main-container">
-        <aside className="top-journey">
-          <SeoJourney step={journeyStep} />
-        </aside>
+      <aside className="top-journey">
+        <SeoJourney step={journeyStep} />
+      </aside>
 
-        {/* Step 1: Animation + Input */}
+      <section className="main-container">
+        {/* Step 1 */}
         {!seoData && !isLoading && journeyStep === "enter" && (
           <>
             <div className="animation-seo">
@@ -374,7 +357,7 @@ export default function PublicPartnerPage() {
           </>
         )}
 
-        {/* Step 2: Loader */}
+        {/* Step 2 */}
         {isLoading && journeyStep === "scanning" && (
           <>
             <div className="animation-seo">
@@ -387,17 +370,17 @@ export default function PublicPartnerPage() {
             <div className="loader-container">
               <div className="book-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
-                  <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5"></rect>
-                  <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5"></line>
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50"></path>
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76"></path>
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30"></path>
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30"></path>
+                  <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5" />
+                  <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" />
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50" />
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76" />
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30" />
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30" />
                 </svg>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15"></path>
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30"></path>
-                  <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z"></path>
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15" />
+                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30" />
+                  <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z" />
                 </svg>
               </div>
               <p>Analyzing website, please wait...</p>
@@ -405,7 +388,7 @@ export default function PublicPartnerPage() {
           </>
         )}
 
-        {/* Step 3: Form */}
+        {/* Step 3 */}
         {!isLoading && isSubmitted && seoData && !leadCaptured && journeyStep === "form" && (
           <PostOverview
             seoData={seoData}
@@ -419,14 +402,14 @@ export default function PublicPartnerPage() {
             setCompany={setCompany}
             phone={phone}
             setPhone={setPhone}
-            handleLeadSubmit={(e) => handleLeadSubmit(e, partner?.id)}
+            handleLeadSubmit={handleLeadSubmit}
             error={error}
             setJourneyStep={setJourneyStep}
             url={url}
           />
         )}
 
-        {/* Step 4: AI Audit + Email */}
+        {/* Step 4 */}
         {leadCaptured && journeyStep === "get-report" && (
           <GetFullReport
             email={email}
@@ -435,13 +418,14 @@ export default function PublicPartnerPage() {
             aiAuditLoading={aiAuditLoading}
             aiAuditError={aiAuditError}
             handleAiAudit={handleAiAudit}
+            handleAiEmailPDF={handleAiEmailPDF}
             setJourneyStep={setJourneyStep}
             url={url}
             seoData={seoData}
           />
         )}
 
-        {/* Step 5: Results */}
+        {/* Step 5 */}
         {journeyStep === "results" && (
           <div className="results-container">
             {isEmailSending ? (
@@ -450,20 +434,21 @@ export default function PublicPartnerPage() {
                 <p>Sending email, please wait...</p>
               </div>
             ) : (
-              <>
+              <div className="body-tab-content">
                 {emailStatusType === "success" && (
-                  <p className="success-message">{emailStatus}</p>
+                  <SuccessNotification
+                    email={email}
+                    clearStatus={() => setEmailStatusType("")}
+                  />
                 )}
                 {emailStatusType === "error" && (
-                  <p className="error-message">{emailStatus}</p>
+                  <p className="email-status error">{emailStatus}</p>
                 )}
-
                 <Overview
                   seoData={seoData}
                   pageSpeed={pageSpeed}
                   onScoreReady={setOverallScore}
                 />
-
                 <button
                   className="secondary-btn"
                   onClick={() => {
@@ -478,7 +463,7 @@ export default function PublicPartnerPage() {
                 >
                   🔄 Scan Another URL
                 </button>
-              </>
+              </div>
             )}
           </div>
         )}

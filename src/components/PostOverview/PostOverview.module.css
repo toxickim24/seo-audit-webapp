@@ -161,7 +161,7 @@
   display: block;
 }
 
-label {
+.form label {
   display: flex;
   flex-direction: column;
   font-size: 0.95rem;

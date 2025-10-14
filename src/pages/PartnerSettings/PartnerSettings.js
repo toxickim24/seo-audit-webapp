@@ -87,7 +87,7 @@ function PartnerSettings() {
       });
 
       alert("✅ Partner settings updated successfully!");
-      setSlugStatus("✅ Saved!");
+      // setSlugStatus("✅ Saved!");
       const updatedUser = { ...storedUser, ...form, slug: res.data.partner?.slug };
       localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (err) {
@@ -157,6 +157,7 @@ function PartnerSettings() {
             </p>
           </div>
 
+          {/*
           <div className="form-group">
             <label>Subdomain (optional)</label>
             <input
@@ -167,6 +168,7 @@ function PartnerSettings() {
               placeholder="e.g. ek"
             />
           </div>
+          */}
 
           <div className="form-group">
             <label>Logo URL (optional)</label>
