@@ -4,7 +4,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // ✅ Create reusable Axios instance
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: `${API_URL}/api/auth`,
   headers: { "Content-Type": "application/json" },
 });
 

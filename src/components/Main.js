@@ -22,7 +22,7 @@ function SuccessNotification({ email, clearStatus }) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 5000);
+    const timer = setTimeout(() => setVisible(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -147,7 +147,8 @@ function Main({ activeTab }) {
 
     try {
 
-      const res = await fetch(`${API_BASE_URL}/analyze?url=${encodeURIComponent(normalized)}`);
+      const res = await fetch(`${API_BASE_URL}/api/seo/analyze?url=${encodeURIComponent(normalized)}`);
+
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
       setSeoData(data);
@@ -179,29 +180,45 @@ function Main({ activeTab }) {
     }
   };
 
-  const handleLeadSubmit = async (e) => {
+  const handleLeadSubmit = async (e, partnerId = null) => {
     e.preventDefault();
+
     if (!name || !email) {
       setError("Name and Email are required.");
       return;
     }
 
-    const newLead = { name, email, phone, company, website: url, overallScore, date: new Date().toISOString() };
+    // ✅ Create lead object
+    const newLead = {
+      name,
+      email,
+      phone,
+      company,
+      website: url,
+      overallScore,
+      date: new Date().toISOString(),
+    };
+
+    // ✅ Add partner_id if it exists
+    // if (partnerId) {
+    //   console.log("✅ Adding partner_id:", partnerId);
+    //   newLead.partner_id = partnerId;
+    // } else {
+    //   console.log("ℹ️ No partner_id found (main site submission)");
+    // }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/leads`, {
+      const res = await fetch(`${API_BASE_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
       });
-      
-      if (!res.ok) throw new Error("Failed to save lead");
 
+      if (!res.ok) throw new Error("Failed to save lead");
       setLeadCaptured(true);
-      setError("");
       setJourneyStep("get-report");
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error saving lead:", err);
       setError("Failed to save lead.");
     }
   };
@@ -246,7 +263,7 @@ function Main({ activeTab }) {
         },
       };
 
-      const res = await fetch(`${API_BASE_URL}/openai/seo-audit`, {
+      const res = await fetch(`${API_BASE_URL}/api/openai/seo-audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(raw),
@@ -306,7 +323,7 @@ function Main({ activeTab }) {
         .replace(/\W/g, "_");
 
       // Send to backend with safeUrl
-      const res = await fetch(`${API_BASE_URL}/send-seo-email`, {
+      const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),

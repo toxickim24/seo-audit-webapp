@@ -41,7 +41,7 @@ function PartnerSettings() {
   useEffect(() => {
     const fetchPartner = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/partner/me`, {
+        const res = await axios.get(`${API_BASE}/partners/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = res.data.partner || res.data || {};
@@ -82,7 +82,7 @@ function PartnerSettings() {
     setSlugStatus("");
 
     try {
-      const res = await axios.put(`${API_BASE}/partner`, form, {
+      const res = await axios.put(`${API_BASE}/partners`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

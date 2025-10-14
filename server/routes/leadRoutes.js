@@ -3,8 +3,8 @@ import { getLeads, addLead, deleteLead } from "../controllers/leadController.js"
 
 const router = express.Router();
 
-router.get("/leads", getLeads);
-router.post("/leads", addLead);
-router.delete("/leads/:id", deleteLead);
+router.get("/", getLeads);
+router.post("/", addLead);
+router.delete("/:id", deleteLead);
 
 export default router;

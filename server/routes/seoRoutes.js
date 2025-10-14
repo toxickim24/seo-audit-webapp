@@ -1,7 +1,9 @@
 import express from "express";
-import { analyzeWebsite } from "../controllers/seoController.js";
+import { SeoController } from "../controllers/seoController.js";
 
 const router = express.Router();
-router.get("/analyze", analyzeWebsite);
+
+// ✅ GET /api/seo/analyze
+router.get("/analyze", SeoController.analyzeWebsite);
 
 export default router;

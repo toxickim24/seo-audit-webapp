@@ -30,6 +30,7 @@ import leadRoutes from "./routes/leadRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import partnerLeadRoutes from "./routes/partnerLeadRoutes.js";
 
 // ===========================
 // ✅ Database Init
@@ -46,15 +47,31 @@ app.use(express.json({ limit: "10mb" }));
 app.use(logger);
 
 // ===========================
-// ✅ Mount API Routes (order matters!)
+// ✅ Mount API Routes (organized by group)
 // ===========================
-app.use("/api", authRoutes);
-app.use("/api", partnerRoutes);
-app.use("/api", seoRoutes);
-app.use("/api", leadRoutes);
-app.use("/api", emailRoutes);
-app.use("/api", aiRoutes);
-app.use("/api", uploadRoutes);
+
+// 🔐 Auth (login/register)
+app.use("/api/auth", authRoutes);
+
+// 🧩 Partner management
+app.use("/api/partners", partnerRoutes);
+
+app.use("/api/partnerLeads", partnerLeadRoutes);
+
+// 🔍 SEO Analysis
+app.use("/api/seo", seoRoutes);
+
+// 📋 Leads
+app.use("/api/leads", leadRoutes);
+
+// 📧 Email sending
+app.use("/api/email", emailRoutes);
+
+// 🤖 AI SEO Analyzer
+app.use("/api/openai", aiRoutes);
+
+// 📁 File uploads
+app.use("/api/upload", uploadRoutes);
 
 // ✅ Global error handler
 app.use(errorHandler);

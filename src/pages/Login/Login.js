@@ -17,7 +17,7 @@ export default function Login() {
 
     try {
       const res = await login({ email, password });
-      console.log("✅ Login Response:", res);
+      // console.log("✅ Login Response:", res);
 
       if (!res || !res.token || !res.user) {
         throw new Error("Unexpected server response");
@@ -46,9 +46,9 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="auth-container">
-        <h2>Partner Login</h2>
-
         <form className="auth-form" onSubmit={handleLogin}>
+          <h2>Partner Login</h2>
+          
           {error && <p className="error-text">{error}</p>}
 
           <div className="form-group">

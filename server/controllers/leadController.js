@@ -1,8 +1,10 @@
 import { getDB } from "../config/db.js";
 
+// ✅ Get all global leads (exclude partner-owned)
 export async function getLeads(req, res) {
-  const pool = getDB();
-  if (!pool) {
+  const db = getDB();
+
+  if (!db) {
     return res.json([
       {
         id: 1,
@@ -16,50 +18,74 @@ export async function getLeads(req, res) {
   }
 
   try {
-    const [rows] = await pool.execute(
-      "SELECT * FROM leads WHERE is_deleted = 0 ORDER BY date DESC"
+    // ✅ Only return leads not assigned to any partner
+    const [rows] = await db.execute(
+      `SELECT * 
+       FROM leads 
+       WHERE (partner_id IS NULL OR partner_id = 0) 
+         AND is_deleted = 0 
+       ORDER BY date DESC`
     );
     res.json(rows);
   } catch (err) {
     console.error("❌ Error fetching leads:", err.message);
-    res.json([]);
+    res.status(500).json({ error: "Server error fetching leads" });
   }
 }
 
+// ✅ Add new lead (works for both global + partner leads)
 export async function addLead(req, res) {
-  const pool = getDB();
-  const { name, phone, company, email, website, overallScore, date } = req.body;
+  console.log("📩 Incoming Lead:", req.body);
+  const db = getDB();
+  const { name, phone, company, email, website, overallScore, partner_id } = req.body;
 
-  if (!email)
-    return res.status(400).json({ error: "Email is required" });
-
-  if (!pool)
-    return res.status(201).json({ success: true, id: Date.now() });
+  if (!email || !name) {
+    console.log("⚠️ Missing name/email");
+    return res.status(400).json({ error: "Name and email are required" });
+  }
 
   try {
-    const [result] = await pool.execute(
-      "INSERT INTO leads (name, phone, company, email, website, score, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [name, phone, company, email, website, overallScore, date]
+    const [result] = await db.execute(
+      `INSERT INTO leads 
+       (partner_id, name, phone, company, email, website, score, date, is_deleted)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 0)`,
+      [
+        partner_id || null, // ✅ auto-fallback to NULL if not a partner link
+        name,
+        phone || "",
+        company || "",
+        email,
+        website || "",
+        overallScore || 0,
+      ]
+    );
+
+    console.log(
+      `✅ Lead inserted (ID: ${result.insertId}) ${
+        partner_id ? `for Partner ID: ${partner_id}` : "(Global Lead)"
+      }`
     );
     res.status(201).json({ success: true, id: result.insertId });
   } catch (err) {
-    console.error("❌ Error inserting lead:", err.message);
-    res.json({ success: true, id: Date.now() });
+    console.error("❌ addLead SQL error:", err);
+    res.status(500).json({ error: err.message });
   }
 }
 
+// ✅ Soft delete a lead
 export async function deleteLead(req, res) {
-  const pool = getDB();
+  const db = getDB();
   const { id } = req.params;
 
-  if (!pool)
-    return res.json({ success: true, message: "Lead marked as deleted (fake)" });
+  if (!db) {
+    return res.json({ success: true, message: "Lead marked as deleted (mock)" });
+  }
 
   try {
-    await pool.execute("UPDATE leads SET is_deleted = 1 WHERE id = ?", [id]);
-    res.json({ success: true, message: "Lead marked as deleted" });
+    await db.execute("UPDATE leads SET is_deleted = 1 WHERE id = ?", [id]);
+    res.json({ success: true, message: "Lead deleted successfully" });
   } catch (err) {
-    console.error("❌ Error deleting lead:", err.message);
-    res.json({ success: true, message: "Lead marked as deleted (fake)" });
+    console.error("❌ Error deleting lead:", err);
+    res.status(500).json({ error: "Server error deleting lead" });
   }
 }

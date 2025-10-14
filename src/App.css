@@ -25,20 +25,6 @@ body {
     padding: 15px;
   }
 
-  .search-box {
-    flex-direction: column;
-    width: 100%;
-    max-width: 320px;
-  }
-
-  .search-box input {
-    width: 100%;
-  }
-
-  .search-box button {
-    width: 100%;
-  }
-
   .logo img {
     height: 24px; /* even smaller on mobile */
   }

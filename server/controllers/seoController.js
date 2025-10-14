@@ -1,43 +1,61 @@
-import { analyzeOnPage } from "../../src/api/SeoOnpage.js";
-import { analyzeContentSeo } from "../../src/api/SeoContent.js";
-import { analyzeTechnicalSeo } from "../../src/api/SeoTechnical.js";
+// server/controllers/seoController.js
+import { analyzeOnPage } from "../services/analyzeOnPage.js";
+import { analyzeContentSeo } from "../services/analyzeContentSeo.js";
+import { analyzeTechnicalSeo } from "../services/analyzeTechnicalSeo.js";
 
 /**
- * Handles GET /analyze
- * Runs the on-page, content, and technical analyzers in sequence
- * Returns averaged overview score and data bundle
+ * Handles GET /api/seo/analyze
+ * Runs on-page, content, and technical analyzers in sequence
+ * Returns averaged overview score and combined data
  */
-export async function analyzeWebsite(req, res) {
-  const { url } = req.query;
+export const SeoController = {
+  async analyzeWebsite(req, res) {
+    const { url } = req.query;
 
-  if (!url) return res.status(400).json({ error: "URL is required" });
+    if (!url) return res.status(400).json({ error: "URL is required" });
 
-  try {
-    new URL(url);
-  } catch {
-    return res.status(400).json({ error: "Invalid URL" });
-  }
+    try {
+      new URL(url);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL format" });
+    }
 
-  let onPage = { overview: { score: 0 }, onpage: {} };
-  let contentSeo = { overview: { score: 0 }, contentSeo: {} };
-  let technicalSeo = { overview: { score: 0 }, technicalSeo: {} };
+    // Default safe placeholders
+    let onPage = { overview: { score: 0 }, onpage: {} };
+    let contentSeo = { overview: { score: 0 }, contentSeo: {} };
+    let technicalSeo = { overview: { score: 0 }, technicalSeo: {} };
 
-  try { onPage = await analyzeOnPage(url).catch(() => onPage); } catch {}
-  try { contentSeo = await analyzeContentSeo(url).catch(() => contentSeo); } catch {}
-  try { technicalSeo = await analyzeTechnicalSeo(url).catch(() => technicalSeo); } catch {}
+    try {
+      onPage = (await analyzeOnPage(url)) || onPage;
+    } catch (err) {
+      console.error("❌ On-page analysis failed:", err.message);
+    }
 
-  const overviewScore = Math.round(
-    ((onPage.overview?.score || 0) +
-      (contentSeo.overview?.score || 0) +
-      (technicalSeo.overview?.score || 0)) / 3
-  );
+    try {
+      contentSeo = (await analyzeContentSeo(url)) || contentSeo;
+    } catch (err) {
+      console.error("❌ Content analysis failed:", err.message);
+    }
 
-  return res.json({
-    url,
-    overview: { score: overviewScore },
-    onpage: onPage,
-    contentSeo,
-    technicalSeo,
-    pageSpeed: null,
-  });
-}
+    try {
+      technicalSeo = (await analyzeTechnicalSeo(url)) || technicalSeo;
+    } catch (err) {
+      console.error("❌ Technical analysis failed:", err.message);
+    }
+
+    const overviewScore = Math.round(
+      ((onPage.overview?.score || 0) +
+        (contentSeo.overview?.score || 0) +
+        (technicalSeo.overview?.score || 0)) / 3
+    );
+
+    res.json({
+      url,
+      overview: { score: overviewScore },
+      onpage: onPage,
+      contentSeo,
+      technicalSeo,
+      pageSpeed: null,
+    });
+  },
+};
