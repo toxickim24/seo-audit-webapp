@@ -22,10 +22,13 @@ import usePartnerTheme from "./hooks/usePartnerTheme";
 import "./App.css";
 
 function AppContent() {
-  // ✅ use the hook correctly
+  // ✅ Load partner theme and public/private state
   const { partnerData, isPartnerPublic, loading } = usePartnerTheme();
 
-  // Tabs for public navigation
+  // ✅ Helper: check login status
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  // ✅ Tabs for public navigation
   const tabs = [
     { id: "seo-audit", label: "SEO Audit" },
     { id: "seo-pricing", label: "Pricing" },
@@ -34,18 +37,24 @@ function AppContent() {
     { id: "leads-management", label: "Lead Management" },
   ];
 
-  // Optional: show loading state while partner theme loads
-  if (loading) {
-    return <p className="loading">Loading theme...</p>;
-  }
-
   return (
     <>
       <Header tabs={tabs} partnerData={partnerData} />
 
       <Routes>
-        {/* ✅ Public Pages */}
-        <Route path="/seo-audit" element={<Main activeTab="seo-audit" />} />
+        {/* ======================================================
+           ✅ Public Pages
+        ====================================================== */}
+        <Route
+          path="/seo-audit"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/partner-dashboard" replace />
+            ) : (
+              <Main activeTab="seo-audit" />
+            )
+          }
+        />
         <Route path="/seo-pricing" element={<Main activeTab="seo-pricing" />} />
         <Route path="/seo-tools" element={<Main activeTab="seo-tools" />} />
         <Route path="/seo-contact" element={<Main activeTab="seo-contact" />} />
@@ -54,7 +63,9 @@ function AppContent() {
           element={<Main activeTab="leads-management" />}
         />
 
-        {/* ✅ Partner Auth & Dashboard */}
+        {/* ======================================================
+           ✅ Partner Authentication & Dashboard
+        ====================================================== */}
         <Route path="/partner-login" element={<Login />} />
         <Route path="/partner-register" element={<Register />} />
 
@@ -74,15 +85,34 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route path="/partner-leads" element={<PartnerLeadsManagement />} />
+        <Route
+          path="/partner-leads"
+          element={
+            <ProtectedRoute>
+              <PartnerLeadsManagement />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* ✅ Dynamic Partner Public Page */}
+        {/* ======================================================
+           ✅ Dynamic Public Partner Page (/:slug)
+        ====================================================== */}
         <Route path="/:slug" element={<PublicPartnerPage />} />
 
-        {/* ✅ Root redirect */}
-        <Route path="/" element={<Navigate to="/seo-audit" replace />} />
+        {/* ======================================================
+           ✅ Default and Fallback Redirects
+        ====================================================== */}
+        <Route
+          path="/"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/partner-dashboard" replace />
+            ) : (
+              <Navigate to="/seo-audit" replace />
+            )
+          }
+        />
 
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/seo-audit" replace />} />
       </Routes>
 

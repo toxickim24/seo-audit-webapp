@@ -3,44 +3,60 @@ import { Link } from "react-router-dom";
 import "./PartnerDashboard.css";
 
 function PartnerDashboard() {
-  const [partner, setPartner] = useState(null);
+  const [partner, setPartner] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (err) {
+      console.error("❌ Error parsing user data:", err);
+      return null;
+    }
+  });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    const handleStorageChange = () => {
       try {
-        setPartner(JSON.parse(storedUser));
-      } catch (err) {
-        console.error("❌ Error parsing user data:", err);
+        const updatedUser = localStorage.getItem("user");
+        setPartner(updatedUser ? JSON.parse(updatedUser) : null);
+      } catch {
+        setPartner(null);
       }
-    }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   if (!partner) {
     return (
-      <div className="partner-dashboard loading">
-        <p>Loading your dashboard...</p>
+      <div className="main-layout">
+        <div className="partner-dashboard">
+          <h2>Partner info not found</h2>
+          <p>Please log in again to access your dashboard.</p>
+          <Link to="/partner-login" className="menu-card">
+            Go to Login
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const partnerLink = `${window.location.origin}/${partner.slug}`;
+  const partnerLink = `${window.location.origin}/${partner?.slug || ""}`;
 
   return (
-    <div className="partner-dashboard">
-      {/* ======== Dashboard Content ======== */}
-      <main className="partner-main">
-        <section className="welcome-section">
-          <h1>
-            Welcome, <span>{partner.company_name || partner.name}</span> 👋
-          </h1>
-          <p className="subtitle">
-            This is your partner dashboard — manage your brand, track leads, and
-            share your white-label SEO Audit page with clients.
-          </p>
-        </section>
+    <div className="main-layout">
+      <div className="partner-dashboard">
+        <header className="dashboard-header">
+          <section className="welcome-section">
+            <h1>
+              Welcome, <span>{partner?.company_name || partner?.name}</span> 👋
+            </h1>
+            <p className="subtitle">
+              This is your partner dashboard — manage your brand, track leads,
+              and share your white-label SEO Audit page with clients.
+            </p>
+          </section>
+        </header>
 
-        {/* ======== Partner Link Card ======== */}
         <section className="link-card">
           <h3>Your Partner Link</h3>
           <a
@@ -57,7 +73,6 @@ function PartnerDashboard() {
           </p>
         </section>
 
-        {/* ======== Quick Menu ======== */}
         <section className="quick-menu">
           <Link to="/partner-settings" className="menu-card">
             <div className="menu-icon">⚙️</div>
@@ -65,19 +80,26 @@ function PartnerDashboard() {
             <p>Update your company name, colors, and logo.</p>
           </Link>
 
-          <Link to="/leads-management" className="menu-card">
+          {/* ✅ Updated Leads link */}
+          <Link to="/partner-leads" className="menu-card">
             <div className="menu-icon">📊</div>
             <h4>Leads</h4>
             <p>View and manage your captured SEO leads.</p>
           </Link>
 
-          <Link to="/seo-audit" className="menu-card">
+          {/* ✅ Updated SEO Audit link — goes to partner public page */}
+          <a
+            href={partnerLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="menu-card"
+          >
             <div className="menu-icon">🧠</div>
             <h4>Run SEO Audit</h4>
-            <p>Generate a new SEO report for any website.</p>
-          </Link>
+            <p>Open your branded SEO Audit page.</p>
+          </a>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

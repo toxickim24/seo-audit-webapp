@@ -316,7 +316,6 @@ export default function PublicPartnerPage() {
     }
   }, [journeyStep, aiAudit]);
 
-  if (partnerLoading) return <p className="loading">Loading partner...</p>;
   if (!partner && partnerError)
     return <p className="error-message">{partnerError}</p>;
 

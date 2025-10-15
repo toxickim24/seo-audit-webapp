@@ -117,14 +117,8 @@ function PartnerSettings() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="partner-settings loading">
-        <p>Loading settings...</p>
-      </div>
-    );
-
   return (
+  <div className="main-layout">
     <div className="partner-settings-page">
       <div className="settings-header">
         <h1>⚙️ Partner Settings</h1>
@@ -239,6 +233,7 @@ function PartnerSettings() {
         </div>
       </form>
     </div>
+  </div>           
   );
 }
 
