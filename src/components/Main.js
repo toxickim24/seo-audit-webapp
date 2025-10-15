@@ -14,6 +14,7 @@ import { fetchSeoPerformance } from "../api/SeoPerformance";
 import { getOverallScore } from "../utils/calcOverallScore";
 import SeoPricing from "./SeoPricing";
 import SeoTools from "./SeoTools";
+import SeoContact from "./SeoContact";
 import LeadsManagement from "./LeadsManagement";
 import SeoJourney from "../components/SeoJourney";
 import GetFullReport from "../components/GetFullReport";
@@ -364,7 +365,7 @@ function Main({ activeTab }) {
 
   return (
     <main className="main-layout">
-      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "leads-management" ? (
+      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-contact" && activeTab !== "leads-management" ? (
         <>
           <aside className="top-journey">
             <SeoJourney step={journeyStep} />
@@ -524,6 +525,7 @@ function Main({ activeTab }) {
         <>
           {activeTab === "seo-pricing" && <SeoPricing />}
           {activeTab === "seo-tools" && <SeoTools />}
+          {activeTab === "seo-contact" && <SeoContact />}
           {activeTab === "leads-management" && <LeadsManagement />}
         </>
       )}
