@@ -54,11 +54,11 @@
 
 /* Active step */
 .circle.active {
-  background: linear-gradient(180deg, #fb6a45 0%, #ff8e63 100%);
   color: #fff;
-  border-color: #fb6a45;
   box-shadow: 0 6px 14px rgba(251,106,69,0.25);
   transform: translateY(-2px);
+  background-color: var(--primary-color, #fb6a45);
+  border: 3px solid var(--primary-color, #fb6a45);
 }
 
 .circle.active .stepText {
@@ -71,9 +71,9 @@
 
 /* Completed step */
 .circle.completed {
-  background: linear-gradient(180deg, #fb6a45 0%, #ff8e63 100%);
   color: #fff;
-  border-color: #fb6a45;
+  background-color: var(--primary-color, #fb6a45);
+  border: 3px solid var(--primary-color, #fb6a45);
 }
 
 .circle.completed .stepNumber,
@@ -92,7 +92,7 @@
 }
 
 .labelActive {
-  color: #fb6a45;
+  color: var(--primary-color, #fb6a45);
   font-weight: 700;
 }
 

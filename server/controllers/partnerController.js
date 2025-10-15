@@ -46,9 +46,9 @@ export const PartnerController = {
         slug,
         subdomain,
         logo_url,
-        primary_color = "#FB6A45",
-        secondary_color = "#FF8E3A",
-        accent_color = "#22354D",
+        primary_color,
+        secondary_color,
+        accent_color,
       } = req.body;
 
       if (!company_name) {
@@ -95,14 +95,14 @@ export const PartnerController = {
             subdomain || null,
             finalSlug,
             logo_url || null,
-            primary_color,
-            secondary_color,
-            accent_color,
+            primary_color || null,
+            secondary_color || null,
+            accent_color || null,
             req.user.id,
           ]
         );
       } else {
-        // 🆕 Create partner record
+        // 🆕 Create partner record (colors can be null)
         await db.query(
           `INSERT INTO partners
            (user_id, company_name, subdomain, slug, logo_url,
@@ -114,9 +114,9 @@ export const PartnerController = {
             subdomain || null,
             finalSlug,
             logo_url || null,
-            primary_color,
-            secondary_color,
-            accent_color,
+            primary_color || null,
+            secondary_color || null,
+            accent_color || null,
           ]
         );
       }
@@ -168,7 +168,9 @@ export const PartnerController = {
       return res.json(rows[0]);
     } catch (err) {
       console.error("❌ [PartnerController.getBySlug] Error:", err);
-      return res.status(500).json({ error: "Server error fetching partner data." });
+      return res
+        .status(500)
+        .json({ error: "Server error fetching partner data." });
     }
   },
 };

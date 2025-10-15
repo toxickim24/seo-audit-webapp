@@ -4,6 +4,7 @@ footer {
   padding: 15px 20px;
   background: #fb6a45;
   color: white;
+  background: var(--primary-color, #fb6a45);
 }
 
 footer a {

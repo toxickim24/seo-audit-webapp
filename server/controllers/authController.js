@@ -59,7 +59,7 @@ export const AuthController = {
           `INSERT INTO partners 
            (user_id, company_name, slug, primary_color, secondary_color, accent_color)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [userId, company_name, slug, "#FB6A45", "#FF8E3A", "#22354D"]
+          [userId, company_name, slug, null, null, null]
         );
 
         partnerSlug = slug;

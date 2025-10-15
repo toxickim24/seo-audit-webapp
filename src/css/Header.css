@@ -9,6 +9,7 @@
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
   z-index: 1000;
+  background: var(--primary-color, #ffffff);
 }
 
 .header-container-wrapper {
@@ -28,6 +29,10 @@
   width: 130px;
   height: auto;
   display: block;
+}
+
+.partner-theme .header-container-wrapper .logo img {
+  width: 150px;
 }
 
 /* ===========================

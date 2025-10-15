@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import usePartnerTheme from "../../hooks/usePartnerTheme"; // ✅ theme hook
 import "./PartnerSettings.css";
 
 function PartnerSettings() {
+  const { partnerData } = usePartnerTheme(); // ✅ optional, just ensures CSS vars are applied
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
@@ -23,14 +25,15 @@ function PartnerSettings() {
       .replace(/[^\w\-]+/g, "") // remove non-word chars
       .replace(/\-\-+/g, "-"); // collapse multiple dashes
 
+  // ✅ Initialize with no defaults — blank colors unless user chooses
   const [form, setForm] = useState({
     company_name: storedUser?.company_name || "",
     slug: storedUser?.slug || "",
     subdomain: "",
     logo_url: "",
-    primary_color: "#FB6A45",
-    secondary_color: "#FF8E3A",
-    accent_color: "#22354D",
+    primary_color: storedUser?.primary_color || "",
+    secondary_color: storedUser?.secondary_color || "",
+    accent_color: storedUser?.accent_color || "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -45,14 +48,15 @@ function PartnerSettings() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = res.data.partner || res.data || {};
+
         setForm((prev) => ({
           company_name: data.company_name || prev.company_name,
           slug: data.slug || prev.slug,
           subdomain: data.subdomain || "",
           logo_url: data.logo_url || "",
-          primary_color: data.primary_color || "#FB6A45",
-          secondary_color: data.secondary_color || "#FF8E3A",
-          accent_color: data.accent_color || "#22354D",
+          primary_color: data.primary_color || "",
+          secondary_color: data.secondary_color || "",
+          accent_color: data.accent_color || "",
         }));
       } catch (err) {
         console.warn("⚠️ Partner fetch failed:", err);
@@ -82,18 +86,30 @@ function PartnerSettings() {
     setSlugStatus("");
 
     try {
-      const res = await axios.put(`${API_BASE}/partners`, form, {
+      // If empty color fields, send as null
+      const payload = {
+        ...form,
+        primary_color: form.primary_color || null,
+        secondary_color: form.secondary_color || null,
+        accent_color: form.accent_color || null,
+      };
+
+      const res = await axios.put(`${API_BASE}/partners`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       alert("✅ Partner settings updated successfully!");
-      // setSlugStatus("✅ Saved!");
-      const updatedUser = { ...storedUser, ...form, slug: res.data.partner?.slug };
+      const updatedUser = {
+        ...storedUser,
+        ...form,
+        slug: res.data.partner?.slug,
+      };
       localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (err) {
       console.error("❌ Save Error:", err);
       const msg =
-        err.response?.data?.error || "Failed to save settings. Please try again.";
+        err.response?.data?.error ||
+        "Failed to save settings. Please try again.";
       setSlugStatus(msg.includes("taken") ? "❌ Slug already taken" : "");
       alert(msg);
     } finally {
@@ -113,7 +129,8 @@ function PartnerSettings() {
       <div className="settings-header">
         <h1>⚙️ Partner Settings</h1>
         <p className="subtitle">
-          Customize your company details, logo, brand colors, and public link slug.
+          Customize your company details, logo, brand colors, and public link
+          slug.
         </p>
       </div>
 
@@ -157,6 +174,7 @@ function PartnerSettings() {
             </p>
           </div>
 
+          {/* Optional Subdomain Field */}
           {/*
           <div className="form-group">
             <label>Subdomain (optional)</label>
@@ -199,11 +217,13 @@ function PartnerSettings() {
           <div className="color-grid">
             {["primary_color", "secondary_color", "accent_color"].map((key) => (
               <div key={key} className="color-item">
-                <label>{key.replace("_", " ").replace("color", "Color")}</label>
+                <label>
+                  {key.replace("_", " ").replace("color", "Color")}
+                </label>
                 <input
                   type="color"
                   name={key}
-                  value={form[key]}
+                  value={form[key] || "#cccccc"} // show gray if none chosen
                   onChange={handleChange}
                 />
               </div>
