@@ -5,6 +5,7 @@
 
 # backend dependencies
 /server/node_modules
+/server/uploads/
 
 # testing
 /coverage
