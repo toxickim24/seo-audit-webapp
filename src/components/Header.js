@@ -31,6 +31,7 @@ function Header({ tabs, partnerData }) {
     "admin-partners",
     "admin-leads",
     "admin-settings",
+    "admin-users",
   ];
 
   const isPartnerPublic = firstSegment && !knownRoutes.includes(firstSegment);
@@ -135,6 +136,9 @@ function Header({ tabs, partnerData }) {
                     </li>
                     <li className="navbar-item">
                       <NavLink to="/admin-settings">Settings</NavLink>
+                    </li>
+                    <li className="navbar-item">
+                      <NavLink to="/admin-users">Users</NavLink>
                     </li>
                     <li className="navbar-item">
                       <NavLink to="/admin-partners">Partners</NavLink>

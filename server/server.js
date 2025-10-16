@@ -32,6 +32,8 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import partnerLeadRoutes from "./routes/partnerLeadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import adminLeadRoutes from "./routes/adminLeadRoutes.js";
+import adminUserRoutes from "./routes/adminUserRoutes.js";
+import adminPartnerRoutes from "./routes/adminPartnerRoutes.js";
 
 // ===========================
 // ✅ Database Init
@@ -79,6 +81,8 @@ app.use("/api/upload", uploadRoutes);
 // 🧠 Admin routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/adminLeads", adminLeadRoutes);
+app.use("/api/admin/users", adminUserRoutes);
+app.use("/api/admin/partners", adminPartnerRoutes);
 
 // ===========================
 // ✅ Global Error Handler

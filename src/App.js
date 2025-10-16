@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminPartners from "./pages/Admin/AdminPartners";
 import AdminLeads from "./pages/Admin/AdminLeads";
 import AdminSettings from "./pages/Admin/AdminSettings";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 // ✅ Public partner page (/:slug)
 import PublicPartnerPage from "./pages/PublicPartnerPage";
@@ -109,6 +110,14 @@ function AppContent() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminPartners />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminUsers />
             </ProtectedRoute>
           }
         />

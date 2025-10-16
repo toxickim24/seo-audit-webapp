@@ -56,7 +56,7 @@ export default function AdminSettings() {
   return (
     <div className="main-layout">
       <main className="main-container">
-        <h1 className="title">Admin Settings</h1>
+        <h1 className="title">⚙️ Admin Settings</h1>
         <p className="subtitle">
           Manage platform configuration and branding preferences.
         </p>

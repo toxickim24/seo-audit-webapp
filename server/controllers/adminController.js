@@ -1,61 +1,6 @@
 import { getDB } from "../config/db.js";
 
 export const AdminController = {
-  async getAllPartners(req, res) {
-    try {
-      const db = getDB();
-      const [rows] = await db.query(
-        "SELECT id, company_name, slug, primary_color FROM partners ORDER BY id DESC"
-      );
-      res.json(rows);
-    } catch (err) {
-      console.error("❌ Error fetching partners:", err);
-      res.status(500).json({ error: "Failed to fetch partners" });
-    }
-  },
-
-  async addPartner(req, res) {
-    try {
-      const { company_name, slug, primary_color } = req.body;
-      const db = getDB();
-      await db.query(
-        "INSERT INTO partners (company_name, slug, primary_color, created_at) VALUES (?, ?, ?, NOW())",
-        [company_name, slug, primary_color]
-      );
-      res.json({ message: "Partner added successfully" });
-    } catch (err) {
-      console.error("❌ Error adding partner:", err);
-      res.status(500).json({ error: "Failed to add partner" });
-    }
-  },
-
-  async updatePartner(req, res) {
-    try {
-      const { id } = req.params;
-      const { company_name, slug, primary_color } = req.body;
-      const db = getDB();
-      await db.query(
-        "UPDATE partners SET company_name=?, slug=?, primary_color=?, updated_at=NOW() WHERE id=?",
-        [company_name, slug, primary_color, id]
-      );
-      res.json({ message: "Partner updated successfully" });
-    } catch (err) {
-      console.error("❌ Error updating partner:", err);
-      res.status(500).json({ error: "Failed to update partner" });
-    }
-  },
-
-  async deletePartner(req, res) {
-    try {
-      const { id } = req.params;
-      const db = getDB();
-      await db.query("DELETE FROM partners WHERE id = ?", [id]);
-      res.json({ message: "Partner deleted successfully" });
-    } catch (err) {
-      console.error("❌ Error deleting partner:", err);
-      res.status(500).json({ error: "Failed to delete partner" });
-    }
-  },
 
   async getSettings(req, res) {
     try {

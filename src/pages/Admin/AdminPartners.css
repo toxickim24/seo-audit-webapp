@@ -1,101 +1,291 @@
-.actions {
-  margin-bottom: 20px;
+/* ==========================
+   Admin Partners Page (Unique & Conflict-Free)
+   ========================== */
+.admin-partners-layout {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ===== Top Controls ===== */
+.admin-partners-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 15px;
   align-self: end;
 }
 
-.add-btn {
-  background: var(--primary-color, #1a273b);
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.add-btn:hover {
-  background: #233956;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
-}
-
-.admin-table th {
-  background: #f4f6f8;
-  font-weight: 600;
-}
-
-.color-preview {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin-right: 6px;
-  border: 1px solid #ccc;
-}
-
-.edit-btn,
-.delete-btn {
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  color: #fff;
-  cursor: pointer;
-}
-
-.edit-btn {
-  background: #3b82f6;
-  margin-right: 6px;
-}
-
-.delete-btn {
-  background: #ef4444;
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+.admin-partners-filters {
   display: flex;
-  justify-content: center;
+  gap: 10px;
   align-items: center;
 }
 
-.modal {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  width: 400px;
-}
-
-.modal input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 14px;
+.admin-partners-filters input,
+.admin-partners-filters select {
+  font-size: 14px;
+  padding: 7px 10px;
   border-radius: 6px;
-  border: 1px solid #ddd;
+  border: 1px solid #d1d5db;
+  outline: none;
 }
 
-.modal-actions {
+.admin-partners-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-partners-buttons button {
+  background: var(--primary-color, #1a273b);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: auto;
+}
+
+.admin-partners-buttons button:hover {
+  background: #2d3e5c;
+}
+
+/* ===== Partners Table ===== */
+.admin-partners-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+.admin-partners-table th {
+  background: #f8fafc;
+  color: #555;
+  text-align: left;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.admin-partners-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #333;
+  vertical-align: middle;
+}
+
+/* Row hover effect */
+.admin-partners-table tr:hover td {
+  background: #f9fafb;
+}
+
+.admin-partners-table img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+/* ===== Status Badges ===== */
+.admin-partners-status {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.admin-partners-status.active {
+  background: #10b981;
+}
+
+.admin-partners-status.inactive {
+  background: #dc2626;
+}
+
+/* ===== Action Buttons ===== */
+.admin-partners-actions-col {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-height: 64px;
+  align-content: center;
+}
+
+.admin-partners-btn {
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1 1 auto;
+  text-align: center;
+  min-width: 80px;
+  width: auto;
+  height: 27px;
+}
+
+.admin-partners-btn.edit {
+  background: #2563eb;
+}
+
+.admin-partners-btn.edit:hover {
+  background: #1e4fc1;
+}
+
+.admin-partners-btn.delete {
+  background: #dc2626;
+}
+
+.admin-partners-btn.delete:hover {
+  background: #b91c1c;
+}
+
+.admin-partners-btn.restore {
+  background: #10b981;
+}
+
+.admin-partners-btn.restore:hover {
+  background: #059669;
+}
+
+/* ===== Modal ===== */
+.admin-partners-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.admin-partners-modal {
+  width: 420px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 25px 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.2s ease-in;
+}
+
+.admin-partners-modal h2 {
+  margin-bottom: 20px;
+  color: var(--primary-color, #1a273b);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.admin-partners-modal label {
+  font-size: 13px;
+  color: #444;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.admin-partners-modal input,
+.admin-partners-modal select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-partners-modal input:focus,
+.admin-partners-modal select:focus {
+  border-color: var(--primary-color, #1a273b);
+}
+
+.admin-partners-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
 
-.cancel-btn {
-  background: #eee;
-  color: #333;
+.admin-partners-modal-actions button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+}
+
+.admin-partners-modal-actions button.save {
+  background: var(--primary-color, #1a273b);
+}
+
+.admin-partners-modal-actions button.cancel {
+  background: #6b7280;
+}
+
+.partners-form input[type="color"] {
+  height: 40px;
+}
+
+.color-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+}
+
+/* ===== Animation ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .admin-partners-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-partners-filters {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .admin-partners-buttons {
+    justify-content: flex-start;
+  }
+
+  .admin-partners-table td,
+  .admin-partners-table th {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .admin-partners-modal {
+    width: 90%;
+  }
 }

@@ -126,7 +126,7 @@ export default function AdminLeads() {
   return (
     <div className="main-layout">
       <main className="main-container">
-        <h1 className="title">Lead Management</h1>
+        <h1 className="title">📈 Lead Management</h1>
         <p className="subtitle">View, sort, and export all leads.</p>
 
         {/* Search + Export */}
