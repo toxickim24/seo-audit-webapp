@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import usePartnerTheme from "../../hooks/usePartnerTheme";
 import "./PartnerSettings.css";
+import { useAlert } from "../../utils/useAlert";
 
 function PartnerSettings() {
+  const { success, error, confirm } = useAlert();
   const { partnerData } = usePartnerTheme();
   const token = localStorage.getItem("token");
   const storedUser = localStorage.getItem("user")
@@ -102,7 +104,7 @@ function PartnerSettings() {
       setForm((prev) => ({ ...prev, logo_url: data.url }));
     } catch (err) {
       console.error("❌ Logo upload failed:", err);
-      alert("Logo upload failed. Please try again.");
+      error("Logo upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -126,7 +128,7 @@ function PartnerSettings() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("✅ Partner settings updated successfully!");
+      success("✅ Partner settings updated successfully!");
 
       const updatedUser = {
         ...storedUser,
@@ -140,7 +142,7 @@ function PartnerSettings() {
         err.response?.data?.error ||
         "Failed to save settings. Please try again.";
       setSlugStatus(msg.includes("taken") ? "❌ Slug already taken" : "");
-      alert(msg);
+      error(msg);
     } finally {
       setSaving(false);
     }

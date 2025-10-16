@@ -18,12 +18,10 @@ export async function getLeads(req, res) {
   }
 
   try {
-    // ✅ Only return leads not assigned to any partner
     const [rows] = await db.execute(
       `SELECT * 
        FROM leads 
-       WHERE (partner_id IS NULL OR partner_id = 0) 
-         AND is_deleted = 0 
+       WHERE (partner_id IS NULL OR partner_id = 0)
        ORDER BY date DESC`
     );
     res.json(rows);
@@ -33,7 +31,6 @@ export async function getLeads(req, res) {
   }
 }
 
-// ✅ Add new lead (works for both global + partner leads)
 export async function addLead(req, res) {
   console.log("📩 Incoming Lead:", req.body);
   const db = getDB();
@@ -47,10 +44,10 @@ export async function addLead(req, res) {
   try {
     const [result] = await db.execute(
       `INSERT INTO leads 
-       (partner_id, name, phone, company, email, website, score, date, is_deleted)
-       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 0)`,
+       (partner_id, name, phone, company, email, website, score, date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
-        partner_id || null, // ✅ auto-fallback to NULL if not a partner link
+        partner_id || null,
         name,
         phone || "",
         company || "",
@@ -72,18 +69,13 @@ export async function addLead(req, res) {
   }
 }
 
-// ✅ Soft delete a lead
 export async function deleteLead(req, res) {
   const db = getDB();
   const { id } = req.params;
 
-  if (!db) {
-    return res.json({ success: true, message: "Lead marked as deleted (mock)" });
-  }
-
   try {
-    await db.execute("UPDATE leads SET is_deleted = 1 WHERE id = ?", [id]);
-    res.json({ success: true, message: "Lead deleted successfully" });
+    await db.execute("DELETE FROM leads WHERE id = ?", [id]);
+    res.json({ success: true, message: "Lead permanently deleted" });
   } catch (err) {
     console.error("❌ Error deleting lead:", err);
     res.status(500).json({ error: "Server error deleting lead" });

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import "../css/Header.css";
+import { useAlert } from "../utils/useAlert";
 
 function Header({ tabs, partnerData }) {
+  const { success, error, confirm } = useAlert();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState(null);
@@ -50,9 +52,13 @@ function Header({ tabs, partnerData }) {
     return () => window.removeEventListener("authChange", checkAuth);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const ok = await confirm("Are you sure you want to log out?");
+    if (!ok) return;
+
     localStorage.clear();
     window.dispatchEvent(new Event("authChange"));
+    success("Logged out successfully!");
     navigate("/");
   };
 

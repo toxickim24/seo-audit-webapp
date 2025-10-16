@@ -1,14 +1,9 @@
 import { getDB } from "../config/db.js";
 
 export const PartnerLeadController = {
-  // ============================================================
-  // ✅ Get leads for the logged-in partner
-  // ============================================================
   async getMyLeads(req, res) {
     try {
       const db = getDB();
-
-      // 🧠 Use partner_id if available, otherwise fall back to id
       const partnerId = req.user.partner_id || req.user.id;
 
       console.log("🔍 Fetching leads for partner ID:", partnerId);
@@ -16,7 +11,7 @@ export const PartnerLeadController = {
       const [rows] = await db.query(
         `SELECT id, name, email, phone, company, website, score, date
          FROM leads
-         WHERE partner_id = ? AND is_deleted = 0
+         WHERE partner_id = ?
          ORDER BY date DESC`,
         [partnerId]
       );
@@ -28,9 +23,6 @@ export const PartnerLeadController = {
     }
   },
 
-  // ============================================================
-  // ✅ Add a new lead for the logged-in partner
-  // ============================================================
   async addLead(req, res) {
     try {
       const { name, email, phone, company, website, score } = req.body;
@@ -59,9 +51,6 @@ export const PartnerLeadController = {
     }
   },
 
-  // ============================================================
-  // ✅ Soft delete a lead (mark as deleted)
-  // ============================================================
   async deleteLead(req, res) {
     try {
       const { id } = req.params;
@@ -69,7 +58,7 @@ export const PartnerLeadController = {
       const partnerId = req.user.partner_id || req.user.id;
 
       const [result] = await db.query(
-        `UPDATE leads SET is_deleted = 1 WHERE id = ? AND partner_id = ?`,
+        `DELETE FROM leads WHERE id = ? AND partner_id = ?`,
         [id, partnerId]
       );
 
@@ -79,7 +68,7 @@ export const PartnerLeadController = {
           .json({ error: "Lead not found or not associated with your account" });
       }
 
-      res.status(200).json({ message: "Lead deleted successfully" });
+      res.status(200).json({ message: "Lead permanently deleted" });
     } catch (err) {
       console.error("❌ Error deleting lead:", err);
       res.status(500).json({ error: "Failed to delete lead" });

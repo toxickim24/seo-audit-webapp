@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import styles from "./PartnerLeadsManagement.module.css";
+import { useAlert } from "../../utils/useAlert";
 
 function PartnerLeadsManagement() {
+  const { success, error, confirm } = useAlert();
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
@@ -67,7 +69,9 @@ function PartnerLeadsManagement() {
 
   // ✅ Delete partner lead
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+    const ok = await confirm("This lead will be permanently deleted.");
+    if (!ok) return;
+    success("Lead deleted!");
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE_URL}/api/partnerLeads/${id}`, {
@@ -78,25 +82,35 @@ function PartnerLeadsManagement() {
       setLeads((prev) => prev.filter((lead) => lead.id !== id));
     } catch (err) {
       console.error("❌ Error deleting partner lead:", err.message);
-      alert("Failed to delete lead. Check server logs.");
+      error("Failed to delete lead. Check server logs.");
     }
   };
 
   // ✅ Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (!leads.length) return;
-    const headers = Object.keys(leads[0]).join(",");
-    const rows = leads.map((lead) =>
-      Object.values(lead)
-        .map((val) => `"${String(val || "").replace(/"/g, '""')}"`)
-        .join(",")
-    );
-    const csv = [headers, ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "partner_leads.csv";
-    link.click();
+
+    const ok = await confirm(`Export ${leads.length} leads to CSV?`);
+    if (!ok) return;
+
+    try {
+      const headers = Object.keys(leads[0]).join(",");
+      const rows = leads.map((lead) =>
+        Object.values(lead)
+          .map((val) => `"${String(val || "").replace(/"/g, '""')}"`)
+          .join(",")
+      );
+      const csv = [headers, ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "partner_leads.csv";
+      link.click();
+
+      success("Leads exported successfully!");
+    } catch (err) {
+      console.error("❌ Error exporting CSV:", err);
+    }
   };
 
   return (

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { login } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import { useAlert } from "../../utils/useAlert";
 
 export default function Login() {
+  const { success, error: alertError, confirm } = useAlert();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,6 +23,8 @@ export default function Login() {
         throw new Error("Unexpected server response");
       }
 
+      success("Login successful!");
+
       // ✅ Save auth data
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
@@ -35,12 +39,14 @@ export default function Login() {
       }
     } catch (err) {
       console.error("❌ Login Error:", err);
-      setError(
+      const message =
         err?.response?.data?.error ||
-          err?.error ||
-          err?.message ||
-          "Login failed, please try again."
-      );
+        err?.error ||
+        err?.message ||
+        "Login failed, please try again.";
+
+      setError(message);
+      alertError(message);
     } finally {
       setLoading(false);
     }

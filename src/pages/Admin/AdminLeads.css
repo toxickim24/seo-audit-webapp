@@ -106,7 +106,8 @@
   justify-content: center;
   gap: 8px;
   margin-top: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-direction: row;
 }
 
 .pageBtn {
@@ -116,10 +117,12 @@
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
+  color: #FF8E3A;
 }
 
 .pageBtn:hover {
-  background: #f0f0f0;
+  background: #FF8E3A;
+  color: white;
 }
 
 .activePage {

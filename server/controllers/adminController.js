@@ -57,7 +57,6 @@ export const AdminController = {
     }
   },
 
-  // ✅ Fetch global settings
   async getSettings(req, res) {
     try {
       const db = getDB();
@@ -76,7 +75,6 @@ export const AdminController = {
     }
   },
 
-  // ✅ Update global settings
   async updateSettings(req, res) {
     try {
       const { site_name, contact_email, primary_color } = req.body;
@@ -99,13 +97,12 @@ export const AdminController = {
     }
   },
 
-  // ✅ Get overall stats for Admin Dashboard
   async getStats(req, res) {
     try {
       const db = getDB();
 
       const [[partners]] = await db.query("SELECT COUNT(*) AS total FROM partners");
-      const [[leads]] = await db.query("SELECT COUNT(*) AS total FROM leads WHERE is_deleted = 0");
+      const [[leads]] = await db.query("SELECT COUNT(*) AS total FROM leads");
       const [[users]] = await db.query("SELECT COUNT(*) AS total FROM users");
 
       res.json({

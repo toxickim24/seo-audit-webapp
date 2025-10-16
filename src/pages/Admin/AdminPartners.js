@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import "./AdminPartners.css";
+import { useAlert } from "../../utils/useAlert";
 
 export default function AdminPartners() {
+  const { success, error, confirm } = useAlert();
   const [partners, setPartners] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,7 +53,10 @@ export default function AdminPartners() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this partner?")) return;
+    const ok = await confirm("Delete this partner?");
+    if (!ok) return;
+    success("Partner deleted!");
+
     await fetch(`${API_URL}/api/admin/partners/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import "./AdminSettings.css";
+import { useAlert } from "../../utils/useAlert";
 
 export default function AdminSettings() {
+  const { success, error, confirm } = useAlert();
   const [settings, setSettings] = useState({
     site_name: "",
     contact_email: "",
@@ -42,10 +44,10 @@ export default function AdminSettings() {
         body: JSON.stringify(settings),
       });
       if (!res.ok) throw new Error("Failed to save");
-      alert("✅ Settings saved successfully!");
+      success("✅ Settings saved successfully!");
     } catch (err) {
       console.error("❌ Save failed:", err);
-      alert("Failed to save settings.");
+      error("❌ Save failed:");
     } finally {
       setSaving(false);
     }

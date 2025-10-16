@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import "./AdminLeads.css";
+import { useAlert } from "../../utils/useAlert";
 
 export default function AdminLeads() {
+  const { success, error, confirm } = useAlert();
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
   const [search, setSearch] = useState("");
@@ -77,7 +79,9 @@ export default function AdminLeads() {
 
   // ✅ Delete
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+    const ok = await confirm("This lead will be permanently deleted.");
+    if (!ok) return;
+    success("Lead deleted!");
     try {
       const res = await fetch(`${API_URL}/api/adminLeads/${id}`, {
         method: "DELETE",
@@ -91,21 +95,32 @@ export default function AdminLeads() {
   };
 
   // ✅ Export CSV
-  const exportToCSV = () => {
+  const exportToCSV = async () => {
     if (!leads.length) return;
-    const headers = Object.keys(leads[0]).join(",");
-    const rows = leads.map((lead) =>
-      Object.values(lead)
-        .map((v) => `"${String(v || "").replace(/"/g, '""')}"`)
-        .join(",")
-    );
-    const blob = new Blob([headers + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "admin_leads.csv";
-    link.click();
+
+    const ok = await confirm(`Export ${leads.length} leads to CSV?`);
+    if (!ok) return;
+
+    try {
+      const headers = Object.keys(leads[0]).join(",");
+      const rows = leads.map((lead) =>
+        Object.values(lead)
+          .map((v) => `"${String(v || "").replace(/"/g, '""')}"`)
+          .join(",")
+      );
+      const blob = new Blob([headers + "\n" + rows.join("\n")], {
+        type: "text/csv",
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "admin_leads.csv";
+      link.click();
+
+      success("Leads exported successfully!");
+    } catch (err) {
+      console.error("❌ Error exporting CSV:", err);
+      error("Failed to export CSV. Try again.");
+    }
   };
 
   return (
