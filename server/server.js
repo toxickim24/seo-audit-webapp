@@ -51,7 +51,7 @@ app.use(logger);
 // ✅ Static Files: Uploaded Logos, PDFs, etc.
 // ===========================
 // This exposes the "uploads" folder so logos like /uploads/partner_1_logo.png can be accessed
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 
 // ===========================
 // ✅ Mount API Routes (organized by group)
@@ -103,5 +103,5 @@ if (process.env.NODE_ENV === "production") {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📂 Uploads available at http://localhost:${PORT}/uploads`);
+  console.log(`📂 Uploads available at http://localhost:${PORT}/server/uploads`);
 });
