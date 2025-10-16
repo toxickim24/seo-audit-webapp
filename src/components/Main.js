@@ -15,7 +15,6 @@ import { getOverallScore } from "../utils/calcOverallScore";
 import SeoPricing from "./SeoPricing";
 import SeoTools from "./SeoTools";
 import SeoContact from "./SeoContact";
-import LeadsManagement from "./LeadsManagement";
 import SeoJourney from "../components/SeoJourney";
 import GetFullReport from "../components/GetFullReport";
 
@@ -200,16 +199,8 @@ function Main({ activeTab }) {
       date: new Date().toISOString(),
     };
 
-    // ✅ Add partner_id if it exists
-    // if (partnerId) {
-    //   console.log("✅ Adding partner_id:", partnerId);
-    //   newLead.partner_id = partnerId;
-    // } else {
-    //   console.log("ℹ️ No partner_id found (main site submission)");
-    // }
-
     try {
-      const res = await fetch(`${API_BASE_URL}/api/leads`, {
+      const res = await fetch(`${API_BASE_URL}/api/adminLeads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
@@ -526,7 +517,6 @@ function Main({ activeTab }) {
           {activeTab === "seo-pricing" && <SeoPricing />}
           {activeTab === "seo-tools" && <SeoTools />}
           {activeTab === "seo-contact" && <SeoContact />}
-          {activeTab === "leads-management" && <LeadsManagement />}
         </>
       )}
     </main>

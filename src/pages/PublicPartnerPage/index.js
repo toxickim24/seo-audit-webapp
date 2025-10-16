@@ -79,6 +79,7 @@ export default function PublicPartnerPage() {
         if (!res.ok) throw new Error("Partner not found");
         const data = await res.json();
         setPartner(data);
+        
         document.documentElement.style.setProperty("--primary-color", data.primary_color || "#22354d");
         document.documentElement.style.setProperty("--secondary-color", data.secondary_color || "#fb6a45");
       } catch (err) {
@@ -193,7 +194,7 @@ export default function PublicPartnerPage() {
     if (partner?.id) newLead.partner_id = partner.id;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/leads`, {
+      const res = await fetch(`${API_BASE_URL}/api/adminLeads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
@@ -209,6 +210,7 @@ export default function PublicPartnerPage() {
   };
 
   const handleAiAudit = async () => {
+
     if (!url) return;
     if (!pageSpeed || !desktopPerf || !mobilePerf) return;
 
@@ -273,7 +275,9 @@ export default function PublicPartnerPage() {
         false,
         simplifiedDesktop,
         simplifiedMobile,
-        seoData
+        seoData,
+        partner?.logo_url,
+        partner?.company_name,
       );
 
       const base64Data = await new Promise((resolve, reject) => {
@@ -420,7 +424,11 @@ export default function PublicPartnerPage() {
             handleAiEmailPDF={handleAiEmailPDF}
             setJourneyStep={setJourneyStep}
             url={url}
+            simplifiedDesktop={simplifiedDesktop}
+            simplifiedMobile={simplifiedMobile}
             seoData={seoData}
+            partnerLogo={partner?.logo_url}
+            partnerCompany={partner?.company_name}
           />
         )}
 

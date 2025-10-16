@@ -3,28 +3,35 @@ import { Link } from "react-router-dom";
 import "./PartnerDashboard.css";
 
 function PartnerDashboard() {
-  const [partner, setPartner] = useState(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch (err) {
-      console.error("❌ Error parsing user data:", err);
-      return null;
-    }
-  });
+  const [partner, setPartner] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const handleStorageChange = () => {
+    const fetchPartner = async () => {
       try {
-        const updatedUser = localStorage.getItem("user");
-        setPartner(updatedUser ? JSON.parse(updatedUser) : null);
-      } catch {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Missing token");
+
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/partners/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch partner data");
+        const data = await res.json();
+
+        setPartner(data.partner);
+      } catch (err) {
+        console.error("❌ Partner fetch failed:", err);
         setPartner(null);
+      } finally {
+        setLoading(false);
       }
     };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+
+    fetchPartner();
   }, []);
+
+  if (loading) return <p>Loading partner data...</p>;
 
   if (!partner) {
     return (
@@ -32,23 +39,21 @@ function PartnerDashboard() {
         <div className="partner-dashboard">
           <h2>Partner info not found</h2>
           <p>Please log in again to access your dashboard.</p>
-          <Link to="/partner-login" className="menu-card">
-            Go to Login
-          </Link>
+          <Link to="/login" className="menu-card">Go to Login</Link>
         </div>
       </div>
     );
   }
 
-  const partnerLink = `${window.location.origin}/${partner?.slug || ""}`;
+  const partnerLink = `${window.location.origin}/${partner.slug || ""}`;
 
   return (
     <div className="main-layout">
       <div className="partner-dashboard">
         <header className="dashboard-header">
           <section className="welcome-section">
-            <h1>
-              Welcome, <span>{partner?.company_name || partner?.name}</span> 👋
+            <h1 className="title">
+              👋 Welcome, <span>{partner.company_name}</span>
             </h1>
             <p className="subtitle">
               This is your partner dashboard — manage your brand, track leads,
@@ -80,14 +85,12 @@ function PartnerDashboard() {
             <p>Update your company name, colors, and logo.</p>
           </Link>
 
-          {/* ✅ Updated Leads link */}
           <Link to="/partner-leads" className="menu-card">
             <div className="menu-icon">📊</div>
             <h4>Leads</h4>
             <p>View and manage your captured SEO leads.</p>
           </Link>
 
-          {/* ✅ Updated SEO Audit link — goes to partner public page */}
           <a
             href={partnerLink}
             target="_blank"

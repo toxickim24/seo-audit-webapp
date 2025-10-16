@@ -39,9 +39,9 @@ function SeoContact() {
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>📬 Contact SEO Mojo</h1>
-      <p className={styles.subtitle}>
+    <div className="main-container">
+      <h1 className="title">📬 Contact SEO Mojo</h1>
+      <p className="subtitle">
         Got questions, partnership inquiries, or technical issues? We’d love to hear from you.
       </p>
 

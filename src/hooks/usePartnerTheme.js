@@ -18,49 +18,63 @@ export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API
     "seo-pricing",
     "seo-tools",
     "seo-contact",
-    "leads-management",
-    "partner-login",
-    "partner-register",
+    "login",
+    "register",
     "partner-dashboard",
     "partner-settings",
     "partner-leads",
+    "admin-dashboard",
+    "admin-partners",
+    "admin-leads",
+    "admin-settings",
   ];
 
   useEffect(() => {
     const isPublic = firstSegment && !knownRoutes.includes(firstSegment);
     setIsPartnerPublic(isPublic);
 
-    const applyColors = (primary, secondary) => {
-      document.documentElement.style.setProperty("--primary-color", primary);
-      document.documentElement.style.setProperty("--secondary-color", secondary);
-    };
+    // ✅ If admin route — skip everything related to partner theme
+    if (firstSegment.startsWith("admin")) {
+      document.documentElement.style.setProperty("--primary-color", "");
+      document.documentElement.style.setProperty("--secondary-color", "");
+      setPartnerData(null);
+      return;
+    }
 
+    // ✅ Only fetch partner data if it's a public partner page
     if (isPublic) {
       document.body.classList.add("partner-theme");
-
-      (async () => {
+      
+      const fetchPartner = async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/api/partners/${firstSegment}`);
           if (!res.ok) throw new Error("Partner not found");
+
           const data = await res.json();
           setPartnerData(data);
 
-          applyColors(
-            data.primary_color || DEFAULT_COLORS.primary,
-            data.secondary_color || DEFAULT_COLORS.secondary
-          );
+          // ✅ Apply colors to document
+          const primary = data.primary_color || DEFAULT_COLORS.primary;
+          const secondary = data.secondary_color || DEFAULT_COLORS.secondary;
+
+          document.documentElement.style.setProperty("--primary-color", primary);
+          document.documentElement.style.setProperty("--secondary-color", secondary);
         } catch (err) {
-          console.error("⚠️ Failed to load partner:", err);
+          console.warn("⚠️ Failed to load partner:", err);
           setPartnerData(null);
-          applyColors(DEFAULT_COLORS.primary, DEFAULT_COLORS.secondary);
+          document.documentElement.style.setProperty("--primary-color", "");
+          document.documentElement.style.setProperty("--secondary-color", "");
         }
-      })();
+      };
+
+      fetchPartner();
     } else {
-      document.body.classList.remove("partner-theme");
+      // ✅ Reset theme on non-partner pages
       setPartnerData(null);
-      applyColors(DEFAULT_COLORS.primary, DEFAULT_COLORS.secondary);
+      document.documentElement.style.setProperty("--primary-color", "");
+      document.documentElement.style.setProperty("--secondary-color", "");
     }
-  }, [firstSegment]);
+  }, [firstSegment, API_BASE_URL]);
 
   return { partnerData, isPartnerPublic };
 }

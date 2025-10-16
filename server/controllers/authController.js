@@ -6,7 +6,7 @@ import { signToken } from "../utils/jwt.js";
 
 export const AuthController = {
   // ============================================================
-  // ✅ REGISTER
+  // ✅ REGISTER (defaults to "partner" role)
   // ============================================================
   async register(req, res) {
     const db = getDB();
@@ -16,28 +16,25 @@ export const AuthController = {
     try {
       const { name, email, password, company_name } = req.body;
 
-      // 🔍 Validate input
       if (!name || !email || !password) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      // 🔍 Check existing email
       const existing = await UserModel.findByEmail(email);
       if (existing) {
         return res.status(400).json({ error: "Email already registered" });
       }
 
-      // 🔐 Hash password
       const hashed = await bcrypt.hash(password, 10);
 
-      // 👤 Insert user record
+      // 👤 Insert user (default role = partner)
       const [userRes] = await conn.query(
-        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-        [name, email, hashed]
+        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+        [name, email, hashed, "partner"]
       );
       const userId = userRes.insertId;
 
-      // 🏢 Create partner if company name provided
+      // 🏢 Create partner if company_name provided
       let partnerSlug = null;
       if (company_name) {
         const baseSlug =
@@ -45,7 +42,6 @@ export const AuthController = {
           `company-${userId}`;
         let slug = baseSlug;
 
-        // ✅ Ensure unique slug
         const [conflicts] = await conn.query(
           "SELECT slug FROM partners WHERE slug = ?",
           [slug]
@@ -54,30 +50,26 @@ export const AuthController = {
           slug = `${baseSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
         }
 
-        // 💾 Insert partner record
         await conn.query(
           `INSERT INTO partners 
            (user_id, company_name, slug, primary_color, secondary_color, accent_color)
            VALUES (?, ?, ?, ?, ?, ?)`,
           [userId, company_name, slug, null, null, null]
         );
-
         partnerSlug = slug;
       }
 
-      // ✅ Commit transaction
       await conn.commit();
 
-      // 🔑 Create token
-      const token = signToken({ id: userId, email });
+      const token = signToken({ id: userId, email, role: "partner" });
 
-      // 📨 Return success
       return res.status(201).json({
         message: "Registration successful",
         user: {
           id: userId,
           name,
           email,
+          role: "partner",
           company_name: company_name || null,
           slug: partnerSlug,
         },
@@ -93,36 +85,28 @@ export const AuthController = {
   },
 
   // ============================================================
-  // ✅ LOGIN (with Partner Info)
+  // ✅ LOGIN (works for both Partner + Admin)
   // ============================================================
   async login(req, res) {
     try {
       const { email, password } = req.body;
       const db = getDB();
 
-      // 🔍 Find user
       const user = await UserModel.findByEmail(email);
-      if (!user) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
+      if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
-      // 🔐 Compare password
       const valid = await bcrypt.compare(password, user.password);
-      if (!valid) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
+      if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
-      // 🏢 Fetch partner info
+      // 🏢 Partner info (if applicable)
       const [partnerRows] = await db.query(
         "SELECT company_name, slug FROM partners WHERE user_id = ? LIMIT 1",
         [user.id]
       );
       const partner = partnerRows[0] || {};
 
-      // 🔑 Create token
-      const token = signToken({ id: user.id, email: user.email });
+      const token = signToken({ id: user.id, email: user.email, role: user.role });
 
-      // ✅ Respond with enriched user
       return res.json({
         message: "Login successful",
         token,
@@ -130,6 +114,7 @@ export const AuthController = {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
           company_name: partner.company_name || null,
           slug: partner.slug || null,
         },
@@ -141,27 +126,25 @@ export const AuthController = {
   },
 
   // ============================================================
-  // ✅ GET CURRENT USER
+  // ✅ CURRENT USER
   // ============================================================
   async me(req, res) {
     try {
       const db = getDB();
-
       const user = await UserModel.findById(req.user.id);
       if (!user) return res.status(404).json({ error: "User not found" });
 
-      // include partner info for /api/me
       const [partnerRows] = await db.query(
         "SELECT company_name, slug FROM partners WHERE user_id = ? LIMIT 1",
         [req.user.id]
       );
-
       const partner = partnerRows[0] || {};
 
       res.json({
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
         company_name: partner.company_name || null,
         slug: partner.slug || null,
       });

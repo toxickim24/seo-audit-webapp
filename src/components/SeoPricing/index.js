@@ -3,9 +3,9 @@ import styles from "./SeoPricing.module.css";
 
 function SeoPricing() {
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>💰 Pricing Plans</h1>
-      <p className={styles.subtitle}>
+    <div className="main-container">
+      <h1 className="title">💰 Pricing Plans</h1>
+      <p className="subtitle">
         Credits are used for running SEO scans. Pick the plan that fits your needs.
       </p>
 

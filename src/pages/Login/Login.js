@@ -17,19 +17,22 @@ export default function Login() {
 
     try {
       const res = await login({ email, password });
-      // console.log("✅ Login Response:", res);
-
       if (!res || !res.token || !res.user) {
         throw new Error("Unexpected server response");
       }
 
+      // ✅ Save auth data
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
-
-      // trigger header refresh
+      localStorage.setItem("userRole", res.user.role);
       window.dispatchEvent(new Event("authChange"));
 
-      navigate("/partner-dashboard", { replace: true });
+      // ✅ Redirect by role
+      if (res.user.role === "admin") {
+        navigate("/admin-dashboard", { replace: true });
+      } else {
+        navigate("/partner-dashboard", { replace: true });
+      }
     } catch (err) {
       console.error("❌ Login Error:", err);
       setError(
@@ -47,8 +50,8 @@ export default function Login() {
     <div className="login-page">
       <div className="auth-container">
         <form className="auth-form" onSubmit={handleLogin}>
-          <h2>Partner Login</h2>
-          
+          <h2>Login</h2>
+
           {error && <p className="error-text">{error}</p>}
 
           <div className="form-group">
@@ -79,6 +82,7 @@ export default function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
       </div>
     </div>
   );

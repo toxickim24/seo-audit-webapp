@@ -1,30 +1,16 @@
 .partner-settings-page {
-  width: 100%;
-  font-family: "Poppins", system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: #22354d;
   background-color: #f9fafb;
+  width: 100%;
 }
 
 /* Header */
 .settings-header {
   text-align: center;
   margin-bottom: 40px;
-}
-
-.settings-header h1 {
-  font-size: 40px;
-  font-weight: 700;
-  color: #22354D;
-  text-align: center;
-  padding-bottom: 10px;
-}
-
-.settings-header .subtitle {
-  display: block;
-  font-size: 18px;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 30px;
 }
 
 .partner-slug {
@@ -45,21 +31,22 @@
 }
 
 /* Form */
-.settings-form {
+.partner-settings-page .settings-form {
   display: flex;
   flex-direction: column;
   gap: 30px;
+  width: 100%;
 }
 
 /* Card sections */
-.settings-card {
+.partner-settings-page .settings-card {
   background: white;
   padding: 24px 20px;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
 }
 
-.settings-card h2 {
+.partner-settings-page .settings-card h2 {
   font-size: 18px;
   margin-bottom: 20px;
   color: #22354d;
@@ -110,8 +97,9 @@
 .color-grid {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-start;
+  flex-direction: row;
 }
 
 .color-item {
@@ -158,6 +146,76 @@
 }
 
 .save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===========================
+   Logo Upload & Preview
+=========================== */
+
+.form-group input[type="file"] {
+  margin-top: 6px;
+  padding: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Preview container */
+.logo-preview-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 15px;
+  max-width: 360px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Preview image */
+.logo-preview-container img.logo-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.logo-preview-container img.logo-preview:hover {
+  transform: scale(1.03);
+}
+
+/* Remove button */
+.remove-logo-btn {
+  background: #fb6a45;
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-logo-btn:hover {
+  background: #e85a34;
+}
+
+/* Upload progress */
+.form-group p {
+  font-size: 13px;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Disabled state */
+.form-group input[type="file"]:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

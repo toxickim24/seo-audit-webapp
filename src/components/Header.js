@@ -4,12 +4,15 @@ import "../css/Header.css";
 
 function Header({ tabs, partnerData }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ Detect current route
   const firstSegment = location.pathname.split("/")[1] || "";
+
+  // ✅ Known internal routes
   const knownRoutes = [
     "",
     "seo-audit",
@@ -17,20 +20,31 @@ function Header({ tabs, partnerData }) {
     "seo-tools",
     "seo-contact",
     "leads-management",
-    "partner-login",
-    "partner-register",
+    "login",
+    "register",
     "partner-dashboard",
     "partner-settings",
     "partner-leads",
+    "admin-dashboard",
+    "admin-partners",
+    "admin-leads",
+    "admin-settings",
   ];
 
   const isPartnerPublic = firstSegment && !knownRoutes.includes(firstSegment);
 
+  // ✅ Logo logic
   const defaultLogo = "/seo-logo.png";
   const partnerLogo = partnerData?.logo_url || defaultLogo;
 
+  // ✅ Track auth state
   useEffect(() => {
-    const checkAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const storedRole = localStorage.getItem("userRole");
+      setIsLoggedIn(!!token);
+      setRole(storedRole);
+    };
     checkAuth();
     window.addEventListener("authChange", checkAuth);
     return () => window.removeEventListener("authChange", checkAuth);
@@ -42,36 +56,19 @@ function Header({ tabs, partnerData }) {
     navigate("/");
   };
 
-  // ✅ Smart logo click behavior
+  // ✅ Smart logo redirect
   const handleLogoClick = (e) => {
     e.preventDefault();
-
-    if (isPartnerPublic) {
-      // Stay on partner link
-      return;
-    }
-
-    if (isLoggedIn) {
-      navigate("/partner-dashboard");
-    } else {
-      navigate("/seo-audit");
-    }
+    if (isPartnerPublic) return;
+    if (isLoggedIn && role === "admin") navigate("/admin-dashboard");
+    else if (isLoggedIn && role === "partner") navigate("/partner-dashboard");
+    else navigate("/seo-audit");
   };
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest(".partner-dropdown-container")) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
 
   return (
     <header className="header-container">
       <div className="header-container-wrapper">
-        {/* ✅ Logo with smart redirect */}
+        {/* ✅ Logo */}
         <a href="/" className="logo" onClick={handleLogoClick}>
           <img
             src={partnerLogo}
@@ -80,7 +77,7 @@ function Header({ tabs, partnerData }) {
           />
         </a>
 
-        {/* ✅ Hide everything else when on partner link */}
+        {/* ✅ Only hide header on partner public pages */}
         {!isPartnerPublic && (
           <div className="nav-group">
             <nav className="navbar-container">
@@ -95,6 +92,7 @@ function Header({ tabs, partnerData }) {
               </button>
 
               <ul className={`navbar-menu ${menuOpen ? "show" : ""}`}>
+                {/* Public Tabs */}
                 {!isLoggedIn &&
                   tabs.map((tab) => (
                     <li className="navbar-item" key={tab.id}>
@@ -108,80 +106,56 @@ function Header({ tabs, partnerData }) {
                     </li>
                   ))}
 
-                {isLoggedIn && (
+                {/* ✅ Partner Routes */}
+                {isLoggedIn && role === "partner" && (
                   <>
                     <li className="navbar-item">
-                      <NavLink
-                        to="/partner-dashboard"
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Dashboard
-                      </NavLink>
+                      <NavLink to="/partner-dashboard">Dashboard</NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink
-                        to="/partner-settings"
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Settings
-                      </NavLink>
+                      <NavLink to="/partner-settings">Settings</NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink
-                        to="/partner-leads"
-                        className={({ isActive }) => (isActive ? "active" : "")}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Lead Management
-                      </NavLink>
+                      <NavLink to="/partner-leads">Leads Management</NavLink>
+                    </li>
+                  </>
+                )}
+
+                {/* ✅ Admin Routes */}
+                {isLoggedIn && role === "admin" && (
+                  <>
+                    <li className="navbar-item">
+                      <NavLink to="/admin-dashboard">Dashboard</NavLink>
+                    </li>
+                    <li className="navbar-item">
+                      <NavLink to="/admin-settings">Settings</NavLink>
+                    </li>
+                    <li className="navbar-item">
+                      <NavLink to="/admin-partners">Partners</NavLink>
+                    </li>
+                    <li className="navbar-item">
+                      <NavLink to="/admin-leads">Lead Management</NavLink>
                     </li>
                   </>
                 )}
               </ul>
             </nav>
 
+            {/* ✅ Auth Button */}
             <div className="auth-controls">
               {!isLoggedIn ? (
-                <div className="partner-dropdown-container">
-                  <button
-                    className="partner-button"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    Partners ▾
-                  </button>
-
-                  <div
-                    className={`partner-dropdown-menu ${
-                      dropdownOpen ? "show" : ""
-                    }`}
-                    onMouseLeave={() => setDropdownOpen(false)}
-                  >
-                    <Link
-                      to="/partner-login"
-                      className="dropdown-item"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setMenuOpen(false);
-                      }}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/partner-register"
-                      className="dropdown-item"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setMenuOpen(false);
-                      }}
-                    >
-                      Register
-                    </Link>
-                  </div>
-                </div>
+                <Link
+                  to="/login"
+                  className="partner-button"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
               ) : (
-                <button className="partner-button logout-btn" onClick={handleLogout}>
+                <button
+                  className="partner-button logout-btn"
+                  onClick={handleLogout}
+                >
                   Logout
                 </button>
               )}

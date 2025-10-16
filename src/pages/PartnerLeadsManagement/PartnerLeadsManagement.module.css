@@ -1,0 +1,219 @@
+/* Actions Row */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Search box */
+.searchBox {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  width: 280px;
+  transition: border-color 0.2s;
+}
+
+.searchBox:focus {
+  border-color: #FF8E3A;
+  outline: none;
+}
+
+/* Export button */
+.exportBtn {
+  padding: 10px 18px;
+  background: #FF8E3A;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s;
+  width: auto;
+}
+
+.exportBtn:hover {
+  background: #e6782f;
+}
+
+/* Table wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Table */
+.table {
+  min-width: 900px;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  background: #fff;
+}
+
+.table th {
+  background: #22354D ;
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 2px solid #e5e7eb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.table th:hover {
+  background: #FF8E3A;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #444;
+}
+
+.table tr:hover td {
+  background: #fafafa;
+}
+
+/* Delete button */
+.deleteBtn {
+  padding: 6px 12px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.deleteBtn:hover {
+  background: #c0392b;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover {
+  background: #f0f0f0;
+}
+
+.activePage {
+  background: #FF8E3A;
+  color: white;
+  border-color: #FF8E3A;
+  font-weight: bold;
+}
+
+
+
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 1024px) {
+
+  /* Table wrapper */
+  .tableWrapper {
+    width: 700px;
+  }
+
+}
+
+@media (max-width: 767px) {
+
+  .title {
+    font-size: 24px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchBox {
+    width: 100%;
+  }
+
+  /* Table to card view */
+  .tableWrapper {
+    width: 100%;
+    overflow-x: hidden !important; /* kill horizontal scroll */
+    box-shadow: none;
+  }
+
+  .table {
+    min-width: unset !important;   /* remove forced width */
+    width: 100% !important;
+    border-collapse: collapse;
+  }
+
+  .table,
+  .table thead,
+  .table tbody,
+  .table th,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100% !important;
+    white-space: normal !important; /* wrap long text */
+  }
+
+  .table tbody {
+    background-color: #F9FAFB;
+  }
+
+  .table thead {
+    display: none; /* no headers */
+  }
+
+  .table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .table td {
+    padding: 8px 0;
+    border: none;
+    font-size: 15px;
+    color: #444;
+    text-align: left;
+    word-wrap: break-word;   /* handle long words like URLs */
+  }
+
+  .table td:last-child {
+    margin-top: 8px;
+  }
+
+  .table td::before {
+    content: none !important; /* remove pseudo labels */
+  }content: none !important;
+  
+}

@@ -9,34 +9,39 @@ export const generateAiSeoPDF = async (
   download = true,
   simplifiedDesktop,
   simplifiedMobile,
-  seoData
+  seoData,
+  partnerLogo = null,
+  partnerCompany = null,
 ) => {
   if (!aiAudit) return;
+
+  const logoToUse = partnerLogo || "/seo-logo.png";
+  const companyName = partnerCompany || "SEO Mojo";
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
   const margin = 20;
   const lineHeight = 8;
-  const headerY = 30;           // header rule
+  const headerY = 30;
   const footerTopY = pageHeight - 18;
   const footerTextY = pageHeight - 8;
-  const contentTopY = 40;       // start of content per page
-  const contentBottomY = footerTopY; // guard for content
+  const contentTopY = 40;
+  const contentBottomY = footerTopY;
   let yPos = 50;
   const year = new Date().getFullYear();
 
   // --- Colors ---
   const COLOR_TEXT = [0, 0, 0];
   const COLOR_MUTED = [90, 90, 90];
-  const COLOR_BAR = [251, 106, 69];      // brand orange
+  const COLOR_BAR = [251, 106, 69];
   const COLOR_BG = [240, 240, 240];
-  const COLOR_HIGH = [220, 53, 69];      // red
-  const COLOR_MED = [255, 165, 0];       // orange
-  const COLOR_LOW = [40, 167, 69];       // green
-  const COLOR_BRAND_FOOTER = [251, 106, 69]; // #FB6A45
+  const COLOR_HIGH = [220, 53, 69];
+  const COLOR_MED = [255, 165, 0];
+  const COLOR_LOW = [40, 167, 69];
+  const COLOR_BRAND_FOOTER = [251, 106, 69];
 
-  // --- Tag typography (shared across sections) ---
+  // --- Tag typography ---
   const TAG_FONT_STYLE = "bold";
   const TAG_FONT_SIZE = 11;
 
@@ -85,7 +90,6 @@ export const generateAiSeoPDF = async (
     doc.setTextColor(...COLOR_TEXT);
   };
 
-  // Single-page-safe text: writes only if there is space on the current page; otherwise stops (no overflow)
   const addTextSinglePage = (text, indent = 0, fontStyle = "normal", size = 12, color = COLOR_TEXT) => {
     const safeText = String(text ?? "");
     const maxWidth = pageWidth - margin * 2 - indent;
@@ -134,15 +138,12 @@ export const generateAiSeoPDF = async (
     doc.setTextColor(...COLOR_TEXT);
     doc.text(label, margin, yPos + barHeight - 1);
 
-    // Background
     doc.setFillColor(...COLOR_BG);
     doc.roundedRect(margin + 60, yPos, barWidth, barHeight, 2, 2, "F");
 
-    // Fill
     doc.setFillColor(...COLOR_BAR);
     doc.roundedRect(margin + 60, yPos, filledWidth, barHeight, 2, 2, "F");
 
-    // % label
     doc.setFontSize(10);
     const textY = yPos + barHeight - 2;
     if (filledWidth > 25) {
@@ -156,10 +157,9 @@ export const generateAiSeoPDF = async (
     yPos += 14;
   };
 
-  // Single-page-safe progress bar: do not overflow page, silently skip if no space
   const drawProgressBarSinglePage = (label, value) => {
     const need = 14;
-    if (spaceLeft() < need) return; // don't draw if it won't fit
+    if (spaceLeft() < need) return;
     const barHeight = 7;
     const barWidth = pageWidth - margin * 2 - 65;
     const score = Math.max(0, Math.min(100, Number(value) || 0));
@@ -197,23 +197,63 @@ export const generateAiSeoPDF = async (
     return COLOR_LOW;
   };
 
+  // ✅ Preload logo dimensions once (async safe)
+  async function loadImageSize(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
+  let logoDimensions = null;
+  try {
+    logoDimensions = await loadImageSize(partnerLogo || "/seo-logo.png");
+  } catch (err) {
+    console.warn("⚠️ Failed to preload logo dimensions:", err);
+  }
+
   const addHeaderFooter = (pageNum, totalPages) => {
-    // Header
     try {
-      const logo = "/seo-logo.png";
-      const w = 20;
-      const h = (w * 97.5) / 130;
-      doc.addImage(logo, "PNG", margin, 8, w, h);
-    } catch (_) {}
+      const maxWidth = 40;
+      const maxHeight = 20;
+      const x = margin;
+      const y = 8;
+
+      // Use preloaded dimensions
+      let logoWidth = logoDimensions?.width || 200;
+      let logoHeight = logoDimensions?.height || 100;
+      const aspectRatio = logoWidth / logoHeight;
+
+      if (aspectRatio >= 1) {
+        logoWidth = maxWidth;
+        logoHeight = maxWidth / aspectRatio;
+      } else {
+        logoHeight = maxHeight;
+        logoWidth = maxHeight * aspectRatio;
+      }
+
+      if (logoWidth > maxWidth) {
+        logoHeight *= maxWidth / logoWidth;
+        logoWidth = maxWidth;
+      }
+      if (logoHeight > maxHeight) {
+        logoWidth *= maxHeight / logoHeight;
+        logoHeight = maxHeight;
+      }
+
+      doc.addImage(logoToUse, "PNG", x, y, logoWidth, logoHeight);
+    } catch (err) {
+      console.warn("⚠️ Failed to render logo:", err);
+    }
+
     doc.setDrawColor(200);
     doc.line(margin, headerY, pageWidth - margin, headerY);
-
-    // Footer line
     doc.line(margin, footerTopY, pageWidth - margin, footerTopY);
 
-    // Left-aligned footer text + right-aligned page #
-    const pre = `© ${year} SEO Mojo. All Rights Reserved. Made by `;
-    const brand = "Web Design Davao";
+    const pre = `© ${year} ${companyName}. All Rights Reserved. Made by `;
+    const brand = " Web Design Davao";
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...COLOR_TEXT);
@@ -234,7 +274,11 @@ export const generateAiSeoPDF = async (
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(...COLOR_TEXT);
-  doc.text("SEO Mojo Audit Report", pageWidth / 2, yPos, { align: "center" });
+  const titleText =
+  companyName && companyName.toLowerCase() !== "seo mojo"
+    ? `${companyName} SEO Audit Report`
+    : `${companyName || "SEO Mojo"} Audit Report`;
+  doc.text(titleText, pageWidth / 2, yPos, { align: "center" });
   yPos += 12;
 
   doc.setFont("helvetica", "normal");

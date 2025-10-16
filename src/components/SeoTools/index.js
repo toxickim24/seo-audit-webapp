@@ -33,9 +33,9 @@ function SeoTools() {
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>🔗 SEO Mojo Tools</h1>
-      <p className={styles.subtitle}>
+    <div className="main-container">
+      <h1 className="title">🔗 SEO Mojo Tools</h1>
+      <p className="subtitle">
         Download our browser extension or embed the SEO Mojo widget into your site.
       </p>
 

@@ -3,7 +3,7 @@
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  width: 100%;
+  width: 50%;
   margin: 0 auto;
   text-align: center;
 }
@@ -148,6 +148,9 @@
 }
 
 @media (max-width: 767px) {
+  .container {
+    width: 100%;
+  }
 
   .actions {
     flex-direction: column;
