@@ -114,9 +114,11 @@
 .admin-partners-actions-col {
   display: flex;
   gap: 5px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   min-height: 64px;
   align-content: center;
+  flex-direction: row;
+  align-items: center;
 }
 
 .admin-partners-btn {

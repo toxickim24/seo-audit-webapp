@@ -1,6 +1,7 @@
 // ===========================
 // ✅ Core Setup
 // ===========================
+import fs from "fs";
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -90,15 +91,24 @@ app.use("/api/admin/partners", adminPartnerRoutes);
 app.use(errorHandler);
 
 // ===========================
-// ✅ Serve React Build in Production
+// ✅ Serve React Build in Production (Auto-detect path)
 // ===========================
 if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "../build");
+  // default path if build is in project root
+  let buildPath = path.join(__dirname, "../build");
+
+  // check if build folder exists; fallback to ./server/build
+  if (!fs.existsSync(buildPath)) {
+    buildPath = path.join(__dirname, "build");
+  }
+
   app.use(express.static(buildPath));
 
-  app.get("*", (req, res) =>
-    res.sendFile(path.join(buildPath, "index.html"))
-  );
+  app.use((req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+
+  console.log(`✅ Serving React build from: ${buildPath}`);
 }
 
 // ===========================
