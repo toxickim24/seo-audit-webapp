@@ -24,7 +24,7 @@ export const AdminPartnerController = {
   },
 
   // ==========================================================
-  // ✅ Add new partner (default 3 credits)
+  // ✅ Add new partner (fixed version)
   // ==========================================================
   async addPartner(req, res) {
     try {
@@ -34,26 +34,27 @@ export const AdminPartnerController = {
         primary_color,
         secondary_color,
         accent_color,
+        credits,
         user_id,
         logo_url,
       } = req.body;
       const db = getDB();
       await db.query(
         `INSERT INTO partners 
-         (company_name, slug, primary_color, secondary_color, accent_color, credits, user_id, logo_url, created_at, updated_at, is_deleted)
-         VALUES (?, ?, ?, ?, ?, 3, ?, ?, NOW(), NOW(), 0)`,
+          (company_name, slug, primary_color, secondary_color, accent_color, credits, user_id, logo_url, created_at, updated_at, is_deleted)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 0)`,
         [
           company_name,
           slug,
           primary_color,
           secondary_color,
           accent_color,
-          req.body.credits || 3,
+          credits,
           user_id || null,
-          logo_url || null,
+          logo_url || null
         ]
       );
-      res.json({ success: true, message: "Partner added successfully with 3 credits" });
+      res.json({ success: true, message: "Partner added successfully" });
     } catch (err) {
       console.error("❌ Error adding partner:", err);
       res.status(500).json({ error: "Failed to add partner" });
@@ -90,7 +91,7 @@ export const AdminPartnerController = {
           credits,
           user_id || null,
           logo_url || null,
-          id,
+          id
         ]
       );
       res.json({ success: true, message: "Partner updated successfully" });
