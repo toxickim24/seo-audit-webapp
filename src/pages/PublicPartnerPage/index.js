@@ -10,6 +10,7 @@ import GetFullReport from "../../components/GetFullReport";
 import { fetchSeoPerformance } from "../../api/SeoPerformance";
 import { getOverallScore } from "../../utils/calcOverallScore";
 import { generateAiSeoPDF } from "../../utils/generateAiSeoPDF";
+import { useAlert } from "../../utils/useAlert";
 
 function SuccessNotification({ email, clearStatus }) {
   const [visible, setVisible] = useState(true);
@@ -18,28 +19,33 @@ function SuccessNotification({ email, clearStatus }) {
     return () => clearTimeout(timer);
   }, []);
   if (!visible) return null;
-
   return (
     <div className="success-notification">
       <span>✅ Report sent! Check your inbox ({email})</span>
-      <button className="close-btn" onClick={() => {
-        setVisible(false);
-        if (clearStatus) clearStatus();
-      }}>✕</button>
+      <button
+        className="close-btn"
+        onClick={() => {
+          setVisible(false);
+          clearStatus && clearStatus();
+        }}
+      >
+        ✕
+      </button>
     </div>
   );
 }
 
 export default function PublicPartnerPage() {
+  const { success, error: showError, confirm } = useAlert();
   const { slug } = useParams();
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  // ===== Partner Data =====
+  // Partner Data
   const [partner, setPartner] = useState(null);
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [partnerError, setPartnerError] = useState("");
 
-  // ===== SEO Audit States =====
+  // SEO Audit states
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -50,19 +56,19 @@ export default function PublicPartnerPage() {
   const [mobilePerf, setMobilePerf] = useState(null);
   const [overallScore, setOverallScore] = useState(null);
 
-  // ===== Lead form =====
+  // Lead form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [leadCaptured, setLeadCaptured] = useState(false);
 
-  // ===== Email status =====
+  // Email status
   const [emailStatus, setEmailStatus] = useState("");
   const [emailStatusType, setEmailStatusType] = useState("");
   const [isEmailSending, setIsEmailSending] = useState(false);
 
-  // ===== AI Audit =====
+  // AI Audit
   const [aiAudit, setAiAudit] = useState(null);
   const [aiAuditLoading, setAiAuditLoading] = useState(false);
   const [aiAuditError, setAiAuditError] = useState("");
@@ -71,29 +77,71 @@ export default function PublicPartnerPage() {
 
   const [journeyStep, setJourneyStep] = useState("enter");
 
-  // ===== Fetch Partner =====
+  // ✅ Fetch Partner
   useEffect(() => {
+    let isMounted = true;
     const fetchPartner = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/partners/${slug}`);
-        if (!res.ok) throw new Error("Partner not found");
+
+        // ✅ Handle deleted/inactive partner (404)
+        if (res.status === 404) {
+          if (!isMounted) return;
+          setPartnerError("Partner not found or inactive.");
+          setPartner(null);
+          document.documentElement.style.setProperty("--primary-color", "#22354d");
+          document.documentElement.style.setProperty("--secondary-color", "#fb6a45");
+          return;
+        }
+
+        // ✅ Handle other non-OK responses
+        if (!res.ok) {
+          if (!isMounted) return;
+          console.warn("⚠️ Partner fetch returned non-OK status:", res.status);
+          setPartnerError("Unable to load partner details.");
+          setPartner(null);
+          return;
+        }
+
         const data = await res.json();
+        if (!isMounted) return;
+
+        if (data.is_deleted === 1) {
+          setPartnerError("Partner not found or inactive.");
+          setPartner(null);
+          return;
+        }
+
+        // ✅ Success — apply colors
         setPartner(data);
-        
-        document.documentElement.style.setProperty("--primary-color", data.primary_color || "#22354d");
-        document.documentElement.style.setProperty("--secondary-color", data.secondary_color || "#fb6a45");
+        document.documentElement.style.setProperty(
+          "--primary-color",
+          data.primary_color || "#22354d"
+        );
+        document.documentElement.style.setProperty(
+          "--secondary-color",
+          data.secondary_color || "#fb6a45"
+        );
       } catch (err) {
-        console.error("❌ Partner fetch failed:", err);
+        // ✅ Ignore expected 404 and log only unexpected errors
+        if (!String(err).includes("404")) {
+          console.warn("⚠️ Partner fetch failed:", err);
+        }
         setPartnerError("Partner not found or inactive.");
         document.documentElement.style.setProperty("--primary-color", "#22354d");
         document.documentElement.style.setProperty("--secondary-color", "#fb6a45");
       } finally {
-        setPartnerLoading(false);
+        if (isMounted) setPartnerLoading(false);
       }
     };
+
     fetchPartner();
+    return () => {
+      isMounted = false;
+    };
   }, [slug]);
 
+  // ============= Utility functions =============
   const normalizeUrl = (rawUrl) => {
     if (!rawUrl) return "";
     let val = rawUrl.trim();
@@ -119,23 +167,24 @@ export default function PublicPartnerPage() {
     return {
       strategy: perf.strategy,
       score: perf.score,
-      metrics: {
-        fcp: perf.fcp,
-        lcp: perf.lcp,
-        tti: perf.tti,
-      },
+      metrics: { fcp: perf.fcp, lcp: perf.lcp, tti: perf.tti },
       opportunities: (perf.opportunities || [])
         .filter((opp) => opp.savingsMs > 0)
         .map((opp) => ({ title: opp.title, savingsMs: opp.savingsMs })),
     };
   };
 
+  // ============= SEO / Lead / AI Handlers =============
   const handleAnalyze = async () => {
-    const err = validateUrl(url);
-    if (err) {
-      setError(err);
+    if (partner && partner.credits <= 0) {
+      showError(
+        "⚠️ You have no SEO audit credits left. Please contact support to purchase more credits."
+      );
       return;
     }
+
+    const err = validateUrl(url);
+    if (err) return setError(err);
 
     setError("");
     setIsSubmitted(true);
@@ -147,8 +196,17 @@ export default function PublicPartnerPage() {
     setUrl(normalized);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/seo/analyze?url=${encodeURIComponent(normalized)}`);
-      if (!res.ok) throw new Error("Server error");
+      const res = await fetch(
+        `${API_BASE_URL}/api/seo/analyze?url=${encodeURIComponent(normalized)}&partner_id=${partner?.id || ""}`
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        if (res.status === 403 && data.error?.includes("No credits")) {
+          showError("⚠️ This partner has no SEO audit credits left. Please contact support to top up.");
+          return;
+        }
+        throw new Error("Server error");
+      }
       const data = await res.json();
       setSeoData(data);
 
@@ -177,10 +235,7 @@ export default function PublicPartnerPage() {
 
   const handleLeadSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email) {
-      setError("Name and Email are required.");
-      return;
-    }
+    if (!name || !email) return setError("Name and Email are required.");
 
     const newLead = {
       name,
@@ -199,7 +254,6 @@ export default function PublicPartnerPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),
       });
-
       if (!res.ok) throw new Error("Failed to save lead");
       setLeadCaptured(true);
       setJourneyStep("get-report");
@@ -210,13 +264,9 @@ export default function PublicPartnerPage() {
   };
 
   const handleAiAudit = async () => {
-
-    if (!url) return;
-    if (!pageSpeed || !desktopPerf || !mobilePerf) return;
-
+    if (!url || !pageSpeed || !desktopPerf || !mobilePerf) return;
     setAiAuditLoading(true);
     setAiAuditError("");
-
     try {
       const simplifiedDesktop = simplifyPerf(desktopPerf);
       const simplifiedMobile = simplifyPerf(mobilePerf);
@@ -244,7 +294,6 @@ export default function PublicPartnerPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(raw),
       });
-
       if (!res.ok) throw new Error("AI audit failed");
       const data = await res.json();
       if (!data.success) throw new Error("No analysis returned");
@@ -263,12 +312,8 @@ export default function PublicPartnerPage() {
       setEmailStatusType("error");
       return;
     }
-
     try {
       setIsEmailSending(true);
-      setEmailStatus("");
-      setEmailStatusType("");
-
       const pdfBlob = await generateAiSeoPDF(
         url,
         aiAudit,
@@ -277,7 +322,7 @@ export default function PublicPartnerPage() {
         simplifiedMobile,
         seoData,
         partner?.logo_url,
-        partner?.company_name,
+        partner?.company_name
       );
 
       const base64Data = await new Promise((resolve, reject) => {
@@ -288,13 +333,11 @@ export default function PublicPartnerPage() {
       });
 
       const safeUrl = String(url || "").replace(/^https?:\/\//, "").replace(/\W/g, "_");
-
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
       });
-
       if (!res.ok) throw new Error("Email failed");
 
       setEmailStatus("✅ Report emailed!");
@@ -308,6 +351,7 @@ export default function PublicPartnerPage() {
     }
   };
 
+  // Trigger AI audit + email
   useEffect(() => {
     if (journeyStep === "get-report" && url && !aiAudit && !aiAuditLoading) {
       handleAiAudit();
@@ -320,14 +364,30 @@ export default function PublicPartnerPage() {
     }
   }, [journeyStep, aiAudit]);
 
-  if (!partner && partnerError)
-    return <p className="error-message">{partnerError}</p>;
+  // ✅ Clean fallback handling
+  if (partnerLoading) return null;
+
+  if (partnerError) {
+    return (
+      <div className="partner-fallback">
+        <div className="partner-fallback-content">
+          <h2>Partner Not Available</h2>
+          <p>
+            This partner’s page is no longer active or has been removed.
+            <br />
+            <br />
+            Please contact your administrator or try again later.
+          </p>
+          <a href="/" className="partner-fallback-btn">
+            Go Back Home
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="main-layout">
-      <aside className="top-journey">
-        <SeoJourney step={journeyStep} />
-      </aside>
 
       <section className="main-container">
         {/* Step 1 */}
@@ -475,6 +535,11 @@ export default function PublicPartnerPage() {
           </div>
         )}
       </section>
+
+      <aside className="top-journey">
+        <SeoJourney step={journeyStep} />
+      </aside>
+
     </main>
   );
 }

@@ -358,9 +358,6 @@ function Main({ activeTab }) {
     <main className="main-layout">
       {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-contact" && activeTab !== "leads-management" ? (
         <>
-          <aside className="top-journey">
-            <SeoJourney step={journeyStep} />
-          </aside>
 
           <div className="content-area">
             <section className="main-container">
@@ -511,6 +508,11 @@ function Main({ activeTab }) {
               )}
             </section>
           </div>
+
+          <aside className="top-journey">
+            <SeoJourney step={journeyStep} />
+          </aside>
+
         </>
       ) : (
         <>

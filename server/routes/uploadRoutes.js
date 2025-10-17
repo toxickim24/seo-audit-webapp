@@ -2,135 +2,99 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { getDB } from "../config/db.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // ============================================================
-// ✅ Base upload directory
+// ✅ Ensure upload folder exists
 // ============================================================
-const baseUploadDir = path.resolve("server/uploads/partners");
-if (!fs.existsSync(baseUploadDir)) fs.mkdirSync(baseUploadDir, { recursive: true });
-
-// ============================================================
-// ✅ Helper: Fetch partner_id safely
-// ============================================================
-async function getPartnerId(userId) {
-  try {
-    const db = getDB();
-    const [rows] = await db.query(
-      "SELECT id FROM partners WHERE user_id = ? LIMIT 1",
-      [userId]
-    );
-    return rows[0]?.id || null;
-  } catch (err) {
-    console.error("❌ Failed to get partner ID:", err);
-    return null;
-  }
+const uploadDir = path.join(process.cwd(), "server/uploads/partners");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // ============================================================
-// ✅ Multer Storage
+// ✅ Multer Configuration
 // ============================================================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, baseUploadDir);
-  },
-  filename: async (req, file, cb) => {
-    try {
-      const partnerId = await getPartnerId(req.user.id);
-      const ext = path.extname(file.originalname).toLowerCase();
-      const fileName = `partner_${partnerId || "unknown"}_logo${ext}`;
-      const filePath = path.join(baseUploadDir, fileName);
-
-      // 🧹 Remove old logo if it exists
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-      cb(null, fileName);
-    } catch (err) {
-      console.error("❌ Error generating filename:", err);
-      cb(null, `partner_unknown_logo${path.extname(file.originalname)}`);
-    }
+  destination: (req, file, cb) => cb(null, uploadDir), // ✅ fixed here
+  filename: (req, file, cb) => {
+    const ext = (path.extname(file.originalname) || ".png").toLowerCase();
+    const safeExt = [".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(ext)
+      ? ext
+      : ".png";
+    const unique = Date.now();
+    cb(null, `logo-${unique}${safeExt}`);
   },
 });
 
-// ============================================================
-// ✅ File Filter (images only)
-// ============================================================
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) cb(null, true);
-  else cb(new Error("Only image files are allowed!"), false);
+  const allowed = /jpeg|jpg|png|gif|webp/;
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.test(ext)) cb(null, true);
+  else cb(new Error("Invalid file type. Please upload an image."));
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB limit
+});
 
 // ============================================================
-// ✅ POST /api/upload/logo → Upload + Save to DB
+// ✅ Upload Partner Logo (used by Admin & Partner)
 // ============================================================
-router.post("/logo", protect, upload.single("logo"), async (req, res) => {
+router.post("/logo", protect, upload.single("logo"), (req, res) => {
   try {
-    const db = getDB();
-    const userId = req.user.id;
-    const [partnerRows] = await db.query(
-      "SELECT id FROM partners WHERE user_id = ? LIMIT 1",
-      [userId]
-    );
-
-    if (!partnerRows.length) {
-      return res.status(404).json({ success: false, error: "Partner not found" });
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded.",
+      });
     }
 
-    const partnerId = partnerRows[0].id;
     const fileUrl = `/uploads/partners/${req.file.filename}`;
 
-    await db.query("UPDATE partners SET logo_url = ? WHERE id = ?", [
-      fileUrl,
-      partnerId,
-    ]);
-
-    res.json({
+    return res.status(200).json({
       success: true,
-      message: "✅ Logo uploaded and saved successfully!",
+      message: "Logo uploaded successfully.",
       url: fileUrl,
     });
   } catch (err) {
-    console.error("❌ Upload failed:", err);
-    res.status(500).json({ success: false, error: "Upload failed" });
+    console.error("❌ Upload error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while uploading file.",
+    });
   }
 });
 
 // ============================================================
-// ✅ DELETE /api/upload/logo → Remove logo file + clear DB
+// ✅ Handle Multer Errors Gracefully
 // ============================================================
-router.delete("/logo", protect, async (req, res) => {
-  try {
-    const db = getDB();
-    const userId = req.user.id;
-    const [rows] = await db.query(
-      "SELECT id, logo_url FROM partners WHERE user_id = ? LIMIT 1",
-      [userId]
-    );
-
-    if (!rows.length)
-      return res.status(404).json({ success: false, error: "Partner not found" });
-
-    const partner = rows[0];
-    const logoPath = path.join(process.cwd(), "server", partner.logo_url || "");
-
-    if (partner.logo_url && fs.existsSync(logoPath)) {
-      fs.unlinkSync(logoPath);
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "File too large. Maximum allowed size is 3 MB.",
+      });
     }
-
-    await db.query("UPDATE partners SET logo_url = NULL WHERE id = ?", [
-      partner.id,
-    ]);
-
-    res.json({ success: true, message: "✅ Logo removed successfully." });
-  } catch (err) {
-    console.error("❌ Logo delete failed:", err);
-    res.status(500).json({ success: false, error: "Logo delete failed" });
   }
+
+  if (err.message === "Invalid file type. Please upload an image.") {
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  console.error("❌ Unexpected error:", err);
+  return res.status(500).json({
+    success: false,
+    message: "Unexpected error occurred while uploading.",
+  });
 });
 
 export default router;

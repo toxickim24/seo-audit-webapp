@@ -10,7 +10,14 @@ export default function AdminPartners() {
   const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
-  const [formData, setFormData] = useState({
+  const [uploading, setUploading] = useState(false);
+
+  // ✅ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // ✅ Initialize form state
+  const [form, setForm] = useState({
     company_name: "",
     slug: "",
     primary_color: "#1a273b",
@@ -18,6 +25,7 @@ export default function AdminPartners() {
     accent_color: "#10b981",
     user_id: "",
     logo_url: "",
+    credits: 3,
   });
 
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -54,9 +62,65 @@ export default function AdminPartners() {
     fetchUsers();
   }, []);
 
+  // ✅ Handle logo upload
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("logo", file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload/logo`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setForm((prev) => ({ ...prev, logo_url: data.url }));
+    } catch (err) {
+      console.error("❌ Upload error:", err);
+      error("Failed to upload logo.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // ✅ Add / Edit Partner
   const handleSave = async (e) => {
     e.preventDefault();
+
+    // ✅ Check if slug already exists
+    const slugTaken = partners.find(
+      (p) =>
+        p.slug?.toLowerCase() === form.slug?.toLowerCase() &&
+        p.id !== (editing?.id || null)
+    );
+
+    if (slugTaken) {
+      error(
+        `The slug "${form.slug}" is already used by ${slugTaken.company_name}. Please choose another slug.`
+      );
+      return;
+    }
+
+    // ✅ Check if user is already assigned to another partner
+    if (form.user_id) {
+      const alreadyAssigned = partners.find(
+        (p) => String(p.user_id) === String(form.user_id) && p.id !== (editing?.id || null)
+      );
+
+      if (alreadyAssigned) {
+        error(
+          `${alreadyAssigned.user_name || "This user"} is already assigned to another partner (${alreadyAssigned.company_name}). Please choose a different user.`
+        );
+        return;
+      }
+    }
+
     const method = editing ? "PUT" : "POST";
     const url = editing
       ? `${API_URL}/api/admin/partners/${editing.id}`
@@ -72,7 +136,7 @@ export default function AdminPartners() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(form),
       });
 
       success(editing ? "Partner updated successfully!" : "Partner added successfully!");
@@ -80,6 +144,7 @@ export default function AdminPartners() {
       setEditing(null);
       fetchPartners();
     } catch (err) {
+      console.error("❌ Error saving partner:", err);
       error("Failed to save partner. Try again.");
     }
   };
@@ -108,7 +173,7 @@ export default function AdminPartners() {
     fetchPartners();
   };
 
-  // ✅ Export CSV (with confirmation)
+  // ✅ Export CSV
   const exportCSV = async () => {
     const filtered = partners.filter((p) =>
       statusFilter === "active" ? p.is_deleted === 0 : p.is_deleted === 1
@@ -137,14 +202,24 @@ export default function AdminPartners() {
       console.error("❌ Error exporting CSV:", err);
       error("Failed to export partners. Try again.");
     }
-};
+  };
 
-  // ✅ Filtered Partners
+  // ✅ Filter + Pagination
   const filteredPartners = partners.filter((p) => {
     const matchSearch = p.company_name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "active" ? p.is_deleted === 0 : p.is_deleted === 1;
     return matchSearch && matchStatus;
   });
+
+  const totalPages = Math.ceil(filteredPartners.length / itemsPerPage);
+  const paginatedPartners = filteredPartners.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   return (
     <div className="main-layout">
@@ -169,7 +244,23 @@ export default function AdminPartners() {
           </div>
 
           <div className="admin-partners-buttons">
-            <button onClick={() => setModalOpen(true)}>+ Add Partner</button>
+            <button
+              onClick={() => {
+                setEditing(null);
+                setForm({
+                  company_name: "",
+                  slug: "",
+                  primary_color: "#1a273b",
+                  secondary_color: "#2563eb",
+                  accent_color: "#10b981",
+                  user_id: "",
+                  logo_url: "",
+                });
+                setModalOpen(true);
+              }}
+            >
+              + Add Partner
+            </button>
             <button onClick={exportCSV}>⬇️ Export CSV</button>
           </div>
         </div>
@@ -182,33 +273,27 @@ export default function AdminPartners() {
               <th>Slug</th>
               <th>Theme</th>
               <th>User Assigned</th>
+              <th>Credits</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredPartners.length === 0 ? (
+            {paginatedPartners.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>
+                <td colSpan="7" style={{ textAlign: "center" }}>
                   No partners found
                 </td>
               </tr>
             ) : (
-              filteredPartners.map((p) => (
+              paginatedPartners.map((p) => (
                 <tr key={p.id}>
                   <td>
-                    <img
-                      src={p.logo_url || "/seo-logo.png"}
-                      alt="logo"
-                    />
+                    <img src={p.logo_url || "/seo-logo.png"} alt="logo" />
                   </td>
                   <td>{p.company_name}</td>
                   <td>
-                    <a
-                      href={`/${p.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
+                    <a href={`/${p.slug}`} target="_blank" rel="noreferrer">
                       {p.slug}
                     </a>
                   </td>
@@ -220,11 +305,10 @@ export default function AdminPartners() {
                     </div>
                   </td>
                   <td>{p.user_name || "—"}</td>
+                  <td>{p.credits}</td>
                   <td>
                     <span
-                      className={`admin-partners-status ${
-                        p.is_deleted ? "inactive" : "active"
-                      }`}
+                      className={`admin-partners-status ${p.is_deleted ? "inactive" : "active"}`}
                     >
                       {p.is_deleted ? "Inactive" : "Active"}
                     </span>
@@ -243,7 +327,16 @@ export default function AdminPartners() {
                           className="admin-partners-btn edit"
                           onClick={() => {
                             setEditing(p);
-                            setFormData(p);
+                            setForm({
+                              company_name: p.company_name || "",
+                              slug: p.slug || "",
+                              primary_color: p.primary_color || "#1a273b",
+                              secondary_color: p.secondary_color || "#2563eb",
+                              accent_color: p.accent_color || "#10b981",
+                              user_id: p.user_id || "",
+                              logo_url: p.logo_url || "",
+                              credits: p.credits ?? 3, 
+                            });
                             setModalOpen(true);
                           }}
                         >
@@ -264,6 +357,31 @@ export default function AdminPartners() {
           </tbody>
         </table>
 
+        {/* ✅ Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="pagination" style={{ marginTop: "20px", textAlign: "center" }}>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`pageBtn ${currentPage === i + 1 ? "activePage" : ""}`}
+                style={{
+                  margin: "0 4px",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid #ddd",
+                  background: currentPage === i + 1 ? "#1a273b" : "#fff",
+                  color: currentPage === i + 1 ? "#fff" : "#333",
+                  cursor: "pointer",
+                }}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Modal */}
         {modalOpen && (
           <div className="admin-partners-modal-overlay">
             <div className="admin-partners-modal">
@@ -271,53 +389,69 @@ export default function AdminPartners() {
               <form onSubmit={handleSave} className="partners-form">
                 <label>Company Name</label>
                 <input
-                  value={formData.company_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, company_name: e.target.value })
-                  }
+                  value={form.company_name}
+                  onChange={(e) => setForm({ ...form, company_name: e.target.value })}
                   required
                 />
 
                 <label>Slug</label>
                 <input
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
                   required
                 />
+
+                <label>Logo</label>
+                <input type="file" accept="image/*" onChange={handleLogoUpload} />
+                {uploading && <p>Uploading...</p>}
+                {form.logo_url && (
+                  <img
+                    src={form.logo_url}
+                    alt="preview"
+                    style={{
+                      width: "auto",
+                      height: "60px",
+                      objectFit: "contain",
+                      margin: "8px 0",
+                    }}
+                  />
+                )}
 
                 <label>Primary Color</label>
                 <input
                   type="color"
-                  value={formData.primary_color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, primary_color: e.target.value })
-                  }
+                  value={form.primary_color}
+                  onChange={(e) => setForm({ ...form, primary_color: e.target.value })}
                 />
 
                 <label>Secondary Color</label>
                 <input
                   type="color"
-                  value={formData.secondary_color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, secondary_color: e.target.value })
-                  }
+                  value={form.secondary_color}
+                  onChange={(e) => setForm({ ...form, secondary_color: e.target.value })}
                 />
 
                 <label>Accent Color</label>
                 <input
                   type="color"
-                  value={formData.accent_color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, accent_color: e.target.value })
-                  }
+                  value={form.accent_color}
+                  onChange={(e) => setForm({ ...form, accent_color: e.target.value })}
+                />
+
+                <label>Credits</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.credits}
+                  onChange={(e) => setForm({ ...form, credits: e.target.value })}
+                  required
                 />
 
                 <label>Assign User</label>
                 <select
-                  value={formData.user_id || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, user_id: e.target.value })
-                  }
+                  value={form.user_id || ""}
+                  onChange={(e) => setForm({ ...form, user_id: e.target.value })}
+                  required
                 >
                   <option value="">— None —</option>
                   {users.map((u) => (
@@ -328,9 +462,7 @@ export default function AdminPartners() {
                 </select>
 
                 <div className="admin-partners-modal-actions">
-                  <button type="submit" className="save">
-                    Save
-                  </button>
+                  <button type="submit" className="save">Save</button>
                   <button
                     type="button"
                     className="cancel"

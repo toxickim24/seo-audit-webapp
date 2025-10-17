@@ -95,6 +95,11 @@ export const AuthController = {
       const user = await UserModel.findByEmail(email);
       if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
+      // ✅ Check if deleted
+      if (user.is_deleted === 1) {
+        return res.status(403).json({ error: "Your account has been deleted. Please contact the administrator." });
+      }
+
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
@@ -117,6 +122,7 @@ export const AuthController = {
           role: user.role,
           company_name: partner.company_name || null,
           slug: partner.slug || null,
+          is_deleted: user.is_deleted,
         },
       });
     } catch (err) {

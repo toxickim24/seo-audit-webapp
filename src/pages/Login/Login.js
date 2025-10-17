@@ -23,6 +23,13 @@ export default function Login() {
         throw new Error("Unexpected server response");
       }
 
+      // ✅ Block login if account deleted
+      if (res.user.is_deleted === 1) {
+        alertError("Your account has been deleted. Please contact the administrator.");
+        setLoading(false);
+        return;
+      }
+
       success("Login successful!");
 
       // ✅ Save auth data

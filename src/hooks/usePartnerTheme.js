@@ -6,7 +6,9 @@ const DEFAULT_COLORS = {
   secondary: "",
 };
 
-export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000") {
+export default function usePartnerTheme(
+  API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+) {
   const location = useLocation();
   const firstSegment = location.pathname.split("/")[1] || "";
   const [partnerData, setPartnerData] = useState(null);
@@ -33,7 +35,7 @@ export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API
     const isPublic = firstSegment && !knownRoutes.includes(firstSegment);
     setIsPartnerPublic(isPublic);
 
-    // ✅ If admin route — skip everything related to partner theme
+    // ✅ If admin route — skip theme entirely
     if (firstSegment.startsWith("admin")) {
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");
@@ -41,14 +43,31 @@ export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API
       return;
     }
 
-    // ✅ Only fetch partner data if it's a public partner page
+    // ✅ Only run on public partner pages
     if (isPublic) {
       document.body.classList.add("partner-theme");
-      
+
       const fetchPartner = async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/api/partners/${firstSegment}`);
-          if (!res.ok) throw new Error("Partner not found");
+
+          // ✅ Gracefully handle 404 (deleted/inactive)
+          if (res.status === 404) {
+            // Don’t throw — just reset colors quietly
+            setPartnerData(null);
+            document.documentElement.style.setProperty("--primary-color", "");
+            document.documentElement.style.setProperty("--secondary-color", "");
+            return; // stop here silently
+          }
+
+          // ✅ Handle other server errors (400–599)
+          if (!res.ok) {
+            console.warn("⚠️ Partner theme fetch returned:", res.status);
+            setPartnerData(null);
+            document.documentElement.style.setProperty("--primary-color", "");
+            document.documentElement.style.setProperty("--secondary-color", "");
+            return;
+          }
 
           const data = await res.json();
           setPartnerData(data);
@@ -56,11 +75,13 @@ export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API
           // ✅ Apply colors to document
           const primary = data.primary_color || DEFAULT_COLORS.primary;
           const secondary = data.secondary_color || DEFAULT_COLORS.secondary;
-
           document.documentElement.style.setProperty("--primary-color", primary);
           document.documentElement.style.setProperty("--secondary-color", secondary);
         } catch (err) {
-          console.warn("⚠️ Failed to load partner:", err);
+          // ✅ Silent catch for network errors
+          if (!String(err).includes("Partner not found")) {
+            console.warn("⚠️ Partner theme fetch failed:", err);
+          }
           setPartnerData(null);
           document.documentElement.style.setProperty("--primary-color", "");
           document.documentElement.style.setProperty("--secondary-color", "");
@@ -69,7 +90,7 @@ export default function usePartnerTheme(API_BASE_URL = process.env.REACT_APP_API
 
       fetchPartner();
     } else {
-      // ✅ Reset theme on non-partner pages
+      // ✅ Reset colors when leaving partner pages
       setPartnerData(null);
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");

@@ -11,7 +11,7 @@ export const PartnerController = {
       const db = getDB();
       const [rows] = await db.query(
         `SELECT id, user_id, company_name, subdomain, slug, logo_url,
-                primary_color, secondary_color, accent_color, created_at, updated_at
+                primary_color, secondary_color, accent_color, credits, created_at, updated_at
          FROM partners
          WHERE user_id = ? LIMIT 1`,
         [req.user.id]
@@ -124,7 +124,7 @@ export const PartnerController = {
       // ✅ Return updated partner info
       const [updated] = await db.query(
         `SELECT id, user_id, company_name, subdomain, slug, logo_url,
-                primary_color, secondary_color, accent_color, updated_at
+                primary_color, secondary_color, accent_color, credits, updated_at
          FROM partners
          WHERE user_id = ? LIMIT 1`,
         [req.user.id]
@@ -143,7 +143,7 @@ export const PartnerController = {
   // ============================================================
   // ✅ Public Partner Page (by slug)
   // ============================================================
-  async getBySlug(req, res) {
+    async getBySlug(req, res) {
     try {
       const db = getDB();
       const { slug } = req.params;
@@ -152,16 +152,18 @@ export const PartnerController = {
         return res.status(400).json({ error: "Slug parameter missing." });
       }
 
+      // ✅ Only fetch active (non-deleted) partners
       const [rows] = await db.query(
         `SELECT id, company_name, slug, logo_url,
-                primary_color, secondary_color, accent_color
+                primary_color, secondary_color, accent_color, credits, is_deleted
          FROM partners
-         WHERE slug = ? LIMIT 1`,
+         WHERE slug = ? AND is_deleted = 0
+         LIMIT 1`,
         [slug]
       );
 
       if (!rows.length) {
-        return res.status(404).json({ error: "Partner not found." });
+        return res.status(404).json({ error: "Partner not found or inactive." });
       }
 
       // ✅ Return clean, frontend-friendly response

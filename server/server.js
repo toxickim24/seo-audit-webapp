@@ -52,7 +52,7 @@ app.use(logger);
 // ===========================
 // ✅ Static Files: Uploaded Logos, PDFs, etc.
 // ===========================
-// This exposes the "uploads" folder so logos like /uploads/partner_1_logo.png can be accessed
+// This exposes the "uploads" folder so logos like /uploads/partners/partner_1_logo.png can be accessed
 app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 
 // ===========================

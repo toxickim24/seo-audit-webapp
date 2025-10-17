@@ -46,6 +46,14 @@ function PartnerDashboard() {
   }
 
   const partnerLink = `${window.location.origin}/${partner.slug || ""}`;
+  const creditColor =
+    partner.credits > 2
+      ? "var(--green-500, #10b981)"
+      : partner.credits === 2
+      ? "var(--yellow-500, #f59e0b)"
+      : partner.credits === 1
+      ? "var(--red-500, #ef4444)"
+      : "#9ca3af";
 
   return (
     <div className="main-layout">
@@ -56,8 +64,7 @@ function PartnerDashboard() {
               👋 Welcome, <span>{partner.company_name}</span>
             </h1>
             <p className="subtitle">
-              This is your partner dashboard — manage your brand, track leads,
-              and share your white-label SEO Audit page with clients.
+              Manage your brand, track leads, and share your white-label SEO Audit page.
             </p>
           </section>
         </header>
@@ -78,19 +85,42 @@ function PartnerDashboard() {
           </p>
         </section>
 
+        {/* ✅ Quick Menu Section */}
         <section className="quick-menu">
+
+          {/* ✅ Credits Card */}
+          <div className="menu-card credits-tile">
+            <div className="menu-icon">
+              💳
+            </div>
+            <h4>Remaining Credits</h4>
+            <p className="credits-value" style={{ color: creditColor }}>
+              {partner.credits ?? "—"}
+            </p>
+            <p className="credits-note">
+              {typeof partner.credits === "number"
+                ? partner.credits > 0
+                  ? "Each SEO audit consumes 1 credit."
+                  : "No credits left — contact support."
+                : "Loading credits..."}
+            </p>
+          </div>
+
+          {/* Brand Settings */}
           <Link to="/partner-settings" className="menu-card">
             <div className="menu-icon">⚙️</div>
             <h4>Brand Settings</h4>
             <p>Update your company name, colors, and logo.</p>
           </Link>
 
+          {/* Leads */}
           <Link to="/partner-leads" className="menu-card">
             <div className="menu-icon">📊</div>
             <h4>Leads</h4>
             <p>View and manage your captured SEO leads.</p>
           </Link>
 
+          {/* Run SEO Audit */}
           <a
             href={partnerLink}
             target="_blank"
