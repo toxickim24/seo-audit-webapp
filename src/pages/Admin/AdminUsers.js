@@ -98,7 +98,7 @@ export default function AdminUsers() {
       : `${API_URL}/api/admin/users`;
 
     try {
-      await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -107,12 +107,19 @@ export default function AdminUsers() {
         body: JSON.stringify(formData),
       });
 
+      const data = await res.json();
+
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || "Failed to save user");
+      }
+
       success(editing ? "User updated successfully!" : "User added successfully!");
       setModalOpen(false);
       setEditing(null);
       fetchUsers();
     } catch (err) {
-      error("Failed to save user. Try again.");
+      console.error("❌ Error saving user:", err);
+      error(err.message || "Failed to save user. Try again.");
     }
   };
 

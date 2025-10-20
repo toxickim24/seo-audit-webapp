@@ -356,7 +356,7 @@ function Main({ activeTab }) {
 
   return (
     <main className="main-layout">
-      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-contact" && activeTab !== "leads-management" ? (
+      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-contact" ? (
         <>
 
           <div className="content-area">

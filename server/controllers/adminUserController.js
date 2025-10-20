@@ -22,14 +22,19 @@ export const AdminUserController = {
       const { name, email, password, role } = req.body;
       const db = getDB();
       const hashed = await bcrypt.hash(password, 10);
+
       await db.query(
         "INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())",
         [name, email, hashed, role || "partner"]
       );
+
       res.json({ success: true, message: "User created successfully" });
     } catch (err) {
       console.error("❌ Error creating user:", err);
-      res.status(500).json({ error: "Failed to create user" });
+      res.status(500).json({
+        success: false,
+        error: err.message || "Failed to create user",
+      });
     }
   },
 
