@@ -1,29 +1,12 @@
-// ===========================
-// ✅ Core Setup
-// ===========================
+// server/server.js
 import fs from "fs";
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-
-// ✅ Load .env file
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-
-// ✅ Resolve dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ===========================
-// ✅ Middleware & Utils
-// ===========================
 import { logger } from "./middleware/loggerMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-
-// ===========================
-// ✅ Routes
-// ===========================
 import authRoutes from "./routes/authRoutes.js";
 import partnerRoutes from "./routes/partnerRoutes.js";
 import seoRoutes from "./routes/seoRoutes.js";
@@ -35,87 +18,47 @@ import adminRoutes from "./routes/adminRoutes.js";
 import adminLeadRoutes from "./routes/adminLeadRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 import adminPartnerRoutes from "./routes/adminPartnerRoutes.js";
-
-// ===========================
-// ✅ Database Init
-// ===========================
 import { initDB } from "./config/db.js";
-await initDB();
 
-// ===========================
-// ✅ Express App Setup
-// ===========================
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
-app.use(logger);
+// top-level logic wrapped in async function
+(async () => {
+  dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-// ===========================
-// ✅ Static Files: Uploaded Logos, PDFs, etc.
-// ===========================
-// This exposes the "uploads" folder so logos like /uploads/partners/partner_1_logo.png can be accessed
-app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
 
-// ===========================
-// ✅ Mount API Routes (organized by group)
-// ===========================
+  await initDB();
 
-// 🔐 Auth (login/register)
-app.use("/api/auth", authRoutes);
+  const app = express();
+  app.use(cors());
+  app.use(express.json({ limit: "10mb" }));
+  app.use(logger);
 
-// 🧩 Partner management
-app.use("/api/partners", partnerRoutes);
-app.use("/api/partnerLeads", partnerLeadRoutes);
+  app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 
-// 🔍 SEO Analysis
-app.use("/api/seo", seoRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/partners", partnerRoutes);
+  app.use("/api/partnerLeads", partnerLeadRoutes);
+  app.use("/api/seo", seoRoutes);
+  app.use("/api/email", emailRoutes);
+  app.use("/api/openai", aiRoutes);
+  app.use("/api/upload", uploadRoutes);
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/adminLeads", adminLeadRoutes);
+  app.use("/api/admin/users", adminUserRoutes);
+  app.use("/api/admin/partners", adminPartnerRoutes);
+  app.use(errorHandler);
 
-// 📧 Email sending
-app.use("/api/email", emailRoutes);
-
-// 🤖 AI SEO Analyzer
-app.use("/api/openai", aiRoutes);
-
-// 📁 File uploads
-app.use("/api/upload", uploadRoutes);
-
-// 🧠 Admin routes
-app.use("/api/admin", adminRoutes);
-app.use("/api/adminLeads", adminLeadRoutes);
-app.use("/api/admin/users", adminUserRoutes);
-app.use("/api/admin/partners", adminPartnerRoutes);
-
-// ===========================
-// ✅ Global Error Handler
-// ===========================
-app.use(errorHandler);
-
-// ===========================
-// ✅ Serve React Build in Production (Auto-detect path)
-// ===========================
-if (process.env.NODE_ENV === "production") {
-  // default path if build is in project root
-  let buildPath = path.join(__dirname, "../build");
-
-  // check if build folder exists; fallback to ./server/build
-  if (!fs.existsSync(buildPath)) {
-    buildPath = path.join(__dirname, "build");
+  if (process.env.NODE_ENV === "production") {
+    let buildPath = path.join(__dirname, "../build");
+    if (!fs.existsSync(buildPath)) buildPath = path.join(__dirname, "build");
+    app.use(express.static(buildPath));
+    app.use((req, res) => res.sendFile(path.join(buildPath, "index.html")));
+    console.log(`✅ Serving React build from: ${buildPath}`);
   }
 
-  app.use(express.static(buildPath));
-
-  app.use((req, res) => {
-    res.sendFile(path.join(buildPath, "index.html"));
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
-
-  console.log(`✅ Serving React build from: ${buildPath}`);
-}
-
-// ===========================
-// ✅ Start Server
-// ===========================
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📂 Uploads available at http://localhost:${PORT}/server/uploads`);
-});
+})();
