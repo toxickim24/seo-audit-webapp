@@ -31,6 +31,16 @@ export const AdminUserController = {
       res.json({ success: true, message: "User created successfully" });
     } catch (err) {
       console.error("❌ Error creating user:", err);
+
+      // ✅ Detect duplicate email (MySQL error code 1062)
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(400).json({
+          success: false,
+          error: "This email is already registered.",
+        });
+      }
+
+      // ✅ Handle all other errors
       res.status(500).json({
         success: false,
         error: err.message || "Failed to create user",

@@ -109,6 +109,7 @@ export default function AdminUsers() {
 
       const data = await res.json();
 
+      // ✅ handle backend errors (like duplicate email)
       if (!res.ok || data.success === false) {
         throw new Error(data.error || "Failed to save user");
       }
