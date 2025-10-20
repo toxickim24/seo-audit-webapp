@@ -119,7 +119,6 @@ export default function AdminUsers() {
       setEditing(null);
       fetchUsers();
     } catch (err) {
-      console.error("❌ Error saving user:", err);
       error(err.message || "Failed to save user. Try again.");
     }
   };

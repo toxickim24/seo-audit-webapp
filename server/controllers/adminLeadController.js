@@ -32,7 +32,6 @@ export async function getLeads(req, res) {
 }
 
 export async function addLead(req, res) {
-  console.log("📩 Incoming Lead:", req.body);
   const db = getDB();
   const { name, phone, company, email, website, overallScore, partner_id } = req.body;
 
