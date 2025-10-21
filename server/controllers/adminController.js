@@ -1,4 +1,5 @@
 import { getDB } from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 export const AdminController = {
 
@@ -34,6 +35,13 @@ export const AdminController = {
          primary_color = VALUES(primary_color)`,
         [site_name, contact_email, primary_color]
       );
+
+      await logActivity({
+        user_id: req.user.id || null,
+        action_type: "system_update",
+        description: "Admin updated system settings (site name, colors, or email)",
+        ip_address: req.ip,
+      });
 
       res.json({ message: "Settings updated successfully" });
     } catch (err) {

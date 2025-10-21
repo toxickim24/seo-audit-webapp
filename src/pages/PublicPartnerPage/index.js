@@ -243,13 +243,13 @@ export default function PublicPartnerPage() {
       phone,
       company,
       website: url,
-      overallScore,
+      score: overallScore,
       date: new Date().toISOString(),
     };
     if (partner?.id) newLead.partner_id = partner.id;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/adminLeads`, {
+      const res = await fetch(`${API_BASE_URL}/api/partnerLeads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newLead),

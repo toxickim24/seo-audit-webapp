@@ -1,4 +1,5 @@
 import { getDB } from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 // ✅ Get all global leads (exclude partner-owned)
 export async function getLeads(req, res) {
@@ -33,7 +34,7 @@ export async function getLeads(req, res) {
 
 export async function addLead(req, res) {
   const db = getDB();
-  const { name, phone, company, email, website, overallScore, partner_id } = req.body;
+  const { name, phone, company, email, website, score, partner_id } = req.body;
 
   if (!email || !name) {
     console.log("⚠️ Missing name/email");
@@ -52,9 +53,17 @@ export async function addLead(req, res) {
         company || "",
         email,
         website || "",
-        overallScore || 0,
+        score || 0,
       ]
     );
+
+    await logActivity({
+      user_id: req.user?.id || null,
+      partner_id: partner_id || null,
+      action_type: "lead_add",
+      description: `Lead added: ${name} (${email})`,
+      ip_address: req.ip,
+    });
 
     console.log(
       `✅ Lead inserted (ID: ${result.insertId}) ${
@@ -74,6 +83,12 @@ export async function deleteLead(req, res) {
 
   try {
     await db.execute("DELETE FROM leads WHERE id = ?", [id]);
+    await logActivity({
+      user_id: req.user.id || null,
+      action_type: "lead_delete",
+      description: `Lead ID ${id} was permanently deleted by admin.`,
+      ip_address: req.ip,
+    });
     res.json({ success: true, message: "Lead permanently deleted" });
   } catch (err) {
     console.error("❌ Error deleting lead:", err);

@@ -105,12 +105,18 @@ export const AuthController = {
 
       // 🏢 Partner info (if applicable)
       const [partnerRows] = await db.query(
-        "SELECT company_name, slug FROM partners WHERE user_id = ? LIMIT 1",
+        "SELECT id AS partner_id, company_name, slug FROM partners WHERE user_id = ? LIMIT 1",
         [user.id]
       );
       const partner = partnerRows[0] || {};
 
-      const token = signToken({ id: user.id, email: user.email, role: user.role });
+      // ✅ Include partner_id in the token payload
+      const token = signToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        partner_id: partner.partner_id || null,
+      });
 
       return res.json({
         message: "Login successful",

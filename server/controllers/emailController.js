@@ -16,7 +16,16 @@ export async function sendSeoEmail(req, res) {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Your SEO Report",
-      text: "Attached is your SEO report PDF.",
+      text: `Hello,
+
+      Attached is your personalized SEO Audit Report. 
+      It includes an overview of your website’s performance, key findings, and actionable recommendations to help improve visibility and search rankings.
+
+      If you have any questions or would like to discuss next steps, feel free to reply to this email.
+
+      Best regards,
+      The SEO Mojo Team
+      `,
       attachments: [{ filename, content: pdfBuffer }],
     });
 

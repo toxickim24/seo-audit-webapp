@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", protect, PartnerLeadController.getMyLeads);
 
 // ✅ Add new lead
-router.post("/", protect, PartnerLeadController.addLead);
+router.post("/", PartnerLeadController.addLead);
 
 // ✅ Delete lead
 router.delete("/:id", protect, PartnerLeadController.deleteLead);

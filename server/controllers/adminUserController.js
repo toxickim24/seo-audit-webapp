@@ -2,6 +2,7 @@ import { getDB } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+import { logActivity } from "../utils/logActivity.js";
 
 export const AdminUserController = {
   async getAllUsers(req, res) {
@@ -27,6 +28,13 @@ export const AdminUserController = {
         "INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())",
         [name, email, hashed, role || "partner"]
       );
+
+      await logActivity({
+        user_id: req.user.id || null,
+        action_type: "user_add",
+        description: `Admin added new user: ${name} (${email}) with role ${role}`,
+        ip_address: req.ip,
+      });
 
       res.json({ success: true, message: "User created successfully" });
     } catch (err) {
@@ -54,6 +62,12 @@ export const AdminUserController = {
         "UPDATE users SET name=?, email=?, role=?, updated_at=NOW() WHERE id=?",
         [name, email, role, id]
       );
+      await logActivity({
+        user_id: req.user.id || null,
+        action_type: "user_update",
+        description: `User ID ${id} was updated by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "User updated successfully" });
     } catch (err) {
       console.error("❌ Error updating user:", err);
@@ -69,6 +83,12 @@ export const AdminUserController = {
       const { id } = req.params;
       const db = getDB();
       await db.query("UPDATE users SET is_deleted = 1 WHERE id = ?", [id]);
+      await logActivity({
+        user_id: req.user.id || null,
+        action_type: "user_delete",
+        description: `User ID ${id} was soft-deleted by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "User moved to trash." });
     } catch (err) {
       console.error("❌ Error soft deleting user:", err);
@@ -84,6 +104,12 @@ export const AdminUserController = {
       const { id } = req.params;
       const db = getDB();
       await db.query("UPDATE users SET is_deleted = 0 WHERE id = ?", [id]);
+      await logActivity({
+        user_id: req.user.id || null,
+        action_type: "user_restore",
+        description: `User ID ${id} was restored by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "User restored successfully!" });
     } catch (err) {
       console.error("❌ Error restoring user:", err);

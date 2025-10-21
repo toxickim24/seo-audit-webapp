@@ -18,6 +18,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import adminLeadRoutes from "./routes/adminLeadRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 import adminPartnerRoutes from "./routes/adminPartnerRoutes.js";
+import adminActivityRoutes from "./routes/adminActivityRoutes.js";
 import { initDB } from "./config/db.js";
 
 // top-level logic wrapped in async function
@@ -47,6 +48,7 @@ import { initDB } from "./config/db.js";
   app.use("/api/adminLeads", adminLeadRoutes);
   app.use("/api/admin/users", adminUserRoutes);
   app.use("/api/admin/partners", adminPartnerRoutes);
+  app.use("/api/admin/activity", adminActivityRoutes);
   app.use(errorHandler);
 
   if (process.env.NODE_ENV === "production") {

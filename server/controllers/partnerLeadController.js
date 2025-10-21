@@ -1,10 +1,17 @@
 import { getDB } from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 export const PartnerLeadController = {
   async getMyLeads(req, res) {
     try {
       const db = getDB();
-      const partnerId = req.user.partner_id || req.user.id;
+
+      // ✅ Strictly enforce partner role
+      if (!req.user || !req.user.partner_id) {
+        return res.status(403).json({ error: "Access denied: Partner account required" });
+      }
+
+      const partnerId = req.user.partner_id;
 
       console.log("🔍 Fetching leads for partner ID:", partnerId);
 
@@ -25,28 +32,44 @@ export const PartnerLeadController = {
 
   async addLead(req, res) {
     try {
-      const { name, email, phone, company, website, score } = req.body;
+      const { name, email, phone, company, website, score, partner_id } = req.body;
 
       if (!name || !email) {
         return res.status(400).json({ error: "Name and email are required" });
       }
 
-      const db = getDB();
-      const partnerId = req.user.partner_id || req.user.id;
+      if (!partner_id) {
+        return res.status(400).json({ error: "Missing partner ID — invalid submission" });
+      }
 
-      console.log("🆕 Adding lead for partner ID:", partnerId, req.body);
+      const db = getDB();
 
       const [result] = await db.query(
-        `INSERT INTO leads (partner_id, name, email, phone, company, website, score)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [partnerId, name, email, phone || "", company || "", website || "", score || null]
+        `INSERT INTO leads (partner_id, name, email, phone, company, website, score, date)
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [partner_id, name, email, phone || "", company || "", website || "", score || null]
       );
 
-      res
-        .status(201)
-        .json({ message: "Lead added successfully", id: result.insertId });
+      // ✅ Optional logging
+      try {
+        await logActivity({
+          user_id: null, // public, no login
+          partner_id,
+          action_type: "lead_add",
+          description: `New public lead added: ${name} (${email})`,
+          ip_address: req.ip,
+        });
+      } catch (logErr) {
+        console.warn("⚠️ Could not log public lead:", logErr.message);
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "Lead added successfully",
+        id: result.insertId,
+      });
     } catch (err) {
-      console.error("❌ Error adding lead:", err);
+      console.error("❌ Error adding public lead:", err);
       res.status(500).json({ error: "Failed to add lead" });
     }
   },
@@ -67,6 +90,14 @@ export const PartnerLeadController = {
           .status(404)
           .json({ error: "Lead not found or not associated with your account" });
       }
+
+      await logActivity({
+        user_id: req.user.id || null,
+        partner_id: partnerId || null,
+        action_type: "lead_delete",
+        description: `Partner deleted lead ID ${id}`,
+        ip_address: req.ip,
+      });
 
       res.status(200).json({ message: "Lead permanently deleted" });
     } catch (err) {

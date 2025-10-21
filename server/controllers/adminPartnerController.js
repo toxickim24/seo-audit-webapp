@@ -1,4 +1,5 @@
 import { getDB } from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 export const AdminPartnerController = {
   // ==========================================================
@@ -54,6 +55,14 @@ export const AdminPartnerController = {
           logo_url || null
         ]
       );
+      // ✅ Log the action
+      await logActivity({
+        user_id: req.user.id,
+        partner_id: null,
+        action_type: "partner_add",
+        description: `Partner "${company_name}" was added by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "Partner added successfully" });
     } catch (err) {
       console.error("❌ Error adding partner:", err);
@@ -94,6 +103,14 @@ export const AdminPartnerController = {
           id
         ]
       );
+      // ✅ Log update
+      await logActivity({
+        user_id: req.user.id,
+        partner_id: id || null,
+        action_type: "partner_update",
+        description: `Partner "${company_name}" was updated by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "Partner updated successfully" });
     } catch (err) {
       console.error("❌ Error updating partner:", err);
@@ -109,6 +126,13 @@ export const AdminPartnerController = {
       const { id } = req.params;
       const db = getDB();
       await db.query("UPDATE partners SET is_deleted = 1, updated_at = NOW() WHERE id = ?", [id]);
+      await logActivity({
+        user_id: req.user.id || null,
+        partner_id: id || null,
+        action_type: "partner_delete",
+        description: `Partner ID ${id} was moved to trash by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "Partner moved to trash" });
     } catch (err) {
       console.error("❌ Error deleting partner:", err);
@@ -124,6 +148,13 @@ export const AdminPartnerController = {
       const { id } = req.params;
       const db = getDB();
       await db.query("UPDATE partners SET is_deleted = 0, updated_at = NOW() WHERE id = ?", [id]);
+      await logActivity({
+        user_id: req.user.id,
+        partner_id: id,
+        action_type: "partner_restore",
+        description: `Partner ID ${id} was restored by admin.`,
+        ip_address: req.ip,
+      });
       res.json({ success: true, message: "Partner restored successfully" });
     } catch (err) {
       console.error("❌ Error restoring partner:", err);

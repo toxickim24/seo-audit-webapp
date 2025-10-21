@@ -23,8 +23,27 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ error: "User not found" });
       }
 
-      req.user = rows[0]; // attach user info
+      // 🧠 Merge DB info + decoded token
+      const user = rows[0];
+
+      // Fetch partner_id if user is a partner
+      let partner_id = decoded.partner_id || null;
+      if (user.role === "partner" && !partner_id) {
+        const [partnerRows] = await db.query(
+          "SELECT id AS partner_id FROM partners WHERE user_id = ? LIMIT 1",
+          [user.id]
+        );
+        partner_id = partnerRows[0]?.partner_id || null;
+      }
+
+      // Attach to request
+      req.user = {
+        ...user,
+        partner_id, // ✅ make sure partner_id is always available
+      };
+
       next();
+
     } catch (err) {
       console.error("❌ Auth Error:", err);
       res.status(401).json({ error: "Invalid or expired token" });

@@ -4,14 +4,15 @@ import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ partners: 0, leads: 0, users: 0 });
-  const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(`${API_URL}/api/admin/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -19,40 +20,53 @@ export default function AdminDashboard() {
         setStats(data);
       } catch (err) {
         console.error("❌ Failed to fetch admin stats:", err);
+      }
+    };
+
+    const fetchActivity = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/admin/activity`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load activity");
+        const data = await res.json();
+        setRecentActivity(data);
+      } catch (err) {
+        console.error("❌ Failed to fetch activity:", err);
+        // fallback to sample data for dev
+        setRecentActivity([
+          {
+            id: 1,
+            type: "user",
+            description: "New admin user added: John Doe",
+            time: "2 hours ago",
+          },
+          {
+            id: 2,
+            type: "partner",
+            description: "Partner 'Bayside Pavers' updated company logo",
+            time: "5 hours ago",
+          },
+          {
+            id: 3,
+            type: "lead",
+            description: "New SEO Audit lead captured from Acme Inc.",
+            time: "6 hours ago",
+          },
+          {
+            id: 4,
+            type: "system",
+            description: "Scheduled backup completed successfully",
+            time: "Yesterday",
+          },
+        ]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Mocked activity data — replace with /api/admin/activity later
-    setRecentActivity([
-      {
-        id: 1,
-        type: "user",
-        description: "New admin user added: John Doe",
-        time: "2 hours ago",
-      },
-      {
-        id: 2,
-        type: "partner",
-        description: "Partner 'Bayside Pavers' updated company logo",
-        time: "5 hours ago",
-      },
-      {
-        id: 3,
-        type: "lead",
-        description: "New SEO Audit lead captured from Acme Inc.",
-        time: "6 hours ago",
-      },
-      {
-        id: 4,
-        type: "system",
-        description: "Scheduled backup completed successfully",
-        time: "Yesterday",
-      },
-    ]);
-
     fetchStats();
+    fetchActivity();
   }, [API_URL]);
 
   return (
@@ -168,20 +182,32 @@ export default function AdminDashboard() {
           </div>
 
           <ul className="activity-list">
-            {recentActivity.map((a) => (
-              <li key={a.id} className={`activity-item type-${a.type}`}>
-                <div className="activity-icon">
-                  {a.type === "user" && "👤"}
-                  {a.type === "partner" && "🏢"}
-                  {a.type === "lead" && "📈"}
-                  {a.type === "system" && "⚙️"}
-                </div>
-                <div className="activity-content">
-                  <p className="activity-desc">{a.description}</p>
-                  <span className="activity-time">{a.time}</span>
-                </div>
-              </li>
-            ))}
+            {recentActivity.length > 0 ? (
+              recentActivity.map((a) => (
+                <li key={a.id} className={`activity-item type-${a.type}`}>
+                  <div className="activity-icon">
+                    {a.type === "user" && "👤"}
+                    {a.type === "partner" && "🏢"}
+                    {a.type === "lead" && "📈"}
+                    {a.type === "system" && "⚙️"}
+                  </div>
+                  <div className="activity-content">
+                    <p className="activity-desc">{a.description}</p>
+                    <span className="activity-time">
+                      {a.time ||
+                        new Date(a.created_at).toLocaleString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                    </span>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li>No recent activity.</li>
+            )}
           </ul>
         </section>
       </div>
