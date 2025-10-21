@@ -18,14 +18,14 @@ export async function sendSeoEmail(req, res) {
       subject: "Your SEO Report",
       text: `Hello,
 
-      Attached is your personalized SEO Audit Report. 
-      It includes an overview of your website’s performance, key findings, and actionable recommendations to help improve visibility and search rankings.
+Attached is your personalized SEO Audit Report. 
+It includes an overview of your website’s performance, key findings, and actionable recommendations to help improve visibility and search rankings.
 
-      If you have any questions or would like to discuss next steps, feel free to reply to this email.
+If you have any questions or would like to discuss next steps, feel free to reply to this email.
 
-      Best regards,
-      The SEO Mojo Team
-      `,
+Best regards,
+The SEO Mojo Team
+`,
       attachments: [{ filename, content: pdfBuffer }],
     });
 

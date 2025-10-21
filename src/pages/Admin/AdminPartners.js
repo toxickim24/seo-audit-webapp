@@ -271,6 +271,7 @@ export default function AdminPartners() {
                   accent_color: "#10b981",
                   user_id: "",
                   logo_url: "",
+                  credits: 3,
                 });
                 setModalOpen(true);
               }}
