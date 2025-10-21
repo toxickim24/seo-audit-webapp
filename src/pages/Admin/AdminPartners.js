@@ -43,6 +43,18 @@ export default function AdminPartners() {
       console.error("❌ Error fetching partners:", err);
     }
   };
+  
+  // ✨ Auto-generate slug when company_name changes (skip when editing)
+  useEffect(() => {
+    if (!editing) {
+      const generatedSlug = form.company_name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-") // replace spaces & special chars
+        .replace(/^-+|-+$/g, ""); // trim dashes
+      setForm((prev) => ({ ...prev, slug: generatedSlug }));
+    }
+  }, [form.company_name]);
 
   // ✅ Fetch Users for Dropdown
   const fetchUsers = async () => {
@@ -51,7 +63,11 @@ export default function AdminPartners() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setUsers(Array.isArray(data) ? data.filter((u) => u.is_deleted === 0) : []);
+      setUsers(
+        Array.isArray(data)
+          ? data.filter((u) => u.is_deleted === 0 && u.role !== "admin")
+          : []
+      );
     } catch (err) {
       console.error("❌ Error fetching users:", err);
     }

@@ -69,6 +69,16 @@ function PartnerSettings() {
     };
     fetchPartner();
   }, [API_BASE, token]);
+  
+  // ✨ Auto-generate slug from company_name (skip if manually editing slug)
+  useEffect(() => {
+    const generatedSlug = form.company_name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    setForm((prev) => ({ ...prev, slug: generatedSlug }));
+  }, [form.company_name]);
 
   // ✅ Handle field changes
   const handleChange = (e) => {
@@ -183,7 +193,7 @@ function PartnerSettings() {
                 name="slug"
                 value={form.slug}
                 onChange={handleChange}
-                placeholder="e.g. ek-productions"
+                placeholder="e.g. my-company"
                 required
               />
               {slugStatus && <p className="slug-status">{slugStatus}</p>}

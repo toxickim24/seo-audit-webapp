@@ -30,6 +30,13 @@ export default function Login() {
         return;
       }
 
+      // ✅ Check missing partner info
+      if (res.user.role === "partner" && (!res.user.company_name || !res.user.slug)) {
+        alertError("Your partner information is missing. Please contact the administrator.");
+        setLoading(false);
+        return;
+      }
+
       success("Login successful!");
 
       // ✅ Save auth data
