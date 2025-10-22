@@ -20,9 +20,9 @@ export default function AdminPartners() {
   const [form, setForm] = useState({
     company_name: "",
     slug: "",
-    primary_color: "#1a273b",
-    secondary_color: "#2563eb",
-    accent_color: "#10b981",
+    primary_color: "#FF8E3A",
+    secondary_color: "#FB6A45",
+    accent_color: "#22354D",
     user_id: "",
     logo_url: "",
     credits: 3,

@@ -150,7 +150,7 @@ function AppContent() {
         <Route path="*" element={<Navigate to="/seo-audit" replace />} />
       </Routes>
 
-      {<Footer />}
+      {<Footer partnerData={partnerData} />}
     </>
   );
 }

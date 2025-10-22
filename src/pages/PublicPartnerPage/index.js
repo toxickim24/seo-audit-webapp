@@ -3,6 +3,7 @@ import "../../css/Loader.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import GlobalLoader from "../../components/Loader";
 import SeoJourney from "../../components/SeoJourney";
 import PostOverview from "../../components/PostOverview/PostOverview";
 import Overview from "../../components/Overview/Overview";
@@ -76,6 +77,8 @@ export default function PublicPartnerPage() {
   const [simplifiedMobile, setSimplifiedMobile] = useState(null);
 
   const [journeyStep, setJourneyStep] = useState("enter");
+
+  const [loadingDone, setLoadingDone] = useState(false);
 
   // ✅ Fetch Partner
   useEffect(() => {
@@ -364,8 +367,24 @@ export default function PublicPartnerPage() {
     }
   }, [journeyStep, aiAudit]);
 
-  // ✅ Clean fallback handling
-  if (partnerLoading) return null;
+  const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    // Always keep loader visible for at least 2.5 s after page mount
+    const minTimer = setTimeout(() => {
+      if (!partnerLoading) setShowLoader(false);
+    }, 2500);
+
+    // If partner still loading after 2.5 s, hide only when done
+    if (!partnerLoading) {
+      const shortDelay = setTimeout(() => setShowLoader(false), 800);
+      return () => clearTimeout(shortDelay);
+    }
+
+    return () => clearTimeout(minTimer);
+  }, [partnerLoading]);
+
+  if (showLoader) return <GlobalLoader partner={partner} />;
 
   if (partnerError) {
     return (

@@ -1,12 +1,13 @@
 import "../css/Footer.css";
 
-function Footer() {
+function Footer({ partnerData }) {
   const year = new Date().getFullYear();
+  const companyName = partnerData?.company_name || "SEO Mojo";
 
   return (
     <footer>
       <p>
-        © {year} SEO Mojo. All Rights Reserved. Made by{" "}
+        © {year} {companyName}. All Rights Reserved. Made by{" "}
         <a
           href="https://webdesigndavao.xyz/"
           target="_blank"
