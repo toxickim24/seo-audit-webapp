@@ -15,6 +15,7 @@
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^18.3.1",
     "react-gauge-chart": "^0.5.1",
+    "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.9.4",
     "react-scripts": "5.0.1",
     "sweetalert2": "^11.26.2",

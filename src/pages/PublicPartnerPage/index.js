@@ -3,6 +3,7 @@ import "../../css/Loader.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Helmet } from "react-helmet-async";
 import GlobalLoader from "../../components/Loader";
 import SeoJourney from "../../components/SeoJourney";
 import PostOverview from "../../components/PostOverview/PostOverview";
@@ -384,6 +385,58 @@ export default function PublicPartnerPage() {
     return () => clearTimeout(minTimer);
   }, [partnerLoading]);
 
+  useEffect(() => {
+    const updateFavicon = (url) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // avoids CORS issues
+      img.src = url;
+
+      img.onload = () => {
+        const size = 64; // favicon size
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        // 🧠 DO NOT FILL BACKGROUND — preserve transparency
+
+        // Fit image proportionally into square canvas
+        const scale = Math.min(size / img.width, size / img.height);
+        const x = (size - img.width * scale) / 2;
+        const y = (size - img.height * scale) / 2;
+
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+        // Convert to PNG data URL
+        const faviconURL = canvas.toDataURL("image/png");
+
+        let favicon = document.querySelector("link[rel='icon']");
+        if (!favicon) {
+          favicon = document.createElement("link");
+          favicon.rel = "icon";
+          document.head.appendChild(favicon);
+        }
+
+        favicon.href = faviconURL;
+      };
+
+      img.onerror = () => {
+        let favicon = document.querySelector("link[rel='icon']");
+        if (!favicon) {
+          favicon = document.createElement("link");
+          favicon.rel = "icon";
+          document.head.appendChild(favicon);
+        }
+        favicon.href = "/seo-icon.png";
+      };
+    };
+
+    if (partner) {
+      const logoUrl = partner.logo_url || "/seo-icon.png";
+      updateFavicon(logoUrl);
+    }
+  }, [partner]);
+
   if (showLoader) return <GlobalLoader partner={partner} />;
 
   if (partnerError) {
@@ -406,6 +459,38 @@ export default function PublicPartnerPage() {
   }
 
   return (
+  <>
+    <Helmet>
+      <title>
+        {partner?.company_name
+          ? `${partner.company_name} | SEO Audit Tool`
+          : "SEO Mojo | SEO Audit Tool"}
+      </title>
+
+      <link
+        rel="icon"
+        type="image/png"
+        href={partner?.logo_url || "/seo-icon.png"}
+      />
+
+      <meta
+        name="description"
+        content={`Run a free SEO audit powered by ${
+          partner?.company_name || "SEO Mojo"
+        }. Instantly analyze and improve your website performance.`}
+      />
+
+      <meta property="og:title" content={partner?.company_name || "SEO Mojo"} />
+      <meta
+        property="og:image"
+        content={partner?.logo_url || "/seo-logo.png"}
+      />
+      <meta
+        property="og:description"
+        content="Run your free SEO audit instantly and get AI-powered insights."
+      />
+    </Helmet>
+
     <main className="main-layout">
 
       <section className="main-container">
@@ -560,5 +645,6 @@ export default function PublicPartnerPage() {
       </aside>
 
     </main>
+  </>
   );
 }
