@@ -118,6 +118,8 @@ export const AuthController = {
         partner_id: partner.partner_id || null,
       });
 
+      await db.query("UPDATE users SET last_login = NOW() WHERE id = ?", [user.id]);
+
       return res.json({
         message: "Login successful",
         token,

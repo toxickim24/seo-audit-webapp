@@ -7,6 +7,12 @@ export default function AdminDashboard() {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const [insights, setInsights] = useState({
+    serverStatus: "Operational",
+    recentLogins: 0,
+    auditReports: 0,
+    leadsThisMonth: 0,
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -65,8 +71,21 @@ export default function AdminDashboard() {
       }
     };
 
+    const fetchInsights = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/admin/system/insights`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setInsights(data);
+      } catch (err) {
+        console.error("❌ Failed to fetch system insights:", err);
+      }
+    };
+
     fetchStats();
     fetchActivity();
+    fetchInsights();
   }, [API_URL]);
 
   return (
@@ -157,21 +176,27 @@ export default function AdminDashboard() {
           <div className="insight-list">
             <div className="insight-line">
               <span className="insight-label">Server Status</span>
-              <span className="insight-value success">Operational</span>
+              <span className={`insight-value ${insights.serverStatus === "Operational" ? "success" : "warning"}`}>
+                {insights.serverStatus}
+              </span>
             </div>
+
             <div className="insight-line">
               <span className="insight-label">Recent Logins (24h)</span>
-              <span className="insight-value">12 users</span>
+              <span className="insight-value">{insights.recentLogins} users</span>
             </div>
+
             <div className="insight-line">
               <span className="insight-label">Audit Reports (This Week)</span>
-              <span className="insight-value">58 generated</span>
+              <span className="insight-value">{insights.auditReports} generated</span>
             </div>
+
             <div className="insight-line">
-              <span className="insight-label">Pending Partner Approvals</span>
-              <span className="insight-value warning">2 waiting</span>
+              <span className="insight-label">Leads Captured (This Month)</span>
+              <span className="insight-value">{insights.leadsThisMonth} new</span>
             </div>
           </div>
+
         </section>
 
         {/* ===== Recent Activity ===== */}
