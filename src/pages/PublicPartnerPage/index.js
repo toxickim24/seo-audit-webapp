@@ -437,7 +437,7 @@ export default function PublicPartnerPage() {
     }
   }, [partner]);
 
-  if (showLoader) return <GlobalLoader partner={partner} />;
+  if (showLoader) return <GlobalLoader visible={showLoader} partner={partner} />;
 
   if (partnerError) {
     return (
