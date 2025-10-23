@@ -9,7 +9,7 @@ export const AdminUserController = {
     try {
       const db = getDB();
       const [rows] = await db.query(
-        "SELECT id, name, email, role, created_at, updated_at, is_deleted FROM users ORDER BY id DESC"
+        "SELECT id, name, email, role, created_at, updated_at, last_login, is_deleted FROM users ORDER BY id DESC"
       );
       res.json(rows);
     } catch (err) {

@@ -205,6 +205,49 @@
   margin-top: 5px;
 }
 
+/* Branding Color */
+.color-description {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.color-item {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.color-item .color-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  max-width: 180px;
+}
+
+/* Live preview styles */
+.color-description {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.color-item {
+  flex: 1 1 200px;
+  text-align: center;
+}
+
+.color-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
 /* Disabled state */
 .form-group input[type="file"]:disabled {
   opacity: 0.6;

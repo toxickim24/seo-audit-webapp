@@ -200,12 +200,12 @@ function PartnerSettings() {
               <p className="partner-slug">
                 Your link:{" "}
                 <a
-                  href={`http://localhost:3000/${form.slug}`}
+                  href={`${window.location.origin}/${form.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="partner-slug-url"
                 >
-                  http://localhost:3000/{form.slug}
+                  {window.location.origin}/{form.slug}
                 </a>
               </p>
             </div>
@@ -247,20 +247,49 @@ function PartnerSettings() {
           {/* ===== Brand Colors ===== */}
           <div className="settings-card">
             <h2>🎨 Brand Colors</h2>
+            <p className="color-description">
+              These colors are applied automatically to your partner-branded pages:
+            </p>
+
             <div className="color-grid">
-              {["primary_color", "secondary_color", "accent_color"].map((key) => (
-                <div key={key} className="color-item">
-                  <label>
-                    {key.replace("_", " ").replace("color", "Color")}
-                  </label>
-                  <input
-                    type="color"
-                    name={key}
-                    value={form[key] || "#cccccc"}
-                    onChange={handleChange}
-                  />
-                </div>
-              ))}
+              <div className="color-item">
+                <label>Primary Color</label>
+                <input
+                  type="color"
+                  name="primary_color"
+                  value={form.primary_color || "#22354d"}
+                  onChange={handleChange}
+                />
+                <p className="color-hint">
+                  Used for <strong>header background</strong>, <strong>main buttons</strong>, and other key elements.
+                </p>
+              </div>
+
+              <div className="color-item">
+                <label>Secondary Color</label>
+                <input
+                  type="color"
+                  name="secondary_color"
+                  value={form.secondary_color || "#fb6a45"}
+                  onChange={handleChange}
+                />
+                <p className="color-hint">
+                  Used for <strong>footer background</strong>, <strong>hover states</strong>, and supporting accents.
+                </p>
+              </div>
+
+              <div className="color-item">
+                <label>Accent Color</label>
+                <input
+                  type="color"
+                  name="accent_color"
+                  value={form.accent_color || "#ffd700"}
+                  onChange={handleChange}
+                />
+                <p className="color-hint">
+                  Used for <strong>progress bars</strong>, <strong>spinners</strong>, and subtle highlights.
+                </p>
+              </div>
             </div>
           </div>
 

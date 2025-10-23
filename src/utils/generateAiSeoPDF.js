@@ -643,8 +643,21 @@ export const generateAiSeoPDF = async (
 
   // ===== OUTPUT =====
   if (download) {
-    const safeUrl = cleanDomain.replace(/\W/g, "_");
-    doc.save(`SEO_Mojo_Report_${safeUrl}.pdf`);
+    const safeDomain = cleanDomain.replace(/\W/g, "_");
+    const isDefaultCompany =
+      !companyName || companyName.toLowerCase().trim() === "seo mojo";
+
+    const fileCompany = isDefaultCompany
+      ? "SEO_Mojo"
+      : companyName.replace(/\W+/g, "_");
+
+    // ✅ if it's SEO Mojo → SEO_Mojo_Audit_Report_...
+    // ✅ if it's partner → EK_Productions_SEO_Audit_Report_...
+    const fileName = isDefaultCompany
+      ? `${fileCompany}_Audit_Report_${safeDomain}.pdf`
+      : `${fileCompany}_SEO_Audit_Report_${safeDomain}.pdf`;
+
+    doc.save(fileName);
   } else {
     return doc.output("blob");
   }

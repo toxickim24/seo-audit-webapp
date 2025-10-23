@@ -318,7 +318,7 @@ function Main({ activeTab }) {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: "SEO Mojo", }),
       });
 
       if (!res.ok) {

@@ -231,7 +231,7 @@ export default function PublicPartnerPage() {
       setJourneyStep("form");
     } catch (err) {
       console.error("❌ SEO analyze failed:", err);
-      setError("Failed to analyze website.");
+      showError("Failed to analyze website.");
     } finally {
       setIsLoading(false);
     }
@@ -340,7 +340,7 @@ export default function PublicPartnerPage() {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", }),
       });
       if (!res.ok) throw new Error("Email failed");
 

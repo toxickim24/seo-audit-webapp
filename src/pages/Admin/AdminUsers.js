@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./AdminUsers.css";
+import Swal from "sweetalert2";
 import { useAlert } from "../../utils/useAlert";
 
 export default function AdminUsers() {
@@ -156,7 +157,7 @@ export default function AdminUsers() {
     const ok = await confirm("Change this user's password?");
     if (!ok) return;
 
-    const { value: newPassword } = await window.Swal.fire({
+    const { value: newPassword } = await Swal.fire({
       title: "Enter New Password",
       input: "password",
       inputPlaceholder: "New password",
@@ -274,7 +275,7 @@ export default function AdminUsers() {
         <table className="admin-table">
           <thead>
             <tr>
-              {["id", "name", "email", "role", "created_at"].map((col) => (
+              {["id", "name", "email", "role", "last_login", "created_at"].map((col) => (
                 <th key={col} onClick={() => toggleSort(col)}>
                   {col.toUpperCase()}{" "}
                   {sortConfig.key === col
@@ -313,6 +314,11 @@ export default function AdminUsers() {
                     >
                       {u.role}
                     </span>
+                  </td>
+                  <td>
+                    {u.last_login
+                      ? new Date(u.last_login).toLocaleString()
+                      : "Never"}
                   </td>
                   <td>
                     {u.created_at
