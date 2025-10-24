@@ -52,7 +52,11 @@
 }
 
 .primaryBtn {
-  background: linear-gradient(180deg, #fb6a45 0%, #ff8e63 100%);
+  /* Use partner colors dynamically */
+  --primary-start: var(--primary-color, #fb6a45);
+  --primary-end: color-mix(in srgb, var(--primary-color, #fb6a45) 85%, white);
+
+  background: linear-gradient(180deg, var(--primary-start) 0%, var(--primary-end) 100%);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -63,8 +67,13 @@
   transition: all 0.25s ease;
 }
 
+/* ✅ Dynamic hover – slightly darken both ends */
 .primaryBtn:hover {
-  background: linear-gradient(180deg, #ff774e 0%, #ff996f 100%);
+  --primary-start-hover: color-mix(in srgb, var(--primary-color, #fb6a45) 85%, black);
+  --primary-end-hover: color-mix(in srgb, var(--primary-color, #fb6a45) 70%, black);
+
+  background: linear-gradient(180deg, var(--primary-start-hover) 0%, var(--primary-end-hover) 100%);
+  transform: translateY(-2px);
 }
 
 .errorText {

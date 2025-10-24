@@ -95,6 +95,7 @@ export default function PublicPartnerPage() {
           setPartner(null);
           document.documentElement.style.setProperty("--primary-color", "#22354d");
           document.documentElement.style.setProperty("--secondary-color", "#fb6a45");
+          document.documentElement.style.setProperty("--accent-color", "#fb6a45");
           return;
         }
 
@@ -126,6 +127,10 @@ export default function PublicPartnerPage() {
           "--secondary-color",
           data.secondary_color || "#fb6a45"
         );
+        document.documentElement.style.setProperty(
+          "--accent-color",
+          data.accent_color || "#fb6a45"
+        );
       } catch (err) {
         // ✅ Ignore expected 404 and log only unexpected errors
         if (!String(err).includes("404")) {
@@ -134,6 +139,7 @@ export default function PublicPartnerPage() {
         setPartnerError("Partner not found or inactive.");
         document.documentElement.style.setProperty("--primary-color", "#22354d");
         document.documentElement.style.setProperty("--secondary-color", "#fb6a45");
+        document.documentElement.style.setProperty("--accent-color", "#fb6a45");
       } finally {
         if (isMounted) setPartnerLoading(false);
       }

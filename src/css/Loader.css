@@ -83,6 +83,18 @@
   transform-origin: left center;
 }
 
+.book,
+.book-page {
+  color: var(--primary-color, #fb6a45);
+  transition: color 0.3s ease;
+}
+
+/* Optional hover pulse */
+.book:hover,
+.book-page:hover {
+  color: color-mix(in srgb, var(--primary-color, #fb6a45) 80%, black);
+}
+
 @keyframes flip {
   0%   { transform: rotateY(0deg); }
   50%  { transform: rotateY(-160deg); }

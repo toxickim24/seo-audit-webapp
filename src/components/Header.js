@@ -134,9 +134,11 @@ function Header({ tabs, partnerData }) {
                     <li className="navbar-item">
                       <NavLink to="/admin-dashboard">Dashboard</NavLink>
                     </li>
+                    {/*
                     <li className="navbar-item">
                       <NavLink to="/admin-settings">Settings</NavLink>
                     </li>
+                    */}
                     <li className="navbar-item">
                       <NavLink to="/admin-users">Users</NavLink>
                     </li>

@@ -191,7 +191,7 @@
 .form button {
   margin-top: 10px;
   padding: 14px;
-  background: #fb6a45;
+  background: var(--primary-color, #fb6a45);
   color: #fff;
   border: none;
   border-radius: 6px;

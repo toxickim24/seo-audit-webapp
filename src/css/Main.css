@@ -48,7 +48,7 @@
 
 .top-journey {
   width: 100%;
-  margin-bottom: 30px;
+  margin-top: 70px;
   display: flex;
   justify-content: center;
 }
@@ -104,7 +104,7 @@
 .search-box button {
   padding: 12px 20px;
   border: none;
-  background: #ff8e3a;
+  background: var(--primary-color, #ff8e3a);
   color: #fff;
   font-size: 1rem;
   font-weight: bold;
@@ -114,8 +114,9 @@
   width: 348px;
 }
 
+/* ✅ Smart hover effect */
 .search-box button:hover {
-  background: #fb6a45;
+  background: color-mix(in srgb, var(--primary-color, #ff8e3a) 85%, black);
   color: white;
 }
 

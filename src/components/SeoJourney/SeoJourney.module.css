@@ -55,10 +55,10 @@
 /* Active step */
 .circle.active {
   color: #fff;
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-color, #fb6a45) 25%, transparent);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--accent-color, #fb6a45) 25%, transparent);
   transform: translateY(-2px);
-  background-color: var(--primary-color, #fb6a45);
-  border: 3px solid var(--primary-color, #fb6a45);
+  background-color: var(--accent-color, #fb6a45);
+  border: 3px solid var(--accent-color, #fb6a45);
 }
 
 .circle.active .stepText {
@@ -72,8 +72,8 @@
 /* Completed step */
 .circle.completed {
   color: #fff;
-  background-color: var(--primary-color, #fb6a45);
-  border: 3px solid var(--primary-color, #fb6a45);
+  background-color: var(--accent-color, #fb6a45);
+  border: 3px solid var(--accent-color, #fb6a45);
 }
 
 .circle.completed .stepNumber,
@@ -92,7 +92,7 @@
 }
 
 .labelActive {
-  color: var(--primary-color, #fb6a45);
+  color: var(--accent-color, #fb6a45);
   font-weight: 700;
 }
 

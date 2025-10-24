@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 const DEFAULT_COLORS = {
   primary: "",
   secondary: "",
+  accent: "",
 };
 
 export default function usePartnerTheme(
@@ -39,6 +40,7 @@ export default function usePartnerTheme(
     if (firstSegment.startsWith("admin")) {
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");
+      document.documentElement.style.setProperty("--accent-color", "");
       setPartnerData(null);
       return;
     }
@@ -57,6 +59,7 @@ export default function usePartnerTheme(
             setPartnerData(null);
             document.documentElement.style.setProperty("--primary-color", "");
             document.documentElement.style.setProperty("--secondary-color", "");
+            document.documentElement.style.setProperty("--accent-color", "");
             return; // stop here silently
           }
 
@@ -66,6 +69,7 @@ export default function usePartnerTheme(
             setPartnerData(null);
             document.documentElement.style.setProperty("--primary-color", "");
             document.documentElement.style.setProperty("--secondary-color", "");
+            document.documentElement.style.setProperty("--accent-color", "");
             return;
           }
 
@@ -75,8 +79,10 @@ export default function usePartnerTheme(
           // ✅ Apply colors to document
           const primary = data.primary_color || DEFAULT_COLORS.primary;
           const secondary = data.secondary_color || DEFAULT_COLORS.secondary;
+          const accent = data.accent_color || DEFAULT_COLORS.accent;
           document.documentElement.style.setProperty("--primary-color", primary);
           document.documentElement.style.setProperty("--secondary-color", secondary);
+          document.documentElement.style.setProperty("--accent-color", accent);
         } catch (err) {
           // ✅ Silent catch for network errors
           if (!String(err).includes("Partner not found")) {
@@ -85,6 +91,7 @@ export default function usePartnerTheme(
           setPartnerData(null);
           document.documentElement.style.setProperty("--primary-color", "");
           document.documentElement.style.setProperty("--secondary-color", "");
+          document.documentElement.style.setProperty("--accent-color", "");
         }
       };
 
@@ -94,6 +101,7 @@ export default function usePartnerTheme(
       setPartnerData(null);
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");
+      document.documentElement.style.setProperty("--accent-color", "");
     }
   }, [firstSegment, API_BASE_URL]);
 
