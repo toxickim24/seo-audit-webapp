@@ -249,7 +249,7 @@
     flex-direction: column;
     background: #ffffff;
     position: absolute;
-    top: 60px;
+    top: 90px;
     right: 50px;
     width: 220px;
     border: 1px solid #e5e7eb;
@@ -264,6 +264,7 @@
     max-height: 500px; /* smooth slide-down */
     opacity: 1;
     padding: 12px;
+    gap: 30px;
   }
 
   .navbar-item {

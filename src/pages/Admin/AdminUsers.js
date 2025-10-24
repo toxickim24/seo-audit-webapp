@@ -298,10 +298,10 @@ export default function AdminUsers() {
             ) : (
               paginatedUsers.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.id}</td>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>
+                  <td data-label="ID">{u.id}</td>
+                  <td data-label="Name">{u.name}</td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="Role">
                     <span
                       style={{
                         background:
@@ -315,17 +315,17 @@ export default function AdminUsers() {
                       {u.role}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Last Login">
                     {u.last_login
                       ? new Date(u.last_login).toLocaleString()
                       : "Never"}
                   </td>
-                  <td>
+                  <td data-label="Created At">
                     {u.created_at
                       ? new Date(u.created_at).toLocaleDateString()
                       : "-"}
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     {u.is_deleted ? (
                       <button
                         className="edit-btn"

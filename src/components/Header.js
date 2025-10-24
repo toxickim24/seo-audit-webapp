@@ -11,6 +11,8 @@ function Header({ tabs, partnerData }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleMenuClose = () => setMenuOpen(false);
+
   // ✅ Detect current route
   const firstSegment = location.pathname.split("/")[1] || "";
 
@@ -53,6 +55,17 @@ function Header({ tabs, partnerData }) {
     return () => window.removeEventListener("authChange", checkAuth);
   }, []);
 
+  // ✅ Close menu when clicking outside (mobile)
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest(".navbar-container") && !e.target.closest(".menu-toggle")) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [menuOpen]);
+
   const handleLogout = async () => {
     const ok = await confirm("Are you sure you want to log out?");
     if (!ok) return;
@@ -60,6 +73,7 @@ function Header({ tabs, partnerData }) {
     localStorage.clear();
     window.dispatchEvent(new Event("authChange"));
     success("Logged out successfully!");
+    handleMenuClose(); // ✅ Close menu after logout
     navigate("/");
   };
 
@@ -106,7 +120,7 @@ function Header({ tabs, partnerData }) {
                       <NavLink
                         to={`/${tab.id}`}
                         className={({ isActive }) => (isActive ? "active" : "")}
-                        onClick={() => setMenuOpen(false)}
+                        onClick={handleMenuClose}
                       >
                         {tab.label}
                       </NavLink>
@@ -117,13 +131,19 @@ function Header({ tabs, partnerData }) {
                 {isLoggedIn && role === "partner" && (
                   <>
                     <li className="navbar-item">
-                      <NavLink to="/partner-dashboard">Dashboard</NavLink>
+                      <NavLink to="/partner-dashboard" onClick={handleMenuClose}>
+                        Dashboard
+                      </NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink to="/partner-settings">Settings</NavLink>
+                      <NavLink to="/partner-settings" onClick={handleMenuClose}>
+                        Settings
+                      </NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink to="/partner-leads">Leads Management</NavLink>
+                      <NavLink to="/partner-leads" onClick={handleMenuClose}>
+                        Leads Management
+                      </NavLink>
                     </li>
                   </>
                 )}
@@ -132,21 +152,31 @@ function Header({ tabs, partnerData }) {
                 {isLoggedIn && role === "admin" && (
                   <>
                     <li className="navbar-item">
-                      <NavLink to="/admin-dashboard">Dashboard</NavLink>
+                      <NavLink to="/admin-dashboard" onClick={handleMenuClose}>
+                        Dashboard
+                      </NavLink>
                     </li>
-                    {/*
+                    {/* 
                     <li className="navbar-item">
-                      <NavLink to="/admin-settings">Settings</NavLink>
+                      <NavLink to="/admin-settings" onClick={handleMenuClose}>
+                        Settings
+                      </NavLink>
                     </li>
                     */}
                     <li className="navbar-item">
-                      <NavLink to="/admin-users">Users</NavLink>
+                      <NavLink to="/admin-users" onClick={handleMenuClose}>
+                        Users
+                      </NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink to="/admin-partners">Partners</NavLink>
+                      <NavLink to="/admin-partners" onClick={handleMenuClose}>
+                        Partners
+                      </NavLink>
                     </li>
                     <li className="navbar-item">
-                      <NavLink to="/admin-leads">Lead Management</NavLink>
+                      <NavLink to="/admin-leads" onClick={handleMenuClose}>
+                        Lead Management
+                      </NavLink>
                     </li>
                   </>
                 )}
@@ -159,7 +189,7 @@ function Header({ tabs, partnerData }) {
                 <Link
                   to="/login"
                   className="partner-button"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={handleMenuClose}
                 >
                   Sign In
                 </Link>

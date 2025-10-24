@@ -305,32 +305,32 @@ export default function AdminPartners() {
             ) : (
               paginatedPartners.map((p) => (
                 <tr key={p.id}>
-                  <td>
+                  <td data-label="Logo">
                     <img src={p.logo_url || "/seo-logo.png"} alt="logo" />
                   </td>
-                  <td>{p.company_name}</td>
-                  <td>
+                  <td  data-label="Company">{p.company_name}</td>
+                  <td  data-label="Slug">
                     <a href={`/${p.slug}`} target="_blank" rel="noreferrer">
                       {p.slug}
                     </a>
                   </td>
-                  <td>
+                  <td  data-label="Theme">
                     <div className="color-dots">
                       <span className="color-dot" style={{ background: p.primary_color }}></span>
                       <span className="color-dot" style={{ background: p.secondary_color }}></span>
                       <span className="color-dot" style={{ background: p.accent_color }}></span>
                     </div>
                   </td>
-                  <td>{p.user_name || "—"}</td>
-                  <td>{p.credits}</td>
-                  <td>
+                  <td data-label="User Assigned">{p.user_name || "—"}</td>
+                  <td data-label="Credits">{p.credits}</td>
+                  <td data-label="Status">
                     <span
                       className={`admin-partners-status ${p.is_deleted ? "inactive" : "active"}`}
                     >
                       {p.is_deleted ? "Inactive" : "Active"}
                     </span>
                   </td>
-                  <td className="admin-partners-actions-col">
+                  <td data-label="Actions" className="admin-partners-actions-col">
                     {p.is_deleted ? (
                       <button
                         className="admin-partners-btn restore"

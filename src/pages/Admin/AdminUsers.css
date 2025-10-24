@@ -285,4 +285,73 @@
     flex-direction: column;
     align-items: stretch;
   }
+
+  .admin-table {
+    box-shadow: none;
+  }
+
+  /* Hide traditional table headers */
+  .admin-table thead {
+    display: none;
+  }
+
+  /* Make table behave like a list of cards */
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table tbody {
+    background: #F9F9F9;
+  }
+
+  .admin-table tr {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    padding: 12px;
+  }
+
+  .admin-table td {
+    border: none;
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column; /* ✅ stack label + value vertically */
+    align-items: flex-start; /* ✅ left align everything */
+    font-size: 14px;
+    text-align: left; /* ✅ ensure text left */
+  }
+
+  /* Add labels using data attributes */
+  .admin-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    flex-basis: 45%;
+    text-align: left;
+  }
+
+  /* Adjust button layout inside cards */
+  .admin-table td button {
+    margin: 4px 4px 0 0;
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  /* Make role badges and status still readable */
+  .user-role-badge {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  /* Fix pagination spacing */
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
