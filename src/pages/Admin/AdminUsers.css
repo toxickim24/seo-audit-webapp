@@ -65,12 +65,13 @@
 }
 
 .admin-table th {
-  background: #f8fafc;
-  color: #555;
+  background: #22354D;
+  color: #fff;
   text-align: left;
   font-weight: 600;
   padding: 12px 16px;
   border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
 }
 
 .admin-table td {
