@@ -55,7 +55,7 @@ function SeoContact() {
         <div className={styles.featureCard}>
           <span className={styles.icon}>📧</span>
           <h3>Email Us</h3>
-          <p>support@seomojo.com</p>
+          <p>support@seomojo.app</p>
         </div>
         <div className={styles.featureCard}>
           <span className={styles.icon}>🏢</span>
@@ -65,7 +65,7 @@ function SeoContact() {
         <div className={styles.featureCard}>
           <span className={styles.icon}>🌐</span>
           <h3>Visit Us</h3>
-          <p>www.seomojo.com</p>
+          <p>www.seomojo.app</p>
         </div>
       </div>
 

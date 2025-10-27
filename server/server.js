@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { logger } from "./middleware/loggerMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 import partnerRoutes from "./routes/partnerRoutes.js";
 import seoRoutes from "./routes/seoRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
@@ -39,6 +40,7 @@ import { initDB } from "./config/db.js";
   app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 
   app.use("/api/auth", authRoutes);
+  app.use("/api/contact", contactRoutes);
   app.use("/api/partners", partnerRoutes);
   app.use("/api/partnerLeads", partnerLeadRoutes);
   app.use("/api/seo", seoRoutes);
