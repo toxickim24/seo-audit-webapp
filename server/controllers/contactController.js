@@ -3,16 +3,17 @@ import { createMailer } from "../config/mailer.js";
 export const sendContactMessage = async (req, res) => {
   try {
     const { name, email, message } = req.body;
-
     if (!name || !email || !message) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
+    console.log("📩 Sending email to:", process.env.EMAIL_USER);
+
     const transporter = createMailer();
 
     const mailOptions = {
-      from: `"SEO Mojo Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
+      from: `"SEO Mojo Contact" <${email}>`,
+      to: process.env.EMAIL_RECEIVER || process.env.EMAIL_USER,
       subject: `New Contact Message from ${name}`,
       html: `
         <h2>New Contact Message</h2>
