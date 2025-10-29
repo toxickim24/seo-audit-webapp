@@ -25,7 +25,7 @@ export default function AdminPartners() {
     accent_color: "#22354D",
     user_id: "",
     logo_url: "",
-    credits: 3,
+    credits: 10,
   });
 
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -271,7 +271,7 @@ export default function AdminPartners() {
                   accent_color: "#22354D",
                   user_id: "",
                   logo_url: "",
-                  credits: 3,
+                  credits: 10,
                 });
                 setModalOpen(true);
               }}

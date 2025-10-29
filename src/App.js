@@ -41,7 +41,7 @@ function AppContent() {
 
   const tabs = [
     { id: "seo-audit", label: "SEO Audit" },
-    { id: "seo-pricing", label: "Pricing" },
+    // { id: "seo-pricing", label: "Pricing" },
     // { id: "seo-tools", label: "Tools" },
     { id: "seo-contact", label: "Contact" },
   ];
