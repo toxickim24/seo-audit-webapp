@@ -1,0 +1,73 @@
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.featureCard {
+  background: #fff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  font-size: 30px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.featureCard h3 {
+  color: #22354d;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.featureCard p {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #22354d;
+  margin-bottom: 14px;
+}
+
+.primaryBtn {
+  display: inline-block;
+  background-color: #fb6a45;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 20px;
+  text-decoration: none;
+}
+
+.primaryBtn:hover {
+  background-color: #e05838;
+}

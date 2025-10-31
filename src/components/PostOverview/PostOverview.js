@@ -78,6 +78,8 @@ function PostOverview({
                 animate={false} // ✅ stops moving on form input
                 colors={["#FF5F6D", "#FFC371", "#00C49F"]}
                 arcWidth={0.3}
+                needleColor="rgba(34, 53, 77, 0.7)"
+                needleBaseColor="#22354d"
                 textColor="#22354d"
                 style={{ width: "clamp(200px, 60vw, 400px)" }}
               />
@@ -97,61 +99,97 @@ function PostOverview({
             <div className={styles.card}>
               <h3>On-Page SEO</h3>
               <div className={styles.progressWrapper}>
-                <CircularProgressbar
-                  value={Number(seoData?.onpage?.overview?.score) || 0}
-                  text={`${Number(seoData?.onpage?.overview?.score) || 0}%`}
-                  styles={buildStyles({
-                    pathColor: "#fb6a45",
-                    textColor: "#22354d",
-                    trailColor: "#eee",
-                  })}
+                <GaugeChart
+                  id="gauge-onpage"
+                  nrOfLevels={20}
+                  percent={(Number(seoData?.onpage?.overview?.score) || 0) / 100}
+                  animate={false}
+                  colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+                  arcWidth={0.3}
+                  needleColor="rgba(34, 53, 77, 0.7)"
+                  needleBaseColor="#22354d"
+                  textColor="#22354d"
+                  style={{
+                    width: "clamp(140px, 30vw, 260px)",
+                    height: "clamp(75px, 20vw, 180px)",
+                    margin: "0 auto",
+                  }}
+                  formatTextValue={() =>
+                    `${Number(seoData?.onpage?.overview?.score) || 0}%`
+                  }
                 />
               </div>
             </div>
 
             <div className={styles.card}>
-              <h3>Content SEO</h3>
+              <h3>On-Page SEO</h3>
               <div className={styles.progressWrapper}>
-                <CircularProgressbar
-                  value={Number(seoData?.contentSeo?.overview?.score) || 0}
-                  text={`${Number(seoData?.contentSeo?.overview?.score) || 0}%`}
-                  styles={buildStyles({
-                    pathColor: "#fb6a45",
-                    textColor: "#22354d",
-                    trailColor: "#eee",
-                  })}
+                <GaugeChart
+                  id="gauge-content"
+                  nrOfLevels={20}
+                  percent={(Number(seoData?.contentSeo?.overview?.score) || 0) / 100}
+                  animate={false}
+                  colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+                  arcWidth={0.3}
+                  needleColor="rgba(34, 53, 77, 0.7)"
+                  needleBaseColor="#22354d"
+                  textColor="#22354d"
+                  style={{
+                    width: "clamp(140px, 30vw, 260px)",
+                    height: "clamp(75px, 20vw, 180px)",
+                    margin: "0 auto",
+                  }}
+                  formatTextValue={() =>
+                    `${Number(seoData?.contentSeo?.overview?.score) || 0}%`
+                  }
                 />
               </div>
             </div>
 
             <div className={styles.card}>
-              <h3>Technical SEO</h3>
+              <h3>On-Page SEO</h3>
               <div className={styles.progressWrapper}>
-                <CircularProgressbar
-                  value={Number(seoData?.technicalSeo?.overview?.score) || 0}
-                  text={`${
-                    Number(seoData?.technicalSeo?.overview?.score) || 0
-                  }%`}
-                  styles={buildStyles({
-                    pathColor: "#fb6a45",
-                    textColor: "#22354d",
-                    trailColor: "#eee",
-                  })}
+                <GaugeChart
+                  id="gauge-technical"
+                  nrOfLevels={20}
+                  percent={(Number(seoData?.technicalSeo?.overview?.score) || 0) / 100}
+                  animate={false}
+                  colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+                  arcWidth={0.3}
+                  needleColor="rgba(34, 53, 77, 0.7)"
+                  needleBaseColor="#22354d"
+                  textColor="#22354d"
+                  style={{
+                    width: "clamp(140px, 30vw, 260px)",
+                    height: "clamp(75px, 20vw, 180px)",
+                    margin: "0 auto",
+                  }}
+                  formatTextValue={() =>
+                    `${Number(seoData?.technicalSeo?.overview?.score) || 0}%`
+                  }
                 />
               </div>
             </div>
 
             <div className={styles.card}>
-              <h3>Performance SEO</h3>
+              <h3>On-Page SEO</h3>
               <div className={styles.progressWrapper}>
-                <CircularProgressbar
-                  value={Number(pageSpeed) || 0}
-                  text={`${Number(pageSpeed) || 0}%`}
-                  styles={buildStyles({
-                    pathColor: "#fb6a45",
-                    textColor: "#22354d",
-                    trailColor: "#eee",
-                  })}
+                <GaugeChart
+                  id="gauge-performance"
+                  nrOfLevels={20}
+                  percent={(Number(pageSpeed) || 0) / 100}
+                  animate={false}
+                  colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+                  arcWidth={0.3}
+                  needleColor="rgba(34, 53, 77, 0.7)"
+                  needleBaseColor="#22354d"
+                  textColor="#22354d"
+                  style={{
+                    width: "clamp(140px, 30vw, 260px)",
+                    height: "clamp(75px, 20vw, 180px)",
+                    margin: "0 auto",
+                  }}
+                  formatTextValue={() => `${Number(pageSpeed) || 0}%`}
                 />
               </div>
             </div>

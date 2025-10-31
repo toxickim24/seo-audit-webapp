@@ -12,7 +12,7 @@ export const sendContactMessage = async (req, res) => {
     const transporter = createMailer();
 
     const mailOptions = {
-      from: `"SEO Mojo Contact" <${process.env.EMAIL_USER}>`,
+      from: `"SEO Mojo" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_RECEIVER || process.env.EMAIL_USER,
       replyTo: email,
       subject: `New Contact Message from ${name}`,

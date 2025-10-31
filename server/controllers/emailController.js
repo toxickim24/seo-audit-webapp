@@ -2,7 +2,7 @@ import { createMailer } from "../config/mailer.js";
 
 export async function sendSeoEmail(req, res) {
   
-  const { email, pdfBlob, safeUrl, company_name } = req.body;
+  const { email, name, pdfBlob, safeUrl, company_name } = req.body;
 
   if (!email || !pdfBlob) return res.status(400).json({ error: "Email and PDF required" });
 
@@ -29,10 +29,10 @@ export async function sendSeoEmail(req, res) {
       : `${company_name} – Your Personalized SEO Audit Report`;
 
     await mailer.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"SEO Mojo" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: subjectLine,
-    text: `Hello,
+    text: `Hello ${name || ""},
 
 Attached is your personalized SEO Audit Report prepared by ${
     company_name || "SEO Mojo"
@@ -42,7 +42,7 @@ It includes an overview of your website’s performance, key findings, and actio
 If you have any questions or would like to discuss next steps, feel free to reply to this email.
 
 Best regards,
-${company_name || "The SEO Mojo Team"}
+${company_name || "Chip | SEO Mojo"}
   `,
     attachments: [{ filename, content: pdfBuffer }],
   });

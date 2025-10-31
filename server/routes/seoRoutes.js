@@ -1,10 +1,9 @@
 import express from "express";
 import { SeoController } from "../controllers/seoController.js";
+import { auditLimiter } from "../middleware/auditLimiter.js";
 
 const router = express.Router();
 
-// ✅ GET /api/seo/analyze
-// Optional partner_id parameter will trigger credit deduction
-router.get("/analyze", SeoController.analyzeWebsite);
+router.get("/analyze", auditLimiter, SeoController.analyzeWebsite);
 
 export default router;

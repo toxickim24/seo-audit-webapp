@@ -36,14 +36,29 @@ export default function usePartnerTheme(
     const isPublic = firstSegment && !knownRoutes.includes(firstSegment);
     setIsPartnerPublic(isPublic);
 
-    // ✅ If admin route — skip theme entirely
-    if (firstSegment.startsWith("admin")) {
+    // 🧹 Skip partner theme on backend/system paths
+    if (
+      firstSegment.startsWith("api") ||
+      firstSegment.startsWith("clear") ||
+      firstSegment.startsWith("reset") ||
+      firstSegment.startsWith("favicon") ||
+      firstSegment.startsWith("admin")
+    ) {
+      setPartnerData(null);
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");
       document.documentElement.style.setProperty("--accent-color", "");
-      setPartnerData(null);
-      return;
+      return; // ✅ stop early
     }
+
+    // ✅ If admin route — skip theme entirely
+    // if (firstSegment.startsWith("admin")) {
+    //   document.documentElement.style.setProperty("--primary-color", "");
+    //   document.documentElement.style.setProperty("--secondary-color", "");
+    //   document.documentElement.style.setProperty("--accent-color", "");
+    //   setPartnerData(null);
+    //   return;
+    // }
 
     // ✅ Only run on public partner pages
     if (isPublic) {

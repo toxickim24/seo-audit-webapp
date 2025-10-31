@@ -1,6 +1,8 @@
 import "../css/Main.css";
 import "../css/Loader.css";
 import { useEffect, useState } from "react";
+import React, { useRef } from "react";
+import Swal from "sweetalert2";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SeoOnPage from "./SeoOnpage/SeoOnpageDisplay";
 import SeoTechnicalDisplay from "./SeoTechnical/SeoTechnicalDisplay";
@@ -17,6 +19,7 @@ import SeoTools from "./SeoTools";
 import SeoContact from "./SeoContact";
 import SeoJourney from "../components/SeoJourney";
 import GetFullReport from "../components/GetFullReport";
+import SeoHowItWorks  from "../components/SeoHowItWorks";
 
 function SuccessNotification({ email, clearStatus }) {
   const [visible, setVisible] = useState(true);
@@ -149,7 +152,34 @@ function Main({ activeTab }) {
 
       const res = await fetch(`${API_BASE_URL}/api/seo/analyze?url=${encodeURIComponent(normalized)}`);
 
+      // ✅ handle rate limit gracefully — no console error
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+
+        Swal.fire({
+          icon: "info",
+          title: "Free Scan Limit Reached",
+          html: `
+            <p>${data.message || "You’ve already used your free SEO audit today."}</p>
+            <p>Please try again later or 
+              <a href="/seo-contact" style="color:#fb6a45;font-weight:600;text-decoration:none;">
+                contact us
+              </a>.
+            </p>
+          `,
+          confirmButtonText: "Got it",
+          confirmButtonColor: "#fb6a45",
+        }).then(() => {
+          setSeoData(null);
+          setIsLoading(false);
+          setJourneyStep("enter");
+        });
+
+        return; // ✅ prevents console red error
+      }
+
       if (!res.ok) throw new Error("Server error");
+
       const data = await res.json();
       setSeoData(data);
 
@@ -318,7 +348,7 @@ function Main({ activeTab }) {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: "SEO Mojo", }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, }),
       });
 
       if (!res.ok) {
@@ -356,7 +386,7 @@ function Main({ activeTab }) {
 
   return (
     <main className="main-layout">
-      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-contact" ? (
+      {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-how-it-works" && activeTab !== "seo-contact" ? (
         <>
 
           <div className="content-area">
@@ -364,6 +394,7 @@ function Main({ activeTab }) {
               {/* Step 1: Enter Website */}
               {!seoData && !isLoading && journeyStep === "enter" && (
                 <>
+
                   <div className="animation-seo">
                     <DotLottieReact
                       src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
@@ -518,6 +549,7 @@ function Main({ activeTab }) {
         <>
           {activeTab === "seo-pricing" && <SeoPricing />}
           {activeTab === "seo-tools" && <SeoTools />}
+          {activeTab === "seo-how-it-works" && <SeoHowItWorks />}
           {activeTab === "seo-contact" && <SeoContact />}
         </>
       )}

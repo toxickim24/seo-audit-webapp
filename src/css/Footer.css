@@ -5,6 +5,7 @@ footer {
   background: #fb6a45;
   color: white;
   background: var(--secondary-color, #fb6a45);
+  line-height: 25px;
 }
 
 footer a {

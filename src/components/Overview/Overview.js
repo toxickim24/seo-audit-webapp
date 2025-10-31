@@ -96,6 +96,8 @@ function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommenda
               percent={overallScore / 100}
               colors={["#FF5F6D", "#FFC371", "#00C49F"]}
               arcWidth={0.3}
+              needleColor="rgba(34, 53, 77, 0.7)"
+              needleBaseColor="#22354d"
               textColor="#22354d"
               style={{ width: "clamp(200px, 60vw, 500px)" }}
             />
@@ -108,60 +110,94 @@ function Overview({ seoData, pageSpeed, desktopRecommendations, mobileRecommenda
 
         {/* Score Cards */}
         <div className={styles.scoreGrid}>
+          {/* On-Page SEO */}
           <div className={styles.scoreCard}>
-            <div className={styles.circle}>📝</div>
             <h4>On-Page SEO</h4>
-            <div className={styles.progressBar}>
-              <div
-                className={`${styles.progressFill} ${getScoreClass(
-                  seoData?.onpage?.overview?.score ?? 0
-                )}`}
-                style={{ width: `${seoData?.onpage?.overview?.score ?? 0}%` }}
-              />
-            </div>
-            <p>{seoData?.onpage?.overview?.score ?? 0}%</p>
+            <GaugeChart
+              id="gauge-onpage-overview"
+              nrOfLevels={20}
+              percent={(Number(seoData?.onpage?.overview?.score) || 0) / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              needleColor="rgba(34, 53, 77, 0.7)"
+              needleBaseColor="#22354d"
+              textColor="#22354d"
+              style={{
+                width: "clamp(240px, 30vw, 240px)",
+                height: "clamp(108px, 20vw, 108px)",
+                margin: "0 auto",
+              }}
+              formatTextValue={() =>
+                `${Number(seoData?.onpage?.overview?.score) || 0}%`
+              }
+            />
           </div>
 
+          {/* Content SEO */}
           <div className={styles.scoreCard}>
-            <div className={styles.circle}>📄</div>
             <h4>Content SEO</h4>
-            <div className={styles.progressBar}>
-              <div
-                className={`${styles.progressFill} ${getScoreClass(
-                  seoData?.contentSeo?.overview?.score ?? 0
-                )}`}
-                style={{ width: `${seoData?.contentSeo?.overview?.score ?? 0}%` }}
-              />
-            </div>
-            <p>{seoData?.contentSeo?.overview?.score ?? 0}%</p>
+            <GaugeChart
+              id="gauge-content-overview"
+              nrOfLevels={20}
+              percent={(Number(seoData?.contentSeo?.overview?.score) || 0) / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              needleColor="rgba(34, 53, 77, 0.7)"
+              needleBaseColor="#22354d"
+              textColor="#22354d"
+              style={{
+                width: "clamp(240px, 30vw, 240px)",
+                height: "clamp(108px, 20vw, 108px)",
+                margin: "0 auto",
+              }}
+              formatTextValue={() =>
+                `${Number(seoData?.contentSeo?.overview?.score) || 0}%`
+              }
+            />
           </div>
 
+          {/* Technical SEO */}
           <div className={styles.scoreCard}>
-            <div className={styles.circle}>⚙️</div>
             <h4>Technical SEO</h4>
-            <div className={styles.progressBar}>
-              <div
-                className={`${styles.progressFill} ${getScoreClass(
-                  seoData?.technicalSeo?.overview?.score ?? 0
-                )}`}
-                style={{
-                  width: `${seoData?.technicalSeo?.overview?.score ?? 0}%`,
-                }}
-              />
-            </div>
-            <p>{seoData?.technicalSeo?.overview?.score ?? 0}%</p>
+            <GaugeChart
+              id="gauge-technical-overview"
+              nrOfLevels={20}
+              percent={(Number(seoData?.technicalSeo?.overview?.score) || 0) / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              needleColor="rgba(34, 53, 77, 0.7)"
+              needleBaseColor="#22354d"
+              textColor="#22354d"
+              style={{
+                width: "clamp(240px, 30vw, 240px)",
+                height: "clamp(108px, 20vw, 108px)",
+                margin: "0 auto",
+              }}
+              formatTextValue={() =>
+                `${Number(seoData?.technicalSeo?.overview?.score) || 0}%`
+              }
+            />
           </div>
 
+          {/* Performance SEO */}
           <div className={styles.scoreCard}>
-            <div className={styles.circle}>🚀</div>
             <h4>Performance SEO</h4>
-            <div className={styles.progressBar}>
-              <div
-                className={`${styles.progressFill} ${getScoreClass(pageSpeed ?? 0)}`}
-                style={{ width: `${pageSpeed ?? 0}%` }}
-              />
-            </div>
-            <p>{pageSpeed ?? 0}%</p>
+            <GaugeChart
+              id="gauge-performance-overview"
+              nrOfLevels={20}
+              percent={(Number(pageSpeed) || 0) / 100}
+              colors={["#FF5F6D", "#FFC371", "#00C49F"]}
+              arcWidth={0.3}
+              needleColor="rgba(34, 53, 77, 0.7)"
+              needleBaseColor="#22354d"
+              textColor="#22354d"
+              style={{
+                width: "clamp(240px, 30vw, 240px)",
+                height: "clamp(108px, 20vw, 108px)",
+                margin: "0 auto",
+              }}
+              formatTextValue={() => `${Number(pageSpeed) || 0}%`}
+            />
           </div>
         </div>
 

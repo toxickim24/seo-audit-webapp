@@ -43,6 +43,7 @@ function AppContent() {
     { id: "seo-audit", label: "SEO Audit" },
     // { id: "seo-pricing", label: "Pricing" },
     // { id: "seo-tools", label: "Tools" },
+    { id: "seo-how-it-works", label: "How It Works" },
     { id: "seo-contact", label: "Contact" },
   ];
 
@@ -64,6 +65,7 @@ function AppContent() {
         <Route path="/seo-audit" element={<Main activeTab="seo-audit" />} />
         <Route path="/seo-pricing" element={<Main activeTab="seo-pricing" />} />
         <Route path="/seo-tools" element={<Main activeTab="seo-tools" />} />
+        <Route path="/seo-how-it-works" element={<Main activeTab="seo-how-it-works" />} />
         <Route path="/seo-contact" element={<Main activeTab="seo-contact" />} />
 
         <Route path="/login" element={<Login />} />
