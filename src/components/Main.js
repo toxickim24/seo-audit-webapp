@@ -160,8 +160,9 @@ function Main({ activeTab }) {
           icon: "info",
           title: "Free Scan Limit Reached",
           html: `
-            <p>${data.message || "You’ve already used your free SEO audit today."}</p>
-            <p>Please try again later or 
+            <p>You’ve already used your free SEO audit today.</p>
+            <p>Each visitor is limited to 1 free audit scan per day.</p>
+            <p>Please try again tomorrow or 
               <a href="/seo-contact" style="color:#fb6a45;font-weight:600;text-decoration:none;">
                 contact us
               </a>.
@@ -321,6 +322,8 @@ function Main({ activeTab }) {
       setIsEmailSending(true);
       setEmailStatus("");
       setEmailStatusType("");
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       const pdfBlob = await generateAiSeoPDF(
         url,

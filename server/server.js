@@ -1,4 +1,3 @@
-// server/server.js
 import fs from "fs";
 import dotenv from "dotenv";
 import express from "express";
@@ -7,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { logger } from "./middleware/loggerMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import clearLimitRoute from "./routes/clearLimitRoute.js";
 import authRoutes from "./routes/authRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import partnerRoutes from "./routes/partnerRoutes.js";
@@ -36,6 +36,8 @@ import { initDB } from "./config/db.js";
   app.use(cors());
   app.use(express.json({ limit: "10mb" }));
   app.use(logger);
+
+  app.use("/api/clear", clearLimitRoute);
 
   app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 

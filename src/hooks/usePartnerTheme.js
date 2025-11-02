@@ -17,9 +17,11 @@ export default function usePartnerTheme(
 
   const knownRoutes = [
     "",
+    "clear",
     "seo-audit",
     "seo-pricing",
     "seo-tools",
+    "seo-how-it-works",
     "seo-contact",
     "login",
     "register",
@@ -36,29 +38,14 @@ export default function usePartnerTheme(
     const isPublic = firstSegment && !knownRoutes.includes(firstSegment);
     setIsPartnerPublic(isPublic);
 
-    // 🧹 Skip partner theme on backend/system paths
-    if (
-      firstSegment.startsWith("api") ||
-      firstSegment.startsWith("clear") ||
-      firstSegment.startsWith("reset") ||
-      firstSegment.startsWith("favicon") ||
-      firstSegment.startsWith("admin")
-    ) {
-      setPartnerData(null);
+    // ✅ If admin route — skip theme entirely
+    if ( firstSegment.startsWith("admin") ) {
       document.documentElement.style.setProperty("--primary-color", "");
       document.documentElement.style.setProperty("--secondary-color", "");
       document.documentElement.style.setProperty("--accent-color", "");
-      return; // ✅ stop early
+      setPartnerData(null);
+      return;
     }
-
-    // ✅ If admin route — skip theme entirely
-    // if (firstSegment.startsWith("admin")) {
-    //   document.documentElement.style.setProperty("--primary-color", "");
-    //   document.documentElement.style.setProperty("--secondary-color", "");
-    //   document.documentElement.style.setProperty("--accent-color", "");
-    //   setPartnerData(null);
-    //   return;
-    // }
 
     // ✅ Only run on public partner pages
     if (isPublic) {

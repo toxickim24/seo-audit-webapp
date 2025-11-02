@@ -1,5 +1,7 @@
 import { HelmetProvider } from "react-helmet-async";
 
+import { useEffect, useState } from "react";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -34,6 +36,25 @@ import PublicPartnerPage from "./pages/PublicPartnerPage";
 
 import "./App.css";
 
+function ClearLimiterRedirect() {
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/clear")
+      .then(() => {
+        console.log("✅ Rate limit cleared!");
+        setDone(true);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to clear limiter:", err);
+        setDone(true);
+      });
+  }, []);
+
+  if (done) return <Navigate to="/seo-audit" replace />;
+  return <p style={{ textAlign: "center", marginTop: "2rem" }}>Clearing rate limit...</p>;
+}
+
 function AppContent() {
   const { partnerData, isPartnerPublic } = usePartnerTheme();
   const isLoggedIn = !!localStorage.getItem("token");
@@ -62,6 +83,7 @@ function AppContent() {
         {/* ======================================================
            ✅ Public Pages
         ====================================================== */}
+        <Route path="/clear" element={<ClearLimiterRedirect />} />
         <Route path="/seo-audit" element={<Main activeTab="seo-audit" />} />
         <Route path="/seo-pricing" element={<Main activeTab="seo-pricing" />} />
         <Route path="/seo-tools" element={<Main activeTab="seo-tools" />} />
