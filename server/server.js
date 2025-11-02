@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { initDB } from "./config/db.js";
 import { fileURLToPath } from "url";
 import { logger } from "./middleware/loggerMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -15,13 +16,13 @@ import emailRoutes from "./routes/emailRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import partnerLeadRoutes from "./routes/partnerLeadRoutes.js";
+import resellerRoutes from "./routes/resellerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import adminLeadRoutes from "./routes/adminLeadRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 import adminPartnerRoutes from "./routes/adminPartnerRoutes.js";
 import adminActivityRoutes from "./routes/adminActivityRoutes.js";
 import adminSystemRoutes from "./routes/adminSystemRoutes.js";
-import { initDB } from "./config/db.js";
 
 // top-level logic wrapped in async function
 (async () => {
@@ -49,6 +50,7 @@ import { initDB } from "./config/db.js";
   app.use("/api/email", emailRoutes);
   app.use("/api/openai", aiRoutes);
   app.use("/api/upload", uploadRoutes);
+  app.use("/api/resellers", resellerRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/adminLeads", adminLeadRoutes);
   app.use("/api/admin/users", adminUserRoutes);

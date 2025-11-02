@@ -2,7 +2,6 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -45,7 +44,7 @@ const upload = multer({
 // ============================================================
 // ✅ Upload Partner Logo (used by Admin & Partner)
 // ============================================================
-router.post("/logo", protect, upload.single("logo"), (req, res) => {
+router.post("/logo", upload.single("logo"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({

@@ -15,7 +15,7 @@ export const sendContactMessage = async (req, res) => {
       from: `"SEO Mojo" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_RECEIVER || process.env.EMAIL_USER,
       replyTo: email,
-      subject: `New Contact Message from ${name}`,
+      subject: `🧩 New Contact Message from ${name}`,
       html: `
         <h2>New Contact Message</h2>
         <p><strong>Name:</strong> ${name}</p>

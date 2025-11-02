@@ -25,6 +25,7 @@ export default function usePartnerTheme(
     "seo-contact",
     "login",
     "register",
+    "resellers",
     "partner-dashboard",
     "partner-settings",
     "partner-leads",

@@ -25,8 +25,8 @@ export async function sendSeoEmail(req, res) {
 
     // ✅ Professional email subject
     const subjectLine = isDefaultCompany
-      ? "Your SEO Audit Report from SEO Mojo"
-      : `${company_name} – Your Personalized SEO Audit Report`;
+      ? "🧩 Your SEO Audit Report from SEO Mojo"
+      : `🧩 ${company_name} – Your Personalized SEO Audit Report`;
 
     await mailer.sendMail({
     from: `"SEO Mojo" <${process.env.EMAIL_USER}>`,

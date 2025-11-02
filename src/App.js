@@ -23,6 +23,7 @@ import Login from "./pages/Login/Login";
 import PartnerDashboard from "./pages/PartnerDashboard/PartnerDashboard";
 import PartnerSettings from "./pages/PartnerSettings/PartnerSettings";
 import PartnerLeads from "./pages/PartnerLeadsManagement";
+import ResellerWhitelabelForm from "./components/ResellerWhitelabelForm";
 
 // ✅ Admin pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -89,6 +90,11 @@ function AppContent() {
         <Route path="/seo-tools" element={<Main activeTab="seo-tools" />} />
         <Route path="/seo-how-it-works" element={<Main activeTab="seo-how-it-works" />} />
         <Route path="/seo-contact" element={<Main activeTab="seo-contact" />} />
+
+        <Route
+          path="/resellers"
+          element={<ResellerWhitelabelForm />}
+        />
 
         <Route path="/login" element={<Login />} />
 

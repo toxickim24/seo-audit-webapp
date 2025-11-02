@@ -24,6 +24,7 @@ function Header({ tabs, partnerData }) {
     "seo-tools",
     "seo-how-it-works",
     "seo-contact",
+    "resellers",
     "leads-management",
     "login",
     "register",
