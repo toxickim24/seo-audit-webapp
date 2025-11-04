@@ -443,6 +443,21 @@ export default function PublicPartnerPage() {
     }
   }, [partner]);
 
+  const root = document.documentElement;
+  const primaryColor = getComputedStyle(root)
+    .getPropertyValue("--primary-color")
+    .trim()
+    .toLowerCase();
+
+  const isWhite =
+    primaryColor === "#fff" ||
+    primaryColor === "#ffffff" ||
+    primaryColor === "white" ||
+    primaryColor === "#f9f9f9" ||
+    primaryColor === "#fafafa";
+
+  document.body.setAttribute("data-primary-white", isWhite);
+
   if (showLoader) return <GlobalLoader visible={showLoader} partner={partner} />;
 
   if (partnerError) {

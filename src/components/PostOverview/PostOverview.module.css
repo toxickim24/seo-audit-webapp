@@ -204,8 +204,14 @@
   transition: background 0.3s ease, transform 0.1s ease;
 }
 
+[data-primary-white="true"] .form button {
+  color: var(--secondary-color, #fff);
+  border: 2px solid var(--secondary-color, #fb6a45);
+}
+
 .form button:hover {
-  background: #e95a39;
+  background: var(--secondary-color, #ff8e3a);
+  color: #fff;
   transform: translateY(-2px);
 }
 

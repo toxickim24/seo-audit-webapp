@@ -26,8 +26,8 @@
    Logo
 =========================== */
 .header-container-wrapper .logo img {
-  width: 130px;
-  height: auto;
+  width: auto;
+  height: 91px;
   display: block;
 }
 
@@ -36,10 +36,6 @@
 =========================== */
 .partner-theme .header-container-wrapper {
   padding: 20px 0px;
-}
-
-.partner-theme .header-container-wrapper .logo img {
-  width: 150px;
 }
 
 /* ===========================

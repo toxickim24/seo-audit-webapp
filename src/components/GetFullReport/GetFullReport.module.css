@@ -67,12 +67,15 @@
   transition: all 0.25s ease;
 }
 
+[data-primary-white="true"] .primaryBtn {
+  color: var(--secondary-color, #fff);
+  border: 2px solid var(--secondary-color, #fb6a45);
+}
+
 /* ✅ Dynamic hover – slightly darken both ends */
 .primaryBtn:hover {
-  --primary-start-hover: color-mix(in srgb, var(--primary-color, #fb6a45) 85%, black);
-  --primary-end-hover: color-mix(in srgb, var(--primary-color, #fb6a45) 70%, black);
-
-  background: linear-gradient(180deg, var(--primary-start-hover) 0%, var(--primary-end-hover) 100%);
+  background: var(--secondary-color, #ff8e3a);
+  color: #fff;
   transform: translateY(-2px);
 }
 
