@@ -84,7 +84,7 @@ export async function deleteLead(req, res) {
   try {
     await db.execute("DELETE FROM leads WHERE id = ?", [id]);
     await logActivity({
-      user_id: req.user.id || null,
+      user_id: req.user?.id || null,
       action_type: "lead_delete",
       description: `Lead ID ${id} was permanently deleted by admin.`,
       ip_address: req.ip,

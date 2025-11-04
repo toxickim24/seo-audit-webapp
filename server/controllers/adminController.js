@@ -54,9 +54,9 @@ export const AdminController = {
     try {
       const db = getDB();
 
-      const [[partners]] = await db.query("SELECT COUNT(*) AS total FROM partners");
+      const [[partners]] = await db.query("SELECT COUNT(*) AS total FROM partners WHERE is_deleted = 0");
       const [[leads]] = await db.query("SELECT COUNT(*) AS total FROM leads");
-      const [[users]] = await db.query("SELECT COUNT(*) AS total FROM users");
+      const [[users]] = await db.query("SELECT COUNT(*) AS total FROM users WHERE is_deleted = 0");
 
       res.json({
         partners: partners.total || 0,
