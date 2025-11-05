@@ -48,11 +48,6 @@ function SeoContact() {
       {/* ---------- Contact Info Section ---------- */}
       <div className={styles.featuresGrid}>
         <div className={styles.featureCard}>
-          <span className={styles.icon}>💬</span>
-          <h3>Chat Support</h3>
-          <p>Reach us through our in-app chat or via email anytime.</p>
-        </div>
-        <div className={styles.featureCard}>
           <span className={styles.icon}>📧</span>
           <h3>Email Us</h3>
           <p>support@seomojo.app</p>

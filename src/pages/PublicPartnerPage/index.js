@@ -332,7 +332,8 @@ export default function PublicPartnerPage() {
         simplifiedMobile,
         seoData,
         partner?.logo_url,
-        partner?.company_name
+        partner?.company_name,
+        partner?.primary_color
       );
 
       const base64Data = await new Promise((resolve, reject) => {
@@ -614,6 +615,7 @@ export default function PublicPartnerPage() {
             seoData={seoData}
             partnerLogo={partner?.logo_url}
             partnerCompany={partner?.company_name}
+            partnerPrimaryColor={partner?.primary_color}
           />
         )}
 

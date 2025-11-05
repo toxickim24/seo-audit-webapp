@@ -12,10 +12,27 @@ export const generateAiSeoPDF = async (
   seoData,
   partnerLogo = null,
   partnerCompany = null,
+  partnerPrimaryColor = "#ffffff",
 ) => {
   if (!aiAudit) return;
 
-  const logoToUse = partnerLogo || "/seo-logo.png";
+  // ✅ Always convert partner logo to Base64 before using
+  let logoToUse = partnerLogo || "/seo-logo.png";
+
+  if (logoToUse && !logoToUse.startsWith("data:")) {
+    try {
+      const response = await fetch(logoToUse);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      logoToUse = await new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      console.warn("⚠️ Failed to load logo from URL, using default:", err);
+      logoToUse = "/seo-logo.png";
+    }
+  }
   const companyName = partnerCompany || "SEO Mojo";
 
   const doc = new jsPDF();
@@ -216,40 +233,52 @@ export const generateAiSeoPDF = async (
 
   const addHeaderFooter = (pageNum, totalPages) => {
     try {
-      const maxWidth = 40;
-      const maxHeight = 20;
-      const x = margin;
-      const y = 8;
 
-      // Use preloaded dimensions
+      // --- Header band ---
+      const headerHeight = headerY; // use your existing line height (e.g., 32)
+      const desiredHeight = 24;     // target visible height for normal logos
+      const minHeight = 20;         // ensures wide logos (like Simplicity I.T.) stay visible
+      const maxWidth = pageWidth * 0.5; // allow up to half the page width
+
+      // Draw colored background
+      const hexToRgb = (hex) => {
+        const m = hex?.replace("#", "").match(/.{1,2}/g);
+        return m ? m.map((v) => parseInt(v, 16)) : [251, 106, 69];
+      };
+      const COLOR_HEADER_BG = hexToRgb(partnerPrimaryColor);
+      doc.setFillColor(...COLOR_HEADER_BG);
+      doc.rect(0, 0, pageWidth, headerHeight, "F");
+
+      // --- Scale logo automatically ---
       let logoWidth = logoDimensions?.width || 200;
       let logoHeight = logoDimensions?.height || 100;
-      const aspectRatio = logoWidth / logoHeight;
+      const aspect = logoWidth / logoHeight;
 
-      if (aspectRatio >= 1) {
-        logoWidth = maxWidth;
-        logoHeight = maxWidth / aspectRatio;
-      } else {
-        logoHeight = maxHeight;
-        logoWidth = maxHeight * aspectRatio;
-      }
+      // Auto-height adjustment
+      logoHeight = Math.max(desiredHeight, minHeight);
+      logoWidth = logoHeight * aspect;
 
+      // Limit extremely wide logos
       if (logoWidth > maxWidth) {
-        logoHeight *= maxWidth / logoWidth;
         logoWidth = maxWidth;
-      }
-      if (logoHeight > maxHeight) {
-        logoWidth *= maxHeight / logoHeight;
-        logoHeight = maxHeight;
+        logoHeight = logoWidth / aspect;
       }
 
+      // Center vertically within header band
+      const x = margin;
+      const y = (headerHeight - logoHeight) / 2;
+
+      // --- Add image ---
       doc.addImage(logoToUse, "PNG", x, y, logoWidth, logoHeight);
     } catch (err) {
       console.warn("⚠️ Failed to render logo:", err);
     }
 
     doc.setDrawColor(200);
-    doc.line(margin, headerY, pageWidth - margin, headerY);
+    // ✅ Draw bottom separator only if background is white
+    if (partnerPrimaryColor?.toLowerCase() === "#ffffff") {
+      doc.line(margin, headerY, pageWidth - margin, headerY);
+    }
     doc.line(margin, footerTopY, pageWidth - margin, footerTopY);
 
     const pre = `© ${year} ${companyName}. All Rights Reserved. Made by `;
