@@ -619,6 +619,61 @@ export const generateAiSeoPDF = async (
     aiAudit.disclaimers.forEach((d) => addText(`- ${d}`, 6));
   }
 
+  // ===== PAGE 8 – Next Steps =====
+  addPage();
+  const nextStepsPage = doc.internal.getNumberOfPages();
+  sectionPage["Next Steps"] = nextStepsPage; // ✅ for TOC
+
+  addSectionTitle("Next Steps");
+
+  addText(
+    "You’ve now got a clearer picture of how your website’s performing — but the question is, what do you do with this information?",
+    0,
+    "normal",
+    12,
+    COLOR_TEXT
+  );
+  yPos += 6;
+
+  addText(
+    "Most business owners see an audit like this and wonder:",
+    0,
+    "normal",
+    12,
+    COLOR_TEXT
+  );
+  yPos += 6;
+
+  addText("“Where should I even start?”", 6, "italic", 12, COLOR_MUTED);
+  addText("“Which of these fixes will actually move the needle?”", 6, "italic", 12, COLOR_MUTED);
+  yPos += 6;
+
+  addText(
+    "If that sounds familiar, you don’t have to figure it out alone.",
+    0,
+    "normal",
+    12,
+    COLOR_TEXT
+  );
+  yPos += 6;
+
+  addText(
+    "Just hit reply to this email, and we’ll personally walk you through what to prioritise first, what can wait, and how to turn these insights into measurable growth.",
+    0,
+    "normal",
+    12,
+    COLOR_TEXT
+  );
+  yPos += 6;
+
+  addText(
+    "There’s no obligation — just a straightforward conversation about where you are, where you want to be, and how we can help you get there faster.",
+    0,
+    "normal",
+    12,
+    COLOR_TEXT
+  );
+
   // ===== TOC (updated order) =====
   doc.setPage(tocPage);
   yPos = tocYStart;
@@ -638,6 +693,7 @@ export const generateAiSeoPDF = async (
     "Category Notes",
     "Total Potential Speed Gain",
     "Disclaimers",
+    "Next Steps",
   ];
 
   tocOrder.forEach((label) => {
