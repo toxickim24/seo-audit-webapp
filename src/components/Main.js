@@ -226,7 +226,7 @@ function Main({ activeTab }) {
       phone,
       company,
       website: url,
-      overallScore,
+      score: overallScore,
       date: new Date().toISOString(),
     };
 
