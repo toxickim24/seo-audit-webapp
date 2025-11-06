@@ -275,7 +275,7 @@ export default function AdminUsers() {
         <table className="admin-table">
           <thead>
             <tr>
-              {["id", "name", "email", "role", "last_login", "created_at"].map((col) => (
+              {["id", "name", "email", "role", "last login", "created at"].map((col) => (
                 <th key={col} onClick={() => toggleSort(col)}>
                   {col.toUpperCase()}{" "}
                   {sortConfig.key === col

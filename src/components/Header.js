@@ -76,7 +76,7 @@ function Header({ tabs, partnerData }) {
     window.dispatchEvent(new Event("authChange"));
     success("Logged out successfully!");
     handleMenuClose(); // ✅ Close menu after logout
-    navigate("/");
+    navigate("/login", { replace: true });
   };
 
   // ✅ Smart logo redirect
