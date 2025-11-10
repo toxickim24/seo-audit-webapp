@@ -347,7 +347,7 @@ export default function PublicPartnerPage() {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", partner?.primary_color, }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", primary_color: partner?.primary_color, }),
       });
       if (!res.ok) throw new Error("Email failed");
 
