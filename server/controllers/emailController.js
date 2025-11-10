@@ -4,7 +4,7 @@ export async function sendSeoEmail(req, res) {
 
   const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  const { email, name, pdfBlob, safeUrl, company_name } = req.body;
+  const { email, name, pdfBlob, safeUrl, company_name, primary_color } = req.body;
 
   if (!email || !pdfBlob) return res.status(400).json({ error: "Email and PDF required" });
 
@@ -33,9 +33,9 @@ export async function sendSeoEmail(req, res) {
     // ✅ Determine header color and text color
     const headerColor = isDefaultCompany
       ? "#ffffff" // white header for default brand
-      : partnerPrimaryColor || "#22354d"; // partner’s main color or fallback
+      : primary_color || "#22354d"; // partner’s main color or fallback
 
-  const textColor = isDefaultCompany ? "#22354d" : "#ffffff";
+    const textColor = isDefaultCompany ? "#22354d" : "#ffffff";
   
 
     await mailer.sendMail({
