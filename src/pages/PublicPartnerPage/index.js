@@ -347,7 +347,7 @@ export default function PublicPartnerPage() {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", primary_color: partner?.primary_color, }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", primary_color: partner?.primary_color, partner_logo: partner?.logo_url }),
       });
       if (!res.ok) throw new Error("Email failed");
 
@@ -530,6 +530,7 @@ export default function PublicPartnerPage() {
                 <button type="submit">Run Your SEO Audit Now</button>
                 {error && <p className="error-message">{error}</p>}
               </form>
+              <p className="cta-subtext">100% Free Audit | ⚡ Instant Results | 📊 No Credit Card Required</p>
             </div>
           </>
         )}
