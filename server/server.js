@@ -59,6 +59,8 @@ import adminSystemRoutes from "./routes/adminSystemRoutes.js";
   app.use("/api/admin/system", adminSystemRoutes);
   app.use(errorHandler);
 
+  app.use("/public", express.static(path.join(__dirname, "public")));
+
   if (process.env.NODE_ENV === "production") {
     let buildPath = path.join(__dirname, "../build");
     if (!fs.existsSync(buildPath)) buildPath = path.join(__dirname, "build");

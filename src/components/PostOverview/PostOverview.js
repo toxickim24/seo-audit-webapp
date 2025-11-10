@@ -61,6 +61,26 @@ function PostOverview({
           Your site scored <b>{finalScore}</b>/100
         </span>
       )}
+
+      {/* ✅ Three white boxes below intro */}
+      <div className={styles.whatYouGetRow}>
+        <div className={styles.whatYouGetItem}>
+          <div className={styles.whatYouGetIcon}>🔍</div>
+          <h4>Performance Insights</h4>
+          <p>Analyze speed, structure, and content to see what’s slowing you down.</p>
+        </div>
+        <div className={styles.whatYouGetItem}>
+          <div className={styles.whatYouGetIcon}>📈</div>
+          <h4>SEO Health Score</h4>
+          <p>Get an overall rating and see exactly where your site stands today.</p>
+        </div>
+        <div className={styles.whatYouGetItem}>
+          <div className={styles.whatYouGetIcon}>💡</div>
+          <h4>Action Plan</h4>
+          <p>Receive step-by-step recommendations to boost your ranking.</p>
+        </div>
+      </div>
+
       <p className={styles.intro}>
         Want to see the full breakdown with fixes and opportunities? Just fill
         in the form below and we’ll email you your complete SEO report.
@@ -203,6 +223,7 @@ function PostOverview({
             Enter your details below and we’ll send the full PDF with fixes and
             opportunities straight to your inbox.
           </span>
+
           <form onSubmit={handleLeadSubmit} className={styles.form}>
             <label>Full Name *</label>
             <input

@@ -388,6 +388,7 @@ function Main({ activeTab }) {
   }, [journeyStep, aiAudit]); // ❗ only trigger when step changes to results
 
   return (
+
     <main className="main-layout">
       {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-how-it-works" && activeTab !== "seo-contact" ? (
         <>
@@ -422,6 +423,7 @@ function Main({ activeTab }) {
                       <button type="submit">Run Your SEO Audit Now</button>
                       {error && <p className="error-message">{error}</p>}
                     </form>
+                    <p className="cta-subtext">100% Free Audit | ⚡ Instant Results | 📊 No Credit Card Required</p>
                   </div>
                 </>
               )}

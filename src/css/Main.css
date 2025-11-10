@@ -131,6 +131,13 @@
   color: #fff;
 }
 
+.cta-subtext{
+  margin-top:.5rem;
+  font-size:.9rem;
+  color:#666;
+  text-align: center;
+}
+
 /* Overview Output */
 .results-container{
   width: 100%;

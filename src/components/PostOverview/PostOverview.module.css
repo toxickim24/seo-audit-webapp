@@ -229,6 +229,50 @@
 }
 
 /* ==========================
+   3-Column White Boxes Row
+========================== */
+.whatYouGetRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.whatYouGetItem {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatYouGetItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.whatYouGetIcon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.whatYouGetItem h4 {
+  color: var(--primary-color, #fb6a45);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.whatYouGetItem p {
+  color: #555;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ==========================
    Responsive Design
 ========================== */
 @media (max-width: 1024px) {
@@ -272,5 +316,9 @@
 
   .card p {
     font-size: 1rem;
+  }
+
+  .whatYouGetItem {
+    padding: 1.2rem;
   }
 }

@@ -485,32 +485,20 @@ export default function PublicPartnerPage() {
     <Helmet>
       <title>
         {partner?.company_name
-          ? `${partner.company_name} | SEO Audit Tool`
-          : "SEO Mojo | SEO Audit Tool"}
+          ? `Free SEO Audit Tool | Analyse Your Website Instantly | ${partner.company_name}`
+          : "Free SEO Audit Tool | Analyse Your Website Instantly | SEO Mojo by Web Design Davao"}
       </title>
 
-      <link
-        rel="icon"
-        type="image/png"
-        href={partner?.logo_url || "/seo-icon.png"}
-      />
+      <link rel="icon" type="image/png" href={partner?.logo_url || "/seo-icon.png"} />
 
       <meta
         name="description"
-        content={`Run a free SEO audit powered by ${
-          partner?.company_name || "SEO Mojo"
-        }. Instantly analyze and improve your website performance.`}
+        content={`Run a free SEO audit with ${partner?.company_name || "SEO Mojo"}. Discover what’s stopping your site from ranking higher and get a custom action plan in under a minute. Powered by Web Design Davao.`}
       />
 
       <meta property="og:title" content={partner?.company_name || "SEO Mojo"} />
-      <meta
-        property="og:image"
-        content={partner?.logo_url || "/seo-logo.png"}
-      />
-      <meta
-        property="og:description"
-        content="Run your free SEO audit instantly and get AI-powered insights."
-      />
+      <meta property="og:image" content={partner?.logo_url || "/seo-logo.png"} />
+      <meta property="og:description" content="Run your free SEO audit instantly and get AI-powered insights." />
     </Helmet>
 
     <main className="main-layout">

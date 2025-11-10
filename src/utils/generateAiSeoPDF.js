@@ -397,13 +397,20 @@ export const generateAiSeoPDF = async (
   const techRecs  = seoData ? buildTechnicalRecs(seoData.technicalSeo?.technicalSeo) : [];
   const contentRecs = seoData ? buildContentRecs(seoData.contentSeo?.contentSeo) : [];
   const perfRecs = [];
-  const addOpps = (src) => {
-    if (src?.opportunities) {
-      src.opportunities.slice(0, 5).forEach((opp) => opp?.title && perfRecs.push({ text: opp.title, level: "medium" }));
+  const addOpps = (src, label) => {
+    if (src?.opportunities?.length) {
+      src.opportunities.slice(0, 5).forEach((opp) => {
+        if (opp?.title) {
+          perfRecs.push({
+            text: `(${label}) ${opp.title}`,
+            level: "medium",
+          });
+        }
+      });
     }
   };
-  addOpps(simplifiedDesktop);
-  addOpps(simplifiedMobile);
+  addOpps(simplifiedDesktop, "Desktop");
+  addOpps(simplifiedMobile, "Mobile");
 
   addSectionTitleSinglePage("Recommendations & Suggestions");
 
