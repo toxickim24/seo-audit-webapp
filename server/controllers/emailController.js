@@ -3,7 +3,7 @@ import { createMailer } from "../config/mailer.js";
 export async function sendSeoEmail(req, res) {
 
   const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-  
+
   const { email, name, pdfBlob, safeUrl, company_name } = req.body;
 
   if (!email || !pdfBlob) return res.status(400).json({ error: "Email and PDF required" });
@@ -30,15 +30,23 @@ export async function sendSeoEmail(req, res) {
       ? "🧩 Your SEO Audit Report from SEO Mojo"
       : `🧩 ${company_name} – Your Personalized SEO Audit Report`;
 
+    // ✅ Determine header color and text color
+    const headerColor = isDefaultCompany
+      ? "#ffffff" // white header for default brand
+      : partnerPrimaryColor || "#22354d"; // partner’s main color or fallback
+
+  const textColor = isDefaultCompany ? "#22354d" : "#ffffff";
+  
+
     await mailer.sendMail({
   from: `"${company_name || "SEO Mojo"}" <${process.env.EMAIL_USER}>`,
   to: email,
   subject: subjectLine,
   html: `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #eaeaea; border-radius: 10px; overflow: hidden;">
-    <div style="background: ${isDefaultCompany ? "#fb6a45" : "#22354d"}; color: #fff; text-align: center; padding: 20px;">
-      <img src="${BASE_URL}/public/seo-logo.png" alt="Logo" style="max-width: 160px; margin-bottom: 5px;" />
-      <h2 style="margin: 0; font-size: 22px;">Your SEO Audit Report</h2>
+    <div style="background: ${headerColor}; color: ${textColor}; text-align: center; padding: 20px;">
+      <img src="${BASE_URL}/public/seo-logo.png" alt="Logo" style="max-width:160px;margin-bottom:5px;" />
+      <h2 style="margin:0; font-size:22px; color:${textColor};">Your SEO Audit Report</h2>
     </div>
 
     <div style="padding: 25px; color: #333;">
