@@ -507,6 +507,11 @@ export default function PublicPartnerPage() {
         {/* Step 1 */}
         {!seoData && !isLoading && journeyStep === "enter" && (
           <>
+            <h1 className="title">Run Your Free SEO Audit</h1>
+            <p className="subtitle">
+              Instantly uncover how your website is performing and where to improve — all in one free report.
+            </p>
+
             <div className="animation-seo">
               <DotLottieReact
                 src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"

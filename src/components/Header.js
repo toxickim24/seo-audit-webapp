@@ -122,26 +122,7 @@ function Header({ tabs, partnerData }) {
                       <NavLink
                         to={`/${tab.id}`}
                         className={({ isActive }) => (isActive ? "active" : "")}
-                        onClick={(e) => {
-                          // special case: click “How It Works” should anchor-scroll on the main page
-                          if (tab.id === "seo-how-it-works") {
-                            e.preventDefault();
-                            handleMenuClose();
-                            if (location.pathname !== "/seo-audit") {
-                              // go to the main page first, then scroll
-                              navigate("/seo-audit");
-                              setTimeout(() => {
-                                const el = document.getElementById("how-it-works");
-                                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }, 0);
-                            } else {
-                              const el = document.getElementById("how-it-works");
-                              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                            }
-                          } else {
-                            handleMenuClose();
-                          }
-                        }}
+                        onClick={handleMenuClose}
                       >
                         {tab.label}
                       </NavLink>

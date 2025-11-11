@@ -65,7 +65,7 @@ function AppContent() {
     { id: "seo-audit", label: "SEO Audit" },
     // { id: "seo-pricing", label: "Pricing" },
     // { id: "seo-tools", label: "Tools" },
-    { id: "seo-how-it-works", label: "How It Works" },
+    // { id: "seo-how-it-works", label: "How It Works" },
     { id: "seo-contact", label: "Contact" },
   ];
 

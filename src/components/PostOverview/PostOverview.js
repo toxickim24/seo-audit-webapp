@@ -53,14 +53,11 @@ function PostOverview({
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>
-        Good news — the SEO checkup for{" "}
-        <span className={styles.url}>{url}</span> is done! 🎉
+        🎉 Good news — the SEO checkup for{" "}
+        <span className={styles.url}>{url}</span> is done!
       </h1>
-      {finalScore !== null && (
-        <span className={`${styles.subtitle} ${getScoreColor(finalScore)}`}>
-          Your site scored <b>{finalScore}</b>/100
-        </span>
-      )}
+      
+      <h2 className={styles.title2}>What You Get</h2>
 
       {/* ✅ Three white boxes below intro */}
       <div className={styles.whatYouGetRow}>
@@ -89,6 +86,11 @@ function PostOverview({
       <div className={styles.contentWrapper}>
         {/* Left: Gauge + scores */}
         <div className={styles.left}>
+          {finalScore !== null && (
+            <span className={`${styles.subtitle} ${getScoreColor(finalScore)}`}>
+              Your site scored <b>{finalScore}</b>/100
+            </span>
+          )}
           {finalScore !== null && (
             <div className={styles.gaugeBox}>
               <GaugeChart

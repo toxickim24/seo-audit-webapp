@@ -234,6 +234,10 @@
    Mobile breakpoint (≤767px)
 =========================== */
 @media (max-width: 767px) {
+  .header-container-wrapper .logo img {
+    width: 100%;
+    height: auto;
+  }
   .menu-toggle {
     display: flex; /* show hamburger */
   }

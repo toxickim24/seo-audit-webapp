@@ -668,6 +668,61 @@
   background: #fb6a45;
 }
 
+/* ==========================
+   How SEO Mojo Works Section
+========================== */
+.how-it-works {
+  width: 100%;
+  margin-top: 80px;
+  text-align: center;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin: 40px auto;
+}
+
+.featureCard {
+  background: #fff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  font-size: 30px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.featureCard h3 {
+  color: #22354d;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.featureCard p {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.journeyDesc {
+  color: #555;
+  font-size: 15px;
+  margin-top: 10px;
+  text-align: center;
+}
+
 /* ===========================
    Tablet breakpoint (≤1024px)
 =========================== */
