@@ -235,7 +235,7 @@
 =========================== */
 @media (max-width: 767px) {
   .header-container-wrapper .logo img {
-    width: 100%;
+    width: 180px;
     height: auto;
   }
   .menu-toggle {
