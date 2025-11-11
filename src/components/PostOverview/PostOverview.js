@@ -57,7 +57,7 @@ function PostOverview({
         <span className={styles.url}>{url}</span> is done!
       </h1>
       
-      <h2 className={styles.title2}>What You Get</h2>
+      <h2 className={styles.title2}>🎁 What You’ll Get</h2>
 
       {/* ✅ Three white boxes below intro */}
       <div className={styles.whatYouGetRow}>

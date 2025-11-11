@@ -16,7 +16,7 @@ function SeoJourney({ step }) {
 
   return (
     <section className={styles.journeySection}>
-      <h2 className={styles.journeyTitle}>How It Works</h2>
+      <h2 className={styles.journeyTitle}>⚙️ How It Works</h2>
       <p className={styles.journeySubtitle}>
         Follow our simple five-step process to understand, analyze, and improve your website’s SEO performance.
       </p>

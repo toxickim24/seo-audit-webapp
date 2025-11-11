@@ -399,7 +399,7 @@ function Main({ activeTab }) {
               {!seoData && !isLoading && journeyStep === "enter" && (
                 <>
 
-                <h1 className="title">Run Your Free SEO Audit</h1>
+                <h1 className="title">🔍 Run Your Free SEO Audit</h1>
                 <p className="subtitle">
                   Instantly uncover how your website is performing and where to improve — all in one free report.
                 </p>
