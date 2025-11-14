@@ -507,10 +507,16 @@ export default function PublicPartnerPage() {
         {/* Step 1 */}
         {!seoData && !isLoading && journeyStep === "enter" && (
           <>
-            <h1 className="title">Run Your Free SEO Audit</h1>
-            <p className="subtitle">
-              Instantly uncover how your website is performing and where to improve — all in one free report.
-            </p>
+            <div>
+              <h1 className="title">Run Your Free SEO Audit</h1>
+              <p className="subtitle">
+                Instantly uncover how your website is performing and where to improve — all in one free report.
+              </p>
+            </div>
+
+            <aside className="top-journey">
+              <SeoJourney step={journeyStep} />
+            </aside>
 
             <div className="animation-seo">
               <DotLottieReact
@@ -656,10 +662,6 @@ export default function PublicPartnerPage() {
           </div>
         )}
       </section>
-
-      <aside className="top-journey">
-        <SeoJourney step={journeyStep} />
-      </aside>
 
     </main>
   </>
