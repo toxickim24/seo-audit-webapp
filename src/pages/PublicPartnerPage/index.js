@@ -504,27 +504,29 @@ export default function PublicPartnerPage() {
     <main className="main-layout">
 
       <section className="main-container">
+
+        <div>
+          <h1 className="title">Run Your Free SEO Audit</h1>
+          <p className="subtitle">
+            Instantly uncover how your website is performing and where to improve — all in one free report.
+          </p>
+        </div>
+
+        <div className="animation-seo">
+          <DotLottieReact
+            src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+            loop
+            autoplay
+          />
+        </div>
+
+        <aside className="top-journey">
+          <SeoJourney step={journeyStep} />
+        </aside>
+
         {/* Step 1 */}
         {!seoData && !isLoading && journeyStep === "enter" && (
           <>
-            <div>
-              <h1 className="title">Run Your Free SEO Audit</h1>
-              <p className="subtitle">
-                Instantly uncover how your website is performing and where to improve — all in one free report.
-              </p>
-            </div>
-
-            <aside className="top-journey">
-              <SeoJourney step={journeyStep} />
-            </aside>
-
-            <div className="animation-seo">
-              <DotLottieReact
-                src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-                loop
-                autoplay
-              />
-            </div>
             <div className="search-box">
               <form
                 onSubmit={(e) => {

@@ -2,18 +2,6 @@
    Admin Users Page (Clean & Centered Modal)
    ========================== */
 
-/* ===== Layout ===== */
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.main-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 /* ===== Top Controls ===== */
 .actions {
   display: flex;

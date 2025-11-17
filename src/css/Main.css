@@ -7,12 +7,12 @@
   justify-content: flex-start;
   gap: 30px;
   padding: 80px 0px;
-  min-height: calc(100vh - 171px);
+  min-height: calc(100vh);
   max-width: 1140px;
 }
 
 .partner-theme .main-layout {
-  min-height: calc(100vh - 187px);
+  min-height: calc(100vh);
 }
 
 /* Main Section */
@@ -22,6 +22,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  gap: 30px;
 }
 
 .title {
@@ -36,9 +37,8 @@
   display: block;
   font-size: 1rem;
   color: #555;
-  margin-bottom: 30px;
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
 /* Sidebar */
@@ -68,7 +68,7 @@
   width: 100%;
   min-width: 400px;
   max-width: 400px;
-  margin: 0 auto 24px; /* center + spacing */
+  margin: -40px auto 0; /* center + spacing */
 }
 
 .animation-seo canvas,
@@ -83,7 +83,6 @@
 .search-box form {
   display: flex;
   gap: 10px;
-  margin-top: 20px;
   position: relative;
 }
 .search-box .error-message{

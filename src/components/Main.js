@@ -399,6 +399,14 @@ function Main({ activeTab }) {
             </p>
           </div>
 
+          <div className="animation-seo">
+            <DotLottieReact
+              src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+              loop
+              autoplay
+            />
+          </div>
+
           <aside className="top-journey">
             <SeoJourney step={journeyStep} />
           </aside>
@@ -408,14 +416,6 @@ function Main({ activeTab }) {
               {/* Step 1: Enter Website */}
               {!seoData && !isLoading && journeyStep === "enter" && (
                 <>
-
-                  <div className="animation-seo">
-                    <DotLottieReact
-                      src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-                      loop
-                      autoplay
-                    />
-                  </div>
 
                   <div className="search-box">
                     <form
