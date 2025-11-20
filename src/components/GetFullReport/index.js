@@ -20,18 +20,38 @@ function GetFullReport({
 }) {
   return (
     <div className={styles.container}>
+
+      <img src="/star-orange.png" className={styles.starsLeft} />
+      <img src="/star-orange.png" className={styles.starsRight} />
+
       <h2 className={styles.title}>Confirm & Send Report</h2>
       <p className={styles.subtitle}>
         Hi <b>{name}</b>, your SEO audit results are being prepared.
       </p>
 
       <div className={styles.reportBox}>
-        <h3 className={styles.reportHeading}>📄 Report will include:</h3>
-        <ul className={styles.reportList}>
-          <li>Full on-page, content, technical, and performance breakdown</li>
-          <li>Top 3 quick wins and priority tags</li>
-          <li>Estimated speed gains with suggested fixes</li>
-        </ul>
+
+        <div className={styles.reportContent}>
+          <h3 className={styles.reportHeading}>Report will include:</h3>
+
+          <ul className={styles.reportList}>
+            <li>
+              <span className={styles.checkIcon}>✔</span>
+              Full on-page, content, technical, and performance breakdown
+            </li>
+            <li>
+              <span className={styles.checkIcon}>✔</span>
+              Top 3 quick wins and priority tags
+            </li>
+            <li>
+              <span className={styles.checkIcon}>✔</span>
+              Estimated speed gains with suggested fixes
+            </li>
+          </ul>
+        </div>
+
+        <img src="/report.png" className={styles.reportImage} />
+
       </div>
 
       <div className={styles.actions}>
@@ -80,6 +100,7 @@ function GetFullReport({
           </div>
         )}
       </div>
+    
     </div>
   );
 }

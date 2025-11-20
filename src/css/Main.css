@@ -33,12 +33,16 @@
   padding-bottom: 10px;
 }
 
+.title span {
+  color: var(--secondary-color, #FB6A45);
+}
+
 .subtitle {
   display: block;
   font-size: 1rem;
-  color: #555;
+  color: #000;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 /* Sidebar */
@@ -58,7 +62,6 @@
 /* Content Area (SEO Audit main flow) */
 .content-area {
   width: 100%;
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -80,9 +83,13 @@
 }
 
 /* Search Box */
+.search-box {
+  width: 750px;
+}
+
 .search-box form {
   display: flex;
-  gap: 10px;
+  gap: 0px;
   position: relative;
 }
 .search-box .error-message{
@@ -95,24 +102,29 @@
 }
 
 .search-box input {
-  padding: 12px;
+  padding: 15px 20px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 10px 0px 0px 10px;
   font-size: 1rem;
+}
+
+.partner-theme .search-box input {
+  border-width: 2px 0 2px 2px !important;
+  border-color: var(--secondary-color, #ccc);
 }
 
 .search-box button {
   padding: 12px 20px;
   border: none;
-  background: var(--primary-color, #ff8e3a);
+  background: var(--primary-color, #F25B37);
   color: #fff;
   font-size: 1rem;
   font-weight: bold;
-  border-radius: 5px;
+  border-radius: 0px 10px 10px 0px;
   cursor: pointer;
   transition: background 0.3s;
-  width: 348px;
   white-space: nowrap;
+  width: 232px;
 }
 
 /* If primary color is white, use secondary color instead */
@@ -127,11 +139,23 @@
   color: #fff;
 }
 
-.cta-subtext{
-  margin-top:.5rem;
-  font-size:.9rem;
-  color:#666;
+.cta {
+  display: flex;
+  flex-direction: row;
+  gap: 20px; /* space between items */
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.cta .cta-subtext {
+  padding: 10px 25px;
+  background: #ECECEC;
+  border-radius: 5px;
+  font-size: .9rem;
+  color: #666;
   text-align: center;
+  white-space: nowrap; /* prevents breaking into 2 lines */
 }
 
 /* Overview Output */
@@ -719,13 +743,32 @@
   text-align: center;
 }
 
+.custom-divider {
+  width: 80px;
+  height: 10px;
+  background-color: var(--secondary-color, #F25B37);
+  border-radius: 5px; /* optional – makes it look smoother */
+}
+
 /* ===========================
    Tablet breakpoint (≤1024px)
 =========================== */
 @media (max-width: 1024px) {
 
+  .search-box {
+    width: 100%;
+  }
+
   .main-layout {
     padding: 80px 40px;
+  }
+
+  .cta {
+    flex-direction: column;
+  }
+
+  .journeyContainer {
+    flex-direction: column;
   }
 
 }
@@ -740,16 +783,6 @@
     padding: 60px 20px;
   }
 
-  .animation-seo {
-    min-width: 100%;
-  }
-
-  .sidebar {
-    width: 100%;
-    position: relative;
-    top: 0;
-  }
-
   .search-box {
     width: 100%;
     max-width: 320px;
@@ -759,8 +792,29 @@
     flex-direction: column;
   }
 
+  .search-box input {
+    border: 1px solid #ccc;
+    border-radius: 10px 10px 10px 10px;
+  }
+
+  .partner-theme .search-box input {
+    border-width: 2px 2px 2px 2px !important;
+  }
+
   .search-box button {
+    margin-top: 5px;
+    border-radius: 10px 10px 10px 10px;
     width: 100%;
+  }
+
+  .animation-seo {
+    min-width: 100%;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
   }
 
   .report-actions {

@@ -12,6 +12,10 @@
   background: var(--primary-color, #ffffff);
 }
 
+body:not(.partner-theme) .header-container {
+  border-bottom: 2px solid #F25B37;
+}
+
 .header-container-wrapper {
   margin: 0 auto;
   width: 100%;
@@ -234,10 +238,16 @@
    Mobile breakpoint (≤767px)
 =========================== */
 @media (max-width: 767px) {
-  .header-container-wrapper .logo img {
-    width: 180px;
+  body:not(.partner-theme) .header-container-wrapper .logo img {
+    width: 178px;
     height: auto;
   }
+
+  .header-container-wrapper .logo img {
+    width: auto;
+    height: 58px;
+  }
+
   .menu-toggle {
     display: flex; /* show hamburger */
   }

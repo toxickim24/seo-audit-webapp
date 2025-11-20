@@ -52,36 +52,48 @@ function PostOverview({
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>
-        🎉 Good news — the SEO checkup for{" "}
-        <span className={styles.url}>{url}</span> is done!
-      </h1>
+
+      <div className={styles.titleContainer}>
+  
+        {/* Left Stars */}
+        <img src="/star-white-left.png" className={styles.starsLeft} />
+
+        {/* Center Content */}
+        <div className={styles.titleWrapper}>
+          <img src="/confetti.png" className={styles.icon} />
+          <h1 className={styles.title}>
+            <span className={styles.done}>Good News</span> — the SEO checkup for <span className={styles.url}>{url}</span> is <span className={styles.done}>done!</span>
+          </h1>
+        </div>
+
+        {/* Right Stars */}
+        <img src="/star-white-right.png" className={styles.starsRight} />
+
+      </div>
       
-      <h2 className={styles.title2}>🎁 What You’ll Get</h2>
+      <h2 className="title">What You’ll Get</h2>
 
       {/* ✅ Three white boxes below intro */}
       <div className={styles.whatYouGetRow}>
         <div className={styles.whatYouGetItem}>
-          <div className={styles.whatYouGetIcon}>🔍</div>
+          <div className={styles.whatYouGetIcon}><img src="/performance-insights.png" /></div>
           <h4>Performance Insights</h4>
           <p>Analyze speed, structure, and content to see what’s slowing you down.</p>
         </div>
         <div className={styles.whatYouGetItem}>
-          <div className={styles.whatYouGetIcon}>📈</div>
+          <div className={styles.whatYouGetIcon}><img src="/seo-health-score.png" /></div>
           <h4>SEO Health Score</h4>
           <p>Get an overall rating and see exactly where your site stands today.</p>
         </div>
         <div className={styles.whatYouGetItem}>
-          <div className={styles.whatYouGetIcon}>💡</div>
+          <div className={styles.whatYouGetIcon}><img src="/action-plan.png" /></div>
           <h4>Action Plan</h4>
           <p>Receive step-by-step recommendations to boost your ranking.</p>
         </div>
       </div>
 
-      <p className={styles.intro}>
-        Want to see the full breakdown with fixes and opportunities? Just fill
-        in the form below and we’ll email you your complete SEO report.
-      </p>
+      <h2 className="title">Want to see the full breakdown with fixes and opportunities?</h2>
+      <p className="subtitle">Just fill in the form below and we’ll email you your complete SEO report.</p>
 
       <div className={styles.contentWrapper}>
         {/* Left: Gauge + scores */}

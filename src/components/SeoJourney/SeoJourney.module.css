@@ -3,97 +3,13 @@
 ========================== */
 .journeyContainer {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: clamp(18px, 4vw, 32px);
   flex-wrap: nowrap;
   widows: 100%;
-}
 
-/* ==========================
-   Step Block
-========================== */
-.stepBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 150px;
-  text-align: center;
-}
-
-/* Pill/Box (kept as .circle for JS compatibility) */
-.circle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 170px;
-  padding: 16px 20px;
-  border-radius: 12px;
-  background: #fff;
-  border: 2px solid #e5e7eb;
-  color: #22354d;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  transition: all 0.25s ease;
-}
-
-/* Step number inside the box */
-.stepNumber {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-/* Step label inside the box */
-.stepText {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #555;
-  line-height: 1.3;
-}
-
-/* Active step */
-.circle.active {
-  color: #fff;
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--accent-color, #fb6a45) 25%, transparent);
-  transform: translateY(-2px);
-  background-color: var(--accent-color, #fb6a45);
-  border: 3px solid var(--accent-color, #fb6a45);
-}
-
-.circle.active .stepText {
-  color: #fff;
-}
-
-.circle.active .stepNumber {
-  color: #fff;
-}
-
-/* Completed step */
-.circle.completed {
-  color: #fff;
-  background-color: var(--accent-color, #fb6a45);
-  border: 3px solid var(--accent-color, #fb6a45);
-}
-
-.circle.completed .stepNumber,
-.circle.completed .stepText {
-  color: #fff;
-}
-
-/* ==========================
-   Labels (underneath box)
-========================== */
-.label {
-  margin-top: 8px;
-  font-size: 0.90rem;
-  color: #555;
-  font-weight: 400;
-}
-
-.labelActive {
-  color: var(--accent-color, #fb6a45);
-  font-weight: 700;
 }
 
 /* ==========================
@@ -102,24 +18,120 @@
 .journeySection {
   width: 100%;
   text-align: center;
-  margin-bottom: 50px;
 }
 
 .journeyTitle {
-  font-size: 1.8rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: #22354d;
   margin-bottom: 10px;
 }
 
 .journeySubtitle {
-  color: #555;
+  color: #000;
   font-size: 1rem;
-  margin-bottom: 40px;
   line-height: 1.6;
   max-width: 100%;
+  margin-bottom: 30px;
   margin-left: auto;
   margin-right: auto;
+}
+
+
+/* ==========================
+   Step Card
+========================== */
+.stepCard {
+  position: relative;
+  background: #ffffff;
+  width: 200px;
+  padding: 40px 20px 25px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  min-height: 220px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: 0.25s ease;
+}
+
+/* Completed card highlight */
+.completedCard {
+  background: var(--accent-color, #fb6a45);
+  border-color: var(--accent-color, #fb6a45);
+  box-shadow: 0 6px 12px rgba(251, 106, 69, 0.25);
+}
+
+.completedCard * {
+  color: #fff !important;
+}
+
+/* ==========================
+   Step Number (top-left)
+========================== */
+.stepNumber {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #c7c7c7;
+  pointer-events: none;
+}
+
+/* ==========================
+   Icon
+========================== */
+.iconWrap {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+}
+
+.iconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ==========================
+   Titles & Text
+========================== */
+.stepTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #22354d;
+  margin-bottom: 6px;
+}
+
+.stepDesc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+  margin-top: 4px;
+  flex: 1;                        /* makes all cards same height */
+}
+
+/* ==========================
+   Orange Completion Bar
+========================== */
+.orangeBar {
+  width: 80px;
+  height: 6px;
+  border-radius: 4px;
+  background: var(--accent-color, #fb6a45);
+  margin: auto auto 0 auto;     /* stick to bottom */
+}
+
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 1024px) {
+  .journeyContainer {
+    flex-wrap: wrap;
+  }
 }
 
 /* ==========================
@@ -132,27 +144,15 @@
     gap: 16px;
   }
 
-  .stepBlock {
-    min-width: auto;
+  .stepCard {
+    width: 260px;
   }
 
-  .circle {
-    min-width: 240px;
-    padding: 14px 16px;
-    font-size: 0.9rem;
-    border-radius: 10px;
+  .journeyTitle {
+    font-size: 24px;
   }
 
-  .stepNumber {
-    font-size: 1rem;
-  }
-
-  .stepText {
-    font-size: 0.85rem;
-  }
-
-  .label {
-    margin-top: 6px;
-    font-size: 0.9rem;
+  .journeySection {
+    margin-bottom: 0;
   }
 }

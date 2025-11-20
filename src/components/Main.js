@@ -393,19 +393,13 @@ function Main({ activeTab }) {
       {activeTab !== "seo-pricing" && activeTab !== "seo-tools" && activeTab !== "seo-how-it-works" && activeTab !== "seo-contact" ? (
         <>
           <div>
-            <h1 className="title">🔍 Run Your Free SEO Audit</h1>
+            <h1 className="title">Run Your Free <span>SEO</span> Audit <img src="/star-orange.png" /></h1>
             <p className="subtitle">
               Instantly uncover how your website is performing and where to improve — all in one free report.
             </p>
           </div>
 
-          <div className="animation-seo">
-            <DotLottieReact
-              src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-              loop
-              autoplay
-            />
-          </div>
+          <div className="custom-divider"></div>
 
           <aside className="top-journey">
             <SeoJourney step={journeyStep} />
@@ -416,6 +410,14 @@ function Main({ activeTab }) {
               {/* Step 1: Enter Website */}
               {!seoData && !isLoading && journeyStep === "enter" && (
                 <>
+
+                  {/*<div className="animation-seo">
+                    <DotLottieReact
+                      src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                      loop
+                      autoplay
+                    />
+                  </div>*/}
 
                   <div className="search-box">
                     <form
@@ -433,7 +435,13 @@ function Main({ activeTab }) {
                       <button type="submit">Run Your SEO Audit Now</button>
                       {error && <p className="error-message">{error}</p>}
                     </form>
-                    <p className="cta-subtext">100% Free Audit | ⚡ Instant Results | 📊 No Credit Card Required</p>
+
+                    <div className="cta">
+                      <p className="cta-subtext">100% Free Audit</p>
+                      <p className="cta-subtext">Instant Results</p>
+                      <p className="cta-subtext">No Credit Card Required</p>
+                    </div>
+                    
                   </div>
                 </>
               )}
@@ -441,13 +449,14 @@ function Main({ activeTab }) {
               {/* Step 2: Scanning (book loader preserved ✅) */}
               {isLoading && journeyStep === "scanning" && (
                 <>
-                  <div className="animation-seo">
+                  {/*<div className="animation-seo">
                     <DotLottieReact
                       src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
                       loop
                       autoplay
                     />
-                  </div>
+                  </div>*/}
+                  
                   <div className="loader-container">
                     <div className="book-wrapper">
                       {/* your book loader remains unchanged */}
@@ -564,6 +573,7 @@ function Main({ activeTab }) {
           {activeTab === "seo-contact" && <SeoContact />}
         </>
       )}
+
     </main>
   );
 }

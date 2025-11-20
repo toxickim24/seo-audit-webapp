@@ -506,19 +506,13 @@ export default function PublicPartnerPage() {
       <section className="main-container">
 
         <div>
-          <h1 className="title">Run Your Free SEO Audit</h1>
+          <h1 className="title">Run Your Free <span>SEO</span> Audit <img src="/star-orange.png" /></h1>
           <p className="subtitle">
             Instantly uncover how your website is performing and where to improve — all in one free report.
           </p>
         </div>
 
-        <div className="animation-seo">
-          <DotLottieReact
-            src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-            loop
-            autoplay
-          />
-        </div>
+        <div className="custom-divider"></div>
 
         <aside className="top-journey">
           <SeoJourney step={journeyStep} />
@@ -527,6 +521,15 @@ export default function PublicPartnerPage() {
         {/* Step 1 */}
         {!seoData && !isLoading && journeyStep === "enter" && (
           <>
+
+            {/*<div className="animation-seo">
+              <DotLottieReact
+                src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                loop
+                autoplay
+              />
+            </div>*/}
+
             <div className="search-box">
               <form
                 onSubmit={(e) => {
@@ -543,7 +546,13 @@ export default function PublicPartnerPage() {
                 <button type="submit">Run Your SEO Audit Now</button>
                 {error && <p className="error-message">{error}</p>}
               </form>
-              <p className="cta-subtext">100% Free Audit | ⚡ Instant Results | 📊 No Credit Card Required</p>
+
+              <div className="cta">
+                <p className="cta-subtext">100% Free Audit</p>
+                <p className="cta-subtext">Instant Results</p>
+                <p className="cta-subtext">No Credit Card Required</p>
+              </div>
+
             </div>
           </>
         )}
@@ -551,13 +560,14 @@ export default function PublicPartnerPage() {
         {/* Step 2 */}
         {isLoading && journeyStep === "scanning" && (
           <>
-            <div className="animation-seo">
+            {/*<div className="animation-seo">
               <DotLottieReact
                 src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
                 loop
                 autoplay
               />
-            </div>
+            </div>*/}
+            
             <div className="loader-container">
               <div className="book-wrapper">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
@@ -663,6 +673,7 @@ export default function PublicPartnerPage() {
             )}
           </div>
         )}
+
       </section>
 
     </main>
