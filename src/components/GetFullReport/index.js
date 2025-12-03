@@ -16,7 +16,8 @@ function GetFullReport({
   seoData,
   partnerLogo,
   partnerCompany,
-  partnerPrimaryColor
+  partnerPrimaryColor,
+  partnerSecondaryColor
 }) {
   return (
     <div className={styles.container}>
@@ -82,7 +83,7 @@ function GetFullReport({
             {process.env.NODE_ENV === "development" && url && (
               <button
                 className={styles.primaryBtn}
-                onClick={() => generateAiSeoPDF(url, aiAudit, true, simplifiedDesktop, simplifiedMobile, seoData, partnerLogo, partnerCompany, partnerPrimaryColor)}
+                onClick={() => generateAiSeoPDF(url, aiAudit, true, simplifiedDesktop, simplifiedMobile, seoData, partnerLogo, partnerCompany, partnerPrimaryColor, partnerSecondaryColor)}
               >
                 💾 Download PDF
               </button>

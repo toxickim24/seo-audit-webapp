@@ -1,23 +1,47 @@
 import { createMailer } from "../config/mailer.js";
 
 export async function sendSeoEmail(req, res) {
-
   const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  const { email, name, pdfBlob, safeUrl, company_name, primary_color, partner_logo } = req.body;
+  const {
+    email,
+    name,
+    pdfBlob,
+    url,
+    safeUrl,
+    company_name,
+    slug,
+    primary_color,
+    partner_logo,
+  } = req.body;
 
-  if (!email || !pdfBlob) return res.status(400).json({ error: "Email and PDF required" });
+  if (!email || !pdfBlob) {
+    return res.status(400).json({ error: "Email and PDF required" });
+  }
 
   try {
     const pdfBuffer = Buffer.from(pdfBlob.split(",")[1], "base64");
-    const mailer = createMailer(); // 🧠 created only when used, env now loaded!
+    const mailer = createMailer();
 
-    // ✅ Use partner logo if available, otherwise default
+    // Logo
     const logoSrc = partner_logo
-    ? `${BASE_URL}${partner_logo}`
-    : `${BASE_URL}/public/seo-logo.png`;
+      ? `${BASE_URL}${partner_logo}`
+      : `${BASE_URL}/public/seo-logo.png`;
 
-    // ✅ Professional filename and subject
+    // Clean domain (FINAL FIX)
+    const cleanDomain = (() => {
+      try {
+        const u = new URL(url);
+        return u.hostname.replace(/^www\./, "");
+      } catch {
+        return String(url || "")
+          .replace(/^https?:\/\//, "")
+          .replace(/^www\./, "")
+          .replace(/\/.*$/, "");
+      }
+    })();
+
+    // Default company logic
     const isDefaultCompany =
       !company_name || company_name.toLowerCase().trim() === "seo mojo";
 
@@ -25,63 +49,134 @@ export async function sendSeoEmail(req, res) {
       ? "SEO_Mojo"
       : company_name.replace(/\W+/g, "_");
 
-    // ✅ Consistent file naming
+    // Filename
     const filename = isDefaultCompany
       ? `${cleanCompany}_Audit_Report_${safeUrl || "Report"}.pdf`
       : `${cleanCompany}_SEO_Audit_Report_${safeUrl || "Report"}.pdf`;
 
-    // ✅ Professional email subject
+    // Subject (safe & non-phishing)
     const subjectLine = isDefaultCompany
-      ? "🧩 Your SEO Audit Report from SEO Mojo"
-      : `🧩 ${company_name} – Your Personalized SEO Audit Report`;
+      ? `SEO Audit Results for ${cleanDomain || "your website"}`
+      : `${company_name} – SEO Audit Results for ${cleanDomain || "your website"}`;
 
-    // ✅ Determine header color and text color
+    // Colors
     const headerColor = isDefaultCompany
-      ? "#ffffff" // white header for default brand
-      : primary_color || "#22354d"; // partner’s main color or fallback
+      ? "#ffffff"
+      : primary_color || "#22354d";
 
-    const textColor = isDefaultCompany ? "#22354d" : "#ffffff";
+    const headerTextColor = isDefaultCompany ? "#22354d" : "#ffffff";
+
+    // --------------------------
+    // BOOKING LINK LOGIC
+    // --------------------------
+    const partnerSlug = slug?.trim() || "";
+    const bookingLink = isDefaultCompany
+      ? "https://seomojo.app/seo-contact"
+      : `https://seomojo.app/${partnerSlug}/contact`;
+
+    // Sender — safe (no impersonation)
+    const fromEmail = process.env.EMAIL_USER; // reports@seomojo.app
+
+    const fromName = company_name
+      ? `${company_name} via SEO Mojo`
+      : "SEO Mojo Reports";
+
+    const replyToEmail = process.env.EMAIL_RECEIVER;
+
+    // --------------------------
+    // PLAIN TEXT VERSION
+    // --------------------------
+    const plainText = `
+Hi ${name || "there"},
+
+Your SEO audit for ${cleanDomain || "your website"} is attached.
+
+Inside the report:
+- Your website's SEO performance
+- Key findings
+- Recommended improvements
+
+If you need help understanding the results, simply reply to this email.
+
+To stop receiving reports, reply with "Unsubscribe".
+
+SEO Mojo
+https://seomojo.app
+`.trim();
+
+    // --------------------------
+    // SEND EMAIL
+    // --------------------------
 
     await mailer.sendMail({
-  from: `"${company_name || "SEO Mojo"}" <${process.env.EMAIL_USER}>`,
-  to: email,
-  subject: subjectLine,
-  html: `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #eaeaea; border-radius: 10px; overflow: hidden;">
-    <div style="background: ${headerColor}; color: ${textColor}; text-align: center; padding: 20px;">
-      <img src="${logoSrc}" alt="Logo" style="max-width:160px;margin-bottom:5px;" />
-      <h2 style="margin:0; font-size:22px; color:${textColor};">Your SEO Audit Report</h2>
-    </div>
+      from: `"${fromName}" <${fromEmail}>`,
+      to: email,
+      replyTo: replyToEmail,
+      subject: subjectLine,
+      text: plainText,
 
-    <div style="padding: 25px; color: #333;">
-      <p>Hi ${name || "there"},</p>
-      <p>Attached is your personalized <strong>SEO Audit Report</strong> prepared by <strong>${company_name || "SEO Mojo"}</strong>.</p>
-      <p>It includes an overview of your website’s performance, key findings, and actionable recommendations to improve rankings and visibility.</p>
+      html: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;
+background: #ffffff; border: 1px solid #eaeaea; border-radius: 10px; overflow: hidden;">
 
-      <h3 style="color: #22354d;">Next Steps</h3>
-      <p>You’ve now got a clearer picture of how your website’s performing — but the question is, what do you do with this information?</p>
-
-      <blockquote style="border-left: 4px solid #fb6a45; padding-left: 12px; color: #555; font-style: italic; margin: 10px 0;">
-        “Where should I even start?”<br />
-        “Which of these fixes will actually move the needle?”
-      </blockquote>
-
-      <p>If that sounds familiar, you don’t have to figure it out alone. Just hit <strong>reply</strong> to this email, and we’ll personally walk you through what to prioritize first, what can wait, and how to turn these insights into measurable growth.</p>
-
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://seomojo.app/contact" style="background: #fb6a45; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: bold; display: inline-block;">Book a Free Consultation</a>
-      </div>
-
-      <p>Best regards,<br /><strong>${company_name || "Chip | SEO Mojo"}</strong></p>
-    </div>
-
-    <div style="background: #f9f9f9; text-align: center; padding: 15px; font-size: 0.8rem; color: #888;">
-      © ${new Date().getFullYear()} ${company_name || "SEO Mojo"}. All Rights Reserved.
-    </div>
+  <!-- HEADER -->
+  <div style="background: ${headerColor}; color: ${headerTextColor};
+  text-align: center; padding: 20px;">
+    <img src="${logoSrc}" alt="Logo" style="max-width:160px;margin-bottom:5px;" />
+    <h2 style="margin:0; font-size:22px; color:${headerTextColor};">
+      SEO Audit Results
+    </h2>
   </div>
+
+  <!-- BODY -->
+  <div style="padding: 25px; color: #333;">
+    <p>Hi ${name || "there"},</p>
+
+    <p>Your SEO audit report for
+    <strong>${cleanDomain || "your website"}</strong> is attached.</p>
+
+    <p>The report includes:</p>
+    <ul>
+      <li>Your current SEO performance</li>
+      <li>Key issues detected</li>
+      <li>Recommended improvements & priorities</li>
+    </ul>
+
+    <p>If you’d like help reviewing the results, our team is here to guide you.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${bookingLink}"
+        style="background: #fb6a45; color: #fff; text-decoration: none;
+        padding: 12px 28px; border-radius: 6px; font-weight: bold;
+        display: inline-block;">
+        Book a Free Consultation
+      </a>
+    </div>
+
+    <p>Kind regards,<br /><strong>SEO Mojo Team</strong></p>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background: #f9f9f9; text-align: center; padding: 15px;
+  font-size: 0.8rem; color: #888;">
+    © ${new Date().getFullYear()} SEO Mojo. All Rights Reserved.<br />
+    <span style="font-size:12px;">If you no longer want these reports,
+    <a href="mailto:${process.env.EMAIL_RECEIVER}?subject=Unsubscribe"
+       style="color:#555;">click here to unsubscribe</a>.</span>
+  </div>
+
+</div>
 `,
-  attachments: [{ filename, content: pdfBuffer }],
-});
+      attachments: [{ filename, content: pdfBuffer }],
+
+      // Gmail & Outlook Anti-Spam / Anti-Phishing header
+      list: {
+        unsubscribe: {
+          url: `mailto:${process.env.EMAIL_RECEIVER}?subject=Unsubscribe`,
+          comment: "Unsubscribe from SEO Mojo reports",
+        },
+      },
+    });
 
     res.status(200).json({ message: "Email sent successfully!" });
   } catch (err) {

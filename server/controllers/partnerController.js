@@ -154,11 +154,22 @@ export const PartnerController = {
 
       // ✅ Only fetch active (non-deleted) partners
       const [rows] = await db.query(
-        `SELECT id, company_name, slug, logo_url,
-                primary_color, secondary_color, accent_color, credits, is_deleted
-         FROM partners
-         WHERE slug = ? AND is_deleted = 0
-         LIMIT 1`,
+        `
+        SELECT 
+          p.id,
+          p.company_name,
+          p.slug,
+          p.logo_url,
+          p.primary_color,
+          p.secondary_color,
+          p.accent_color,
+          p.credits,
+          p.is_deleted,
+          u.email AS user_email  -- ⭐ owner's email comes from users table
+        FROM partners p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.slug = ? AND p.is_deleted = 0
+        LIMIT 1`,
         [slug]
       );
 

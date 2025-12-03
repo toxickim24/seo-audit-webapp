@@ -3,12 +3,13 @@ import "../../css/Loader.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { Helmet } from "react-helmet-async";
+import PartnerHelmet from "../../components/Partner/PartnerHelmet";
 import GlobalLoader from "../../components/Loader";
 import SeoJourney from "../../components/SeoJourney";
 import PostOverview from "../../components/PostOverview/PostOverview";
 import Overview from "../../components/Overview/Overview";
 import GetFullReport from "../../components/GetFullReport";
+import PublicPartnerContact from "../PublicPartnerContact";
 import { fetchSeoPerformance } from "../../api/SeoPerformance";
 import { getOverallScore } from "../../utils/calcOverallScore";
 import { generateAiSeoPDF } from "../../utils/generateAiSeoPDF";
@@ -55,6 +56,8 @@ export default function PublicPartnerPage() {
   const [seoData, setSeoData] = useState(null);
   const [pageSpeed, setPageSpeed] = useState(null);
   const [desktopPerf, setDesktopPerf] = useState(null);
+  const [desktopRecommendations, setDesktopRecommendations] = useState([]);
+  const [mobileRecommendations, setMobileRecommendations] = useState([]);
   const [mobilePerf, setMobilePerf] = useState(null);
   const [overallScore, setOverallScore] = useState(null);
 
@@ -234,6 +237,10 @@ export default function PublicPartnerPage() {
 
       setPageSpeed(perfScore);
       setOverallScore(getOverallScore(data));
+
+      setDesktopRecommendations((desktop?.opportunities || []).filter((opp) => opp.savingsMs > 0));
+      setMobileRecommendations((mobile?.opportunities || []).filter((opp) => opp.savingsMs > 0));
+      
       setJourneyStep("form");
     } catch (err) {
       console.error("❌ SEO analyze failed:", err);
@@ -333,7 +340,8 @@ export default function PublicPartnerPage() {
         seoData,
         partner?.logo_url,
         partner?.company_name,
-        partner?.primary_color
+        partner?.primary_color,
+        partner?.secondary_color
       );
 
       const base64Data = await new Promise((resolve, reject) => {
@@ -347,7 +355,7 @@ export default function PublicPartnerPage() {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, safeUrl, company_name: partner?.company_name || "SEO Mojo", primary_color: partner?.primary_color, partner_logo: partner?.logo_url }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, url, safeUrl, company_name: partner?.company_name || "SEO Mojo", slug: partner?.slug, primary_color: partner?.primary_color, partner_logo: partner?.logo_url }),
       });
       if (!res.ok) throw new Error("Email failed");
 
@@ -392,72 +400,11 @@ export default function PublicPartnerPage() {
     return () => clearTimeout(minTimer);
   }, [partnerLoading]);
 
-  useEffect(() => {
-    const updateFavicon = (url) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous"; // avoids CORS issues
-      img.src = url;
-
-      img.onload = () => {
-        const size = 64; // favicon size
-        const canvas = document.createElement("canvas");
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext("2d");
-
-        // 🧠 DO NOT FILL BACKGROUND — preserve transparency
-
-        // Fit image proportionally into square canvas
-        const scale = Math.min(size / img.width, size / img.height);
-        const x = (size - img.width * scale) / 2;
-        const y = (size - img.height * scale) / 2;
-
-        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-
-        // Convert to PNG data URL
-        const faviconURL = canvas.toDataURL("image/png");
-
-        let favicon = document.querySelector("link[rel='icon']");
-        if (!favicon) {
-          favicon = document.createElement("link");
-          favicon.rel = "icon";
-          document.head.appendChild(favicon);
-        }
-
-        favicon.href = faviconURL;
-      };
-
-      img.onerror = () => {
-        let favicon = document.querySelector("link[rel='icon']");
-        if (!favicon) {
-          favicon = document.createElement("link");
-          favicon.rel = "icon";
-          document.head.appendChild(favicon);
-        }
-        favicon.href = "/seo-icon.png";
-      };
-    };
-
-    if (partner) {
-      const logoUrl = partner.logo_url || "/seo-icon.png";
-      updateFavicon(logoUrl);
-    }
-  }, [partner]);
-
   const root = document.documentElement;
   const primaryColor = getComputedStyle(root)
     .getPropertyValue("--primary-color")
     .trim()
     .toLowerCase();
-
-  const isWhite =
-    primaryColor === "#fff" ||
-    primaryColor === "#ffffff" ||
-    primaryColor === "white" ||
-    primaryColor === "#f9f9f9" ||
-    primaryColor === "#fafafa";
-
-  document.body.setAttribute("data-primary-white", isWhite);
 
   if (showLoader) return <GlobalLoader visible={showLoader} partner={partner} />;
 
@@ -482,199 +429,192 @@ export default function PublicPartnerPage() {
 
   return (
   <>
-    <Helmet>
-      <title>
-        {partner?.company_name
-          ? `Free SEO Audit Tool | Analyse Your Website Instantly | ${partner.company_name}`
-          : "Free SEO Audit Tool | Analyse Your Website Instantly | SEO Mojo by Web Design Davao"}
-      </title>
-
-      <link rel="icon" type="image/png" href={partner?.logo_url || "/seo-icon.png"} />
-
-      <meta
-        name="description"
-        content={`Run a free SEO audit with ${partner?.company_name || "SEO Mojo"}. Discover what’s stopping your site from ranking higher and get a custom action plan in under a minute. Powered by Web Design Davao.`}
-      />
-
-      <meta property="og:title" content={partner?.company_name || "SEO Mojo"} />
-      <meta property="og:image" content={partner?.logo_url || "/seo-logo.png"} />
-      <meta property="og:description" content="Run your free SEO audit instantly and get AI-powered insights." />
-    </Helmet>
+    <PartnerHelmet partner={partner} slug={slug} page="audit" />
 
     <main className="main-layout">
 
-      <section className="main-container">
-
-        <div>
-          <h1 className="title">Run Your Free <span>SEO</span> Audit <img src="/star-orange.png" /></h1>
-          <p className="subtitle">
-            Instantly uncover how your website is performing and where to improve — all in one free report.
-          </p>
-        </div>
-
-        <div className="custom-divider"></div>
-
-        <aside className="top-journey">
-          <SeoJourney step={journeyStep} />
-        </aside>
-
-        {/* Step 1 */}
-        {!seoData && !isLoading && journeyStep === "enter" && (
-          <>
-
-            {/*<div className="animation-seo">
-              <DotLottieReact
-                src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-                loop
-                autoplay
-              />
-            </div>*/}
-
-            <div className="search-box">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAnalyze();
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Enter your website URL"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-                <button type="submit">Run Your SEO Audit Now</button>
-                {error && <p className="error-message">{error}</p>}
-              </form>
-
-              <div className="cta">
-                <p className="cta-subtext">100% Free Audit</p>
-                <p className="cta-subtext">Instant Results</p>
-                <p className="cta-subtext">No Credit Card Required</p>
-              </div>
-
+      {/* NEW CONTACT PAGE — detect /:slug/contact */}
+      {window.location.pathname.endsWith("/contact") ? (
+        <PublicPartnerContact partner={partner} />
+      ) : (
+        <>
+          {/* EXISTING AUDIT UI */}
+          <section className="main-container">
+            <div>
+              <h1 className="title">Run Your Free <span>SEO</span> Audit <img src="/star-orange.png" /></h1>
+              <p className="subtitle">
+                Instantly uncover how your website is performing and where to improve — all in one free report.
+              </p>
             </div>
-          </>
-        )}
 
-        {/* Step 2 */}
-        {isLoading && journeyStep === "scanning" && (
-          <>
-            {/*<div className="animation-seo">
-              <DotLottieReact
-                src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
-                loop
-                autoplay
-              />
-            </div>*/}
-            
-            <div className="loader-container">
-              <div className="book-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
-                  <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5" />
-                  <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" />
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50" />
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76" />
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30" />
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30" />
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15" />
-                  <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30" />
-                  <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z" />
-                </svg>
-              </div>
-              <p>Analyzing website, please wait...</p>
-            </div>
-          </>
-        )}
+            <div className="custom-divider"></div>
 
-        {/* Step 3 */}
-        {!isLoading && isSubmitted && seoData && !leadCaptured && journeyStep === "form" && (
-          <PostOverview
-            seoData={seoData}
-            pageSpeed={pageSpeed}
-            onScoreReady={setOverallScore}
-            name={name}
-            setName={setName}
-            email={email}
-            setEmail={setEmail}
-            company={company}
-            setCompany={setCompany}
-            phone={phone}
-            setPhone={setPhone}
-            handleLeadSubmit={handleLeadSubmit}
-            error={error}
-            setJourneyStep={setJourneyStep}
-            url={url}
-          />
-        )}
+            <aside className="top-journey">
+              <SeoJourney step={journeyStep} />
+            </aside>
 
-        {/* Step 4 */}
-        {leadCaptured && journeyStep === "get-report" && (
-          <GetFullReport
-            email={email}
-            name={name}
-            aiAudit={aiAudit}
-            aiAuditLoading={aiAuditLoading}
-            aiAuditError={aiAuditError}
-            handleAiAudit={handleAiAudit}
-            handleAiEmailPDF={handleAiEmailPDF}
-            setJourneyStep={setJourneyStep}
-            url={url}
-            simplifiedDesktop={simplifiedDesktop}
-            simplifiedMobile={simplifiedMobile}
-            seoData={seoData}
-            partnerLogo={partner?.logo_url}
-            partnerCompany={partner?.company_name}
-            partnerPrimaryColor={partner?.primary_color}
-          />
-        )}
+            {/* Step 1 */}
+            {!seoData && !isLoading && journeyStep === "enter" && (
+              <>
 
-        {/* Step 5 */}
-        {journeyStep === "results" && (
-          <div className="results-container">
-            {isEmailSending ? (
-              <div className="loader-container email-loader">
-                <div className="loader"></div>
-                <p>Sending email, please wait...</p>
-              </div>
-            ) : (
-              <div className="body-tab-content">
-                {emailStatusType === "success" && (
-                  <SuccessNotification
-                    email={email}
-                    clearStatus={() => setEmailStatusType("")}
+                {/*<div className="animation-seo">
+                  <DotLottieReact
+                    src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                    loop
+                    autoplay
                   />
+                </div>*/}
+
+                <div className="search-box">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleAnalyze();
+                    }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Enter your website URL"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                    />
+                    <button type="submit">Run Your SEO Audit Now</button>
+                    {error && <p className="error-message">{error}</p>}
+                  </form>
+
+                  <div className="cta">
+                    <p className="cta-subtext">100% Free Audit</p>
+                    <p className="cta-subtext">Instant Results</p>
+                    <p className="cta-subtext">No Credit Card Required</p>
+                  </div>
+
+                </div>
+              </>
+            )}
+
+            {/* Step 2 */}
+            {isLoading && journeyStep === "scanning" && (
+              <>
+                {/*<div className="animation-seo">
+                  <DotLottieReact
+                    src="https://lottie.host/dfd131d8-940e-49d0-b576-e4ebd9e8d280/NiKyCbXYDP.lottie"
+                    loop
+                    autoplay
+                  />
+                </div>*/}
+                
+                <div className="loader-container">
+                  <div className="book-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 126 75" className="book">
+                      <rect strokeWidth="5" stroke="#fb6a45" rx="7.5" height="70" width="121" y="2.5" x="2.5" />
+                      <line strokeWidth="5" stroke="#fb6a45" y2="75" x2="63.5" x1="63.5" />
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M25 20H50" />
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M101 20H76" />
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M16 30L50 30" />
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M110 30L76 30" />
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#ffffff74" viewBox="0 0 65 75" className="book-page">
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M40 20H15" />
+                      <path strokeLinecap="round" strokeWidth="4" stroke="#22354d" d="M49 30L15 30" />
+                      <path strokeWidth="5" stroke="#fb6a45" d="M2.5 2.5H55C59.1421 2.5 62.5 5.85786 62.5 10V65C62.5 69.1421 59.1421 72.5 55 72.5H2.5V2.5Z" />
+                    </svg>
+                  </div>
+                  <p>Analyzing website, please wait...</p>
+                </div>
+              </>
+            )}
+
+            {/* Step 3 */}
+            {!isLoading && isSubmitted && seoData && !leadCaptured && journeyStep === "form" && (
+              <PostOverview
+                seoData={seoData}
+                pageSpeed={pageSpeed}
+                onScoreReady={setOverallScore}
+                name={name}
+                setName={setName}
+                email={email}
+                setEmail={setEmail}
+                company={company}
+                setCompany={setCompany}
+                phone={phone}
+                setPhone={setPhone}
+                handleLeadSubmit={handleLeadSubmit}
+                error={error}
+                setJourneyStep={setJourneyStep}
+                url={url}
+              />
+            )}
+
+            {/* Step 4 */}
+            {leadCaptured && journeyStep === "get-report" && (
+              <GetFullReport
+                email={email}
+                name={name}
+                aiAudit={aiAudit}
+                aiAuditLoading={aiAuditLoading}
+                aiAuditError={aiAuditError}
+                handleAiAudit={handleAiAudit}
+                handleAiEmailPDF={handleAiEmailPDF}
+                setJourneyStep={setJourneyStep}
+                url={url}
+                simplifiedDesktop={simplifiedDesktop}
+                simplifiedMobile={simplifiedMobile}
+                seoData={seoData}
+                partnerLogo={partner?.logo_url}
+                partnerCompany={partner?.company_name}
+                partnerPrimaryColor={partner?.primary_color}
+                partnerSecondaryColor={partner?.secondary_color}
+              />
+            )}
+
+            {/* Step 5 */}
+            {journeyStep === "results" && (
+              <div className="results-container">
+                {isEmailSending ? (
+                  <div className="loader-container email-loader">
+                    <div className="loader"></div>
+                    <p>Sending email, please wait...</p>
+                  </div>
+                ) : (
+                  <div className="body-tab-content">
+                    {emailStatusType === "success" && (
+                      <SuccessNotification
+                        email={email}
+                        clearStatus={() => setEmailStatusType("")}
+                      />
+                    )}
+                    {emailStatusType === "error" && (
+                      <p className="email-status error">{emailStatus}</p>
+                    )}
+                    <Overview
+                      seoData={seoData}
+                      pageSpeed={pageSpeed}
+                      desktopRecommendations={desktopRecommendations}
+                      mobileRecommendations={mobileRecommendations}
+                      onScoreReady={setOverallScore}
+                    />
+                    <button
+                      className="secondary-btn"
+                      onClick={() => {
+                        setLeadCaptured(false);
+                        setSeoData(null);
+                        setUrl("");
+                        setJourneyStep("enter");
+                        setEmailStatus("");
+                        setEmailStatusType("");
+                        setAiAudit(null);
+                      }}
+                    >
+                      🔄 Scan Another URL
+                    </button>
+                  </div>
                 )}
-                {emailStatusType === "error" && (
-                  <p className="email-status error">{emailStatus}</p>
-                )}
-                <Overview
-                  seoData={seoData}
-                  pageSpeed={pageSpeed}
-                  onScoreReady={setOverallScore}
-                />
-                <button
-                  className="secondary-btn"
-                  onClick={() => {
-                    setLeadCaptured(false);
-                    setSeoData(null);
-                    setUrl("");
-                    setJourneyStep("enter");
-                    setEmailStatus("");
-                    setEmailStatusType("");
-                    setAiAudit(null);
-                  }}
-                >
-                  🔄 Scan Another URL
-                </button>
               </div>
             )}
-          </div>
-        )}
 
-      </section>
+          </section>
+        </>
+      )}
 
     </main>
   </>

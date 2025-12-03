@@ -156,7 +156,7 @@ function PostOverview({
             </div>
 
             <div className={styles.card}>
-              <h3>On-Page SEO</h3>
+              <h3>Content SEO</h3>
               <div className={styles.progressWrapper}>
                 <GaugeChart
                   id="gauge-content"
@@ -181,7 +181,7 @@ function PostOverview({
             </div>
 
             <div className={styles.card}>
-              <h3>On-Page SEO</h3>
+              <h3>Technical SEO</h3>
               <div className={styles.progressWrapper}>
                 <GaugeChart
                   id="gauge-technical"
@@ -206,7 +206,7 @@ function PostOverview({
             </div>
 
             <div className={styles.card}>
-              <h3>On-Page SEO</h3>
+              <h3>Performance SEO</h3>
               <div className={styles.progressWrapper}>
                 <GaugeChart
                   id="gauge-performance"

@@ -50,7 +50,7 @@ function SeoContact() {
         <div className={styles.featureCard}>
           <span className={styles.icon}>📧</span>
           <h3>Email Us</h3>
-          <p>support@seomojo.app</p>
+          <p>reports@seomojo.app</p>
         </div>
         <div className={styles.featureCard}>
           <span className={styles.icon}>🏢</span>

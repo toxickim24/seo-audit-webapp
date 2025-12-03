@@ -86,6 +86,67 @@ export default function usePartnerTheme(
           document.documentElement.style.setProperty("--primary-color", primary);
           document.documentElement.style.setProperty("--secondary-color", secondary);
           document.documentElement.style.setProperty("--accent-color", accent);
+
+          const normalizedPrimary = (primary || "").trim().toLowerCase();
+          
+          const isWhiteTheme =
+            normalizedPrimary === "#fff" ||
+            normalizedPrimary === "#ffffff" ||
+            normalizedPrimary === "white" ||
+            normalizedPrimary === "#f9f9f9" ||
+            normalizedPrimary === "#fafafa";
+
+          document.body.setAttribute("data-primary-white", isWhiteTheme ? "true" : "false");
+
+          // ✅ GLOBAL FAVICON LOGIC — your original working version, now shared
+          if (data.logo_url) {
+            const updateFavicon = (url) => {
+              const img = new Image();
+              img.crossOrigin = "anonymous"; // avoids CORS issues
+              img.src = url;
+
+              img.onload = () => {
+                const size = 64; // favicon size
+                const canvas = document.createElement("canvas");
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext("2d");
+
+                // Fit image proportionally into square canvas
+                const scale = Math.min(size / img.width, size / img.height);
+                const x = (size - img.width * scale) / 2;
+                const y = (size - img.height * scale) / 2;
+
+                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+                // Convert to PNG data URL
+                const faviconURL = canvas.toDataURL("image/png");
+
+                let favicon = document.querySelector("link[rel='icon']");
+                if (!favicon) {
+                  favicon = document.createElement("link");
+                  favicon.rel = "icon";
+                  document.head.appendChild(favicon);
+                }
+
+                favicon.href = faviconURL;
+              };
+
+              img.onerror = () => {
+                let favicon = document.querySelector("link[rel='icon']");
+                if (!favicon) {
+                  favicon = document.createElement("link");
+                  favicon.rel = "icon";
+                  document.head.appendChild(favicon);
+                }
+                favicon.href = "/seo-icon.png";
+              };
+            };
+
+            const logoUrl = data.logo_url || "/seo-icon.png";
+            updateFavicon(logoUrl);
+          }
+
         } catch (err) {
           // ✅ Silent catch for network errors
           if (!String(err).includes("Partner not found")) {

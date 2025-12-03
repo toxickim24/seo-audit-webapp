@@ -13,6 +13,7 @@ export const generateAiSeoPDF = async (
   partnerLogo = null,
   partnerCompany = null,
   partnerPrimaryColor = "#ffffff",
+  partnerSecondaryColor = "#FA6B45",
 ) => {
   if (!aiAudit) return;
 
@@ -49,14 +50,24 @@ export const generateAiSeoPDF = async (
   const year = new Date().getFullYear();
 
   // --- Colors ---
+  const hexToRgb = (hex) => {
+    const m = hex?.replace("#", "").match(/.{1,2}/g);
+    return m ? m.map((v) => parseInt(v, 16)) : [251, 106, 69];
+  };
+
   const COLOR_TEXT = [0, 0, 0];
   const COLOR_MUTED = [90, 90, 90];
-  const COLOR_BAR = [251, 106, 69];
+
+  // 🔥 apply partnerSecondaryColor
+  const COLOR_BAR = hexToRgb(partnerSecondaryColor); 
+
   const COLOR_BG = [240, 240, 240];
   const COLOR_HIGH = [220, 53, 69];
   const COLOR_MED = [255, 165, 0];
   const COLOR_LOW = [40, 167, 69];
-  const COLOR_BRAND_FOOTER = [251, 106, 69];
+
+  // 🔥 apply partnerSecondaryColor for brand text
+  const COLOR_BRAND_FOOTER = hexToRgb(partnerSecondaryColor);
 
   // --- Tag typography ---
   const TAG_FONT_STYLE = "bold";
@@ -282,7 +293,7 @@ export const generateAiSeoPDF = async (
     doc.line(margin, footerTopY, pageWidth - margin, footerTopY);
 
     const pre = `© ${year} ${companyName}. All Rights Reserved. Made by `;
-    const brand = " Web Design Davao";
+    const brand = " SEO Mojo";
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...COLOR_TEXT);

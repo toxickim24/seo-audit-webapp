@@ -34,6 +34,7 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 
 // ✅ Public partner page (/:slug)
 import PublicPartnerPage from "./pages/PublicPartnerPage";
+import PublicPartnerContact from "./pages/PublicPartnerContact";
 
 import "./App.css";
 
@@ -174,6 +175,7 @@ function AppContent() {
            ✅ Public Partner Pages
         ====================================================== */}
         <Route path="/:slug" element={<PublicPartnerPage />} />
+        <Route path="/:slug/contact" element={<PublicPartnerContact />} />
 
         {/* ======================================================
            ✅ Default & Fallback
