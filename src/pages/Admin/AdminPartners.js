@@ -25,6 +25,7 @@ export default function AdminPartners() {
     accent_color: "#22354D",
     user_id: "",
     logo_url: "",
+    booking_link: "",
     credits: 10,
   });
 
@@ -271,6 +272,7 @@ export default function AdminPartners() {
                   accent_color: "#22354D",
                   user_id: "",
                   logo_url: "",
+                  booking_link: "",
                   credits: 10,
                 });
                 setModalOpen(true);
@@ -352,7 +354,8 @@ export default function AdminPartners() {
                               accent_color: p.accent_color || "#10b981",
                               user_id: p.user_id || "",
                               logo_url: p.logo_url || "",
-                              credits: p.credits ?? 3, 
+                              booking_link: p.booking_link || "",
+                              credits: p.credits ?? 3,
                             });
                             setModalOpen(true);
                           }}
@@ -416,6 +419,13 @@ export default function AdminPartners() {
                   value={form.slug}
                   onChange={(e) => setForm({ ...form, slug: e.target.value })}
                   required
+                />
+
+                <label>Booking Link</label>
+                <input
+                  type="text"
+                  value={form.booking_link}
+                  onChange={(e) => setForm({ ...form, booking_link: e.target.value })}
                 />
 
                 <label>Logo</label>

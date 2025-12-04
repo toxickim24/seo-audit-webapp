@@ -341,7 +341,8 @@ export default function PublicPartnerPage() {
         partner?.logo_url,
         partner?.company_name,
         partner?.primary_color,
-        partner?.secondary_color
+        partner?.secondary_color,
+        partner?.booking_link
       );
 
       const base64Data = await new Promise((resolve, reject) => {
@@ -355,7 +356,7 @@ export default function PublicPartnerPage() {
       const res = await fetch(`${API_BASE_URL}/api/email/send-seo-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, pdfBlob: base64Data, url, safeUrl, company_name: partner?.company_name || "SEO Mojo", slug: partner?.slug, primary_color: partner?.primary_color, partner_logo: partner?.logo_url }),
+        body: JSON.stringify({ email, name, pdfBlob: base64Data, url, safeUrl, company_name: partner?.company_name || "SEO Mojo", slug: partner?.slug, primary_color: partner?.primary_color, secondary_color: partner?.secondary_color, partner_logo: partner?.logo_url, booking_link: partner?.booking_link }),
       });
       if (!res.ok) throw new Error("Email failed");
 

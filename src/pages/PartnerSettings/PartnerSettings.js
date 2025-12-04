@@ -23,6 +23,7 @@ function PartnerSettings() {
     slug: storedUser?.slug || "",
     subdomain: "",
     logo_url: "",
+    booking_link: "",
     primary_color: storedUser?.primary_color || "",
     secondary_color: storedUser?.secondary_color || "",
     accent_color: storedUser?.accent_color || "",
@@ -57,6 +58,7 @@ function PartnerSettings() {
           slug: data.slug || prev.slug,
           subdomain: data.subdomain || "",
           logo_url: data.logo_url || "",
+          booking_link: data.booking_link || "",
           primary_color: data.primary_color || "",
           secondary_color: data.secondary_color || "",
           accent_color: data.accent_color || "",
@@ -207,6 +209,21 @@ function PartnerSettings() {
                 >
                   {window.location.origin}/{form.slug}
                 </a>
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label>Booking Link (Optional)</label>
+              <input
+                type="text"
+                name="booking_link"
+                placeholder="https://yourbookingpage.com"
+                value={form.booking_link}
+                onChange={handleChange}
+              />
+              <p className="hint">
+                If empty, your booking link defaults to: <br />
+                <strong>{window.location.origin}/{form.slug}/contact</strong>
               </p>
             </div>
 

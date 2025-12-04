@@ -12,7 +12,9 @@ export async function sendSeoEmail(req, res) {
     company_name,
     slug,
     primary_color,
+    secondary_color,
     partner_logo,
+    booking_link,
   } = req.body;
 
   if (!email || !pdfBlob) {
@@ -67,12 +69,22 @@ export async function sendSeoEmail(req, res) {
     const headerTextColor = isDefaultCompany ? "#22354d" : "#ffffff";
 
     // --------------------------
-    // BOOKING LINK LOGIC
+    // BOOKING LINK LOGIC (FINAL)
     // --------------------------
     const partnerSlug = slug?.trim() || "";
-    const bookingLink = isDefaultCompany
-      ? "https://seomojo.app/seo-contact"
-      : `https://seomojo.app/${partnerSlug}/contact`;
+
+    // First priority: default company
+    let bookingLink = "https://seomojo.app/seo-contact";
+
+    // If not default → try partner booking link (from DB)
+    if (!isDefaultCompany) {
+      if (req.body.booking_link && req.body.booking_link.trim() !== "") {
+        bookingLink = req.body.booking_link.trim();
+      } else {
+        // fallback when no booking link saved
+        bookingLink = `https://seomojo.app/${partnerSlug}/contact`;
+      }
+    }
 
     // Sender — safe (no impersonation)
     const fromEmail = process.env.EMAIL_USER; // reports@seomojo.app
@@ -123,7 +135,7 @@ background: #ffffff; border: 1px solid #eaeaea; border-radius: 10px; overflow: h
   <div style="background: ${headerColor}; color: ${headerTextColor};
   text-align: center; padding: 20px;">
     <img src="${logoSrc}" alt="Logo" style="max-width:160px;margin-bottom:5px;" />
-    <h2 style="margin:0; font-size:22px; color:${headerTextColor};">
+    <h2 style="margin:0; font-size:22px; color: #333;">
       SEO Audit Results
     </h2>
   </div>
@@ -146,14 +158,17 @@ background: #ffffff; border: 1px solid #eaeaea; border-radius: 10px; overflow: h
 
     <div style="text-align: center; margin: 30px 0;">
       <a href="${bookingLink}"
-        style="background: #fb6a45; color: #fff; text-decoration: none;
+        style="background: ${secondary_color}; color: #fff; text-decoration: none;
         padding: 12px 28px; border-radius: 6px; font-weight: bold;
         display: inline-block;">
         Book a Free Consultation
       </a>
     </div>
 
-    <p>Kind regards,<br /><strong>SEO Mojo Team</strong></p>
+    <p>
+      Kind regards,<br />
+      <strong>${isDefaultCompany ? "SEO Mojo Team" : company_name}</strong>
+    </p>
   </div>
 
   <!-- FOOTER -->

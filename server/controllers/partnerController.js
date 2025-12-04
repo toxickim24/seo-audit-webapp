@@ -10,7 +10,7 @@ export const PartnerController = {
     try {
       const db = getDB();
       const [rows] = await db.query(
-        `SELECT id, user_id, company_name, subdomain, slug, logo_url,
+        `SELECT id, user_id, company_name, subdomain, slug, logo_url, booking_link,
                 primary_color, secondary_color, accent_color, credits, created_at, updated_at
          FROM partners
          WHERE user_id = ? LIMIT 1`,
@@ -46,6 +46,7 @@ export const PartnerController = {
         slug,
         subdomain,
         logo_url,
+        booking_link,
         primary_color,
         secondary_color,
         accent_color,
@@ -87,7 +88,7 @@ export const PartnerController = {
         // 🔄 Update partner record
         await db.query(
           `UPDATE partners
-           SET company_name=?, subdomain=?, slug=?, logo_url=?,
+           SET company_name=?, subdomain=?, slug=?, logo_url=?, booking_link=?,
                primary_color=?, secondary_color=?, accent_color=?, updated_at=NOW()
            WHERE user_id=?`,
           [
@@ -95,6 +96,7 @@ export const PartnerController = {
             subdomain || null,
             finalSlug,
             logo_url || null,
+            booking_link || null,
             primary_color || null,
             secondary_color || null,
             accent_color || null,
@@ -105,7 +107,7 @@ export const PartnerController = {
         // 🆕 Create partner record (colors can be null)
         await db.query(
           `INSERT INTO partners
-           (user_id, company_name, subdomain, slug, logo_url,
+           (user_id, company_name, subdomain, slug, logo_url, booking_link,
             primary_color, secondary_color, accent_color)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
@@ -114,6 +116,7 @@ export const PartnerController = {
             subdomain || null,
             finalSlug,
             logo_url || null,
+            booking_link || null,
             primary_color || null,
             secondary_color || null,
             accent_color || null,
@@ -160,6 +163,7 @@ export const PartnerController = {
           p.company_name,
           p.slug,
           p.logo_url,
+          p.booking_link,
           p.primary_color,
           p.secondary_color,
           p.accent_color,

@@ -9,7 +9,7 @@ export const AdminPartnerController = {
     try {
       const db = getDB();
       const [rows] = await db.query(`
-        SELECT p.id, p.company_name, p.slug, p.logo_url, 
+        SELECT p.id, p.company_name, p.slug, p.logo_url, p.booking_link,
                p.primary_color, p.secondary_color, p.accent_color, p.credits,
                p.is_deleted, p.created_at, p.updated_at,
                u.name AS user_name, u.id AS user_id
@@ -38,11 +38,12 @@ export const AdminPartnerController = {
         credits,
         user_id,
         logo_url,
+        booking_link,
       } = req.body;
       const db = getDB();
       await db.query(
         `INSERT INTO partners 
-          (company_name, slug, primary_color, secondary_color, accent_color, credits, user_id, logo_url, created_at, updated_at, is_deleted)
+          (company_name, slug, primary_color, secondary_color, accent_color, credits, user_id, logo_url, booking_link, created_at, updated_at, is_deleted)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 0)`,
         [
           company_name,
@@ -52,7 +53,8 @@ export const AdminPartnerController = {
           accent_color,
           credits,
           user_id || null,
-          logo_url || null
+          logo_url || null,
+          booking_link || null
         ]
       );
       // ✅ Log the action
@@ -85,11 +87,12 @@ export const AdminPartnerController = {
         credits,
         user_id,
         logo_url,
+        booking_link
       } = req.body;
       const db = getDB();
       await db.query(
         `UPDATE partners 
-         SET company_name=?, slug=?, primary_color=?, secondary_color=?, accent_color=?, credits=?, user_id=?, logo_url=?, updated_at=NOW()
+         SET company_name=?, slug=?, primary_color=?, secondary_color=?, accent_color=?, credits=?, user_id=?, logo_url=?, booking_link=?, updated_at=NOW()
          WHERE id=?`,
         [
           company_name,
@@ -100,6 +103,7 @@ export const AdminPartnerController = {
           credits,
           user_id || null,
           logo_url || null,
+          booking_link || null,
           id
         ]
       );
