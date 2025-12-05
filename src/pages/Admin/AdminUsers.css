@@ -69,6 +69,10 @@
   vertical-align: middle;
 }
 
+.admin-table td[data-label="Actions"] {
+    width: 282px;
+}
+
 /* Hide ID column */
 .admin-table th:first-child,
 .admin-table td:first-child {

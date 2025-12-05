@@ -126,7 +126,7 @@ export const PartnerController = {
 
       // ✅ Return updated partner info
       const [updated] = await db.query(
-        `SELECT id, user_id, company_name, subdomain, slug, logo_url,
+        `SELECT id, user_id, company_name, subdomain, slug, logo_url, booking_link,
                 primary_color, secondary_color, accent_color, credits, updated_at
          FROM partners
          WHERE user_id = ? LIMIT 1`,
