@@ -109,7 +109,7 @@ export const PartnerController = {
           `INSERT INTO partners
            (user_id, company_name, subdomain, slug, logo_url, booking_link,
             primary_color, secondary_color, accent_color)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             req.user.id,
             company_name,

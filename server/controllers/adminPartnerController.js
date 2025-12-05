@@ -44,7 +44,7 @@ export const AdminPartnerController = {
       await db.query(
         `INSERT INTO partners 
           (company_name, slug, primary_color, secondary_color, accent_color, credits, user_id, logo_url, booking_link, created_at, updated_at, is_deleted)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 0)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 0)`,
         [
           company_name,
           slug,
