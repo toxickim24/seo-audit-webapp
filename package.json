@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:5000",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "@lottiefiles/dotlottie-react": "^0.16.4",
     "ajv": "^6.12.6",
     "ajv-keywords": "^3.5.2",

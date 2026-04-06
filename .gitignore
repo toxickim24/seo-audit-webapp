@@ -34,3 +34,13 @@ tmp/
 
 # Ignore all OpenAI test files
 test-openai*.js
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Files folder
+files/
+
+# Documentation (security-sensitive)
+docs/
