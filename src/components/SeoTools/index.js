@@ -7,7 +7,7 @@ function SeoTools() {
   const widgetCode = `<script>
   (function() {
     var seoMojo = document.createElement('script');
-    seoMojo.src = 'http://localhost:3001/embeddable-widget/widget.js';
+    seoMojo.src = '${process.env.REACT_APP_WIDGET_URL || "https://seomojo.app"}/embeddable-widget/widget.js';
     seoMojo.async = true;
     document.head.appendChild(seoMojo);
     

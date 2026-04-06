@@ -7,6 +7,8 @@ import { initDB } from "./config/db.js";
 import { fileURLToPath } from "url";
 import { logger } from "./middleware/loggerMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { protect } from "./middleware/authMiddleware.js";
+import helmet from "helmet";
 import clearLimitRoute from "./routes/clearLimitRoute.js";
 import authRoutes from "./routes/authRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
@@ -34,11 +36,61 @@ import adminSystemRoutes from "./routes/adminSystemRoutes.js";
   await initDB();
 
   const app = express();
-  app.use(cors());
+
+  // Security: disable x-powered-by header
+  app.disable("x-powered-by");
+
+  // Security: add security headers with Content-Security-Policy
+  const cspDirectives = {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://seomojo.app"],
+    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    imgSrc: ["'self'", "data:", "blob:", "https:"],
+    connectSrc: ["'self'", "https://www.googleapis.com", "https://lottie.host"],
+    frameSrc: ["'self'", "https://lottie.host"],
+    objectSrc: ["'none'"],
+    baseUri: ["'self'"],
+    formAction: ["'self'"],
+  };
+
+  if (process.env.NODE_ENV !== "production") {
+    cspDirectives.connectSrc.push("http://localhost:3000", "http://localhost:5000", "ws://localhost:3000");
+  } else {
+    cspDirectives.upgradeInsecureRequests = [];
+  }
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: { directives: cspDirectives },
+    })
+  );
+
+  // Security: restrict CORS to allowed origins
+  const allowedOrigins = [
+    "https://seomojo.app",
+    "https://www.seomojo.app",
+  ];
+  if (process.env.NODE_ENV !== "production") {
+    // In development, allow all origins to avoid CORS issues with local dev servers
+    app.use(cors({ credentials: true }));
+  } else {
+    app.use(
+      cors({
+        origin: function (origin, callback) {
+          if (!origin) return callback(null, true);
+          if (allowedOrigins.includes(origin)) return callback(null, true);
+          return callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+      })
+    );
+  }
+
   app.use(express.json({ limit: "10mb" }));
   app.use(logger);
 
-  app.use("/api/clear", clearLimitRoute);
+  app.use("/api/clear", protect, clearLimitRoute);
 
   app.use("/uploads/partners", express.static(path.join(process.cwd(), "server/uploads/partners")));
 
