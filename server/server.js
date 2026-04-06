@@ -43,7 +43,7 @@ import adminSystemRoutes from "./routes/adminSystemRoutes.js";
   // Security: add security headers with Content-Security-Policy
   const cspDirectives = {
     defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://seomojo.app"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://seomojo.app", "https://seomojo.newwebsite.live"],
     styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     fontSrc: ["'self'", "https://fonts.gstatic.com"],
     imgSrc: ["'self'", "data:", "blob:", "https:"],
@@ -70,6 +70,8 @@ import adminSystemRoutes from "./routes/adminSystemRoutes.js";
   const allowedOrigins = [
     "https://seomojo.app",
     "https://www.seomojo.app",
+    "https://seomojo.newwebsite.live",
+    "https://www.seomojo.newwebsite.live",
   ];
   if (process.env.NODE_ENV !== "production") {
     // In development, allow all origins to avoid CORS issues with local dev servers
