@@ -1,7 +1,5 @@
-const API_KEY = process.env.REACT_APP_PAGESPEED_KEY;
+const API_KEY = process.env.REACT_APP_PAGESPEED_KEY || "";
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour cache
-
-if (!API_KEY) throw new Error("⚠️ Missing PageSpeed API key");
 
 function getCacheKey(url, strategy) {
   return `seoPerformance:${url}:${strategy}`;
@@ -36,6 +34,11 @@ function setCacheResult(url, strategy, data) {
 }
 
 export async function fetchSeoPerformance(url, strategy = "mobile") {
+  if (!API_KEY) {
+    console.warn("⚠️ REACT_APP_PAGESPEED_KEY not set — PageSpeed skipped");
+    return null;
+  }
+
   // ✅ Try cache first
   const cached = getCachedResult(url, strategy);
   if (cached) return cached;

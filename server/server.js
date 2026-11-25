@@ -30,6 +30,11 @@ import adminSystemRoutes from "./routes/adminSystemRoutes.js";
 (async () => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+  if (!process.env.JWT_SECRET) {
+    console.error("FATAL: JWT_SECRET is not set. Refusing to start.");
+    process.exit(1);
+  }
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 

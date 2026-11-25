@@ -32,6 +32,9 @@ stderr.log
 # temporary files
 tmp/
 
+# Local-only DB schema (not for production)
+server/schema_local.sql
+
 # Ignore all OpenAI test files
 test-openai*.js
 
@@ -42,5 +45,6 @@ CLAUDE.md
 # Files folder
 files/
 
-# Documentation (security-sensitive)
-docs/
+# Documentation — tracked guides live in docs/
+# Keep sensitive or private notes out of git by naming them *.private.md
+docs/*.private.md

@@ -245,6 +245,8 @@ export default function PublicPartnerPage() {
     } catch (err) {
       console.error("❌ SEO analyze failed:", err);
       showError("Failed to analyze website.");
+      setJourneyStep("enter");
+      setSeoData(null);
     } finally {
       setIsLoading(false);
     }

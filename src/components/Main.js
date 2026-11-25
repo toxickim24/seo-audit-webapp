@@ -206,6 +206,8 @@ function Main({ activeTab }) {
     } catch (err) {
       console.error(err);
       setError("Failed to fetch SEO data.");
+      setJourneyStep("enter"); // restore form so user can retry
+      setSeoData(null);        // also reset if PageSpeed failed after seoData was set
     } finally {
       setIsLoading(false);
     }

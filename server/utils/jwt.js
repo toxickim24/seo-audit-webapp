@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || "super_secret_jwt_key";
-
+// Read at call time, not at module-load time, so dotenv has already run
 export const signToken = (payload) => {
-  return jwt.sign(payload, SECRET, { expiresIn: "7d" });
+  const secret = process.env.JWT_SECRET;
+  return jwt.sign(payload, secret, { expiresIn: "7d" });
 };
 
 export const verifyToken = (token) => {
-  return jwt.verify(token, SECRET);
+  const secret = process.env.JWT_SECRET;
+  return jwt.verify(token, secret);
 };
